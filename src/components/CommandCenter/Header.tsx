@@ -1,13 +1,10 @@
 import React, { useState } from 'react';
-import { Bell, ShieldCheck, ChevronRight, X, Moon, Sun } from 'lucide-react';
+import { Bell, ShieldCheck, ChevronRight, X } from 'lucide-react';
 import { RECENT_ACTIVITIES } from '../../data/mockData';
 
-interface HeaderProps {
-  theme: 'dark' | 'light';
-  onToggleTheme: () => void;
-}
+interface HeaderProps {}
 
-export const Header: React.FC<HeaderProps> = ({ theme, onToggleTheme }) => {
+export const Header: React.FC<HeaderProps> = () => {
   const [showNotifications, setShowNotifications] = useState(false);
   const unreadCount = 3;
 
@@ -29,28 +26,13 @@ export const Header: React.FC<HeaderProps> = ({ theme, onToggleTheme }) => {
         </div>
       </div>
 
-      {/* Right: AI Pulse, Theme Toggle, Notifications & User Role Profile */}
+      {/* Right: AI Pulse, Notifications & User Role Profile */}
       <div className="header-right">
         {/* AI Status Indicator Badge */}
         <div className="header-ai-status" title="Systech AI Intelligence Pipeline Status">
           <span className="cyan-pulse-dot" />
           <span className="ai-status-label">Learning Intelligence Online</span>
         </div>
-
-        {/* Theme Switcher Toggle Button (Moon ↔ Sun) */}
-        <button
-          type="button"
-          className="theme-toggle-btn"
-          onClick={onToggleTheme}
-          aria-label={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-          title={theme === 'dark' ? 'Switch to Light Theme' : 'Switch to Dark Theme'}
-        >
-          {theme === 'dark' ? (
-            <Sun size={18} className="theme-icon sun" />
-          ) : (
-            <Moon size={18} className="theme-icon moon" />
-          )}
-        </button>
 
         {/* Notification Bell Icon */}
         <div className="notification-wrapper">

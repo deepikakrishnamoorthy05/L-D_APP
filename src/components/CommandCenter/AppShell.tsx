@@ -17,12 +17,10 @@ import { useBootcamps } from '../../context/BootcampContext';
 import { CheckCircle2 } from 'lucide-react';
 
 interface AppShellProps {
-  theme: 'dark' | 'light';
-  onToggleTheme: () => void;
   onLogout: () => void;
 }
 
-export const AppShell: React.FC<AppShellProps> = ({ theme, onToggleTheme, onLogout }) => {
+export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
   const getNavFromPath = () => {
     const rawPath = window.location.pathname.replace(/^\//, '');
     const validNavs = [
@@ -126,7 +124,7 @@ export const AppShell: React.FC<AppShellProps> = ({ theme, onToggleTheme, onLogo
       {/* Main Viewport Content Area */}
       <main className="shell-main-viewport">
         {currentNav === 'command-center' && (
-          <CommandCenterView theme={theme} onToggleTheme={onToggleTheme} />
+          <CommandCenterView />
         )}
 
         {currentNav === 'bootcamps' && (

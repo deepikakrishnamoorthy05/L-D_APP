@@ -13,19 +13,10 @@ const MainAppContent: React.FC = () => {
   const { isAuthenticated, logout } = useAuth();
   const [, setLocationPath] = useState(window.location.pathname);
 
-  const [theme, setTheme] = useState<'dark' | 'light'>(() => {
-    const savedTheme = localStorage.getItem('systech_theme');
-    return (savedTheme as 'dark' | 'light') || 'dark';
-  });
-
   useEffect(() => {
-    document.documentElement.setAttribute('data-theme', theme);
-    localStorage.setItem('systech_theme', theme);
-  }, [theme]);
-
-  const toggleTheme = () => {
-    setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
-  };
+    document.documentElement.removeAttribute('data-theme');
+    localStorage.removeItem('systech_theme');
+  }, []);
 
   useEffect(() => {
     const handlePopState = () => {
@@ -59,7 +50,7 @@ const MainAppContent: React.FC = () => {
   }
 
   return (
-    <AppShell theme={theme} onToggleTheme={toggleTheme} onLogout={logout} />
+    <AppShell onLogout={logout} />
   );
 };
 

@@ -9,16 +9,13 @@ import { UpcomingActivity } from './UpcomingActivity';
 import { CertificationSnapshot } from './CertificationSnapshot';
 import { RecentActivityFeed } from './RecentActivityFeed';
 
-interface CommandCenterViewProps {
-  theme: 'dark' | 'light';
-  onToggleTheme: () => void;
-}
+interface CommandCenterViewProps {}
 
-export const CommandCenterView: React.FC<CommandCenterViewProps> = ({ theme, onToggleTheme }) => {
+export const CommandCenterView: React.FC<CommandCenterViewProps> = () => {
   return (
     <div className="command-center-content-wrapper">
       {/* Top Header */}
-      <Header theme={theme} onToggleTheme={onToggleTheme} />
+      <Header />
 
       {/* Section 1 — 6 KPI Cards */}
       <section className="dashboard-section" aria-label="Key Performance Indicators">
