@@ -163,7 +163,7 @@ const MASTER_TRAINEES: TraineeTelemetryRecord[] = [
     avatarInitials: 'MR',
     role: 'Cloud Data Engineer',
     department: 'Cloud Solutions',
-    bootcampName: 'Enterprise Data Engineering',
+    bootcampName: 'Data Engineering',
     assessmentScore: 78,
     trainerFeedbackRating: 4.0, // 80%
     attendancePercent: 88,

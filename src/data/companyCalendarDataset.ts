@@ -462,7 +462,7 @@ export const COMPANY_CALENDAR_SESSIONS: Session[] = [
   {
     id: 'cal-114',
     bootcampId: 'bc-4',
-    bootcampName: 'Enterprise Data Engineering',
+    bootcampName: 'Data Engineering',
     trainingDay: 21,
     sessionDate: '2026-02-16',
     dayOfWeek: 'Monday',
@@ -493,7 +493,7 @@ export const COMPANY_CALENDAR_SESSIONS: Session[] = [
   {
     id: 'cal-115',
     bootcampId: 'bc-4',
-    bootcampName: 'Enterprise Data Engineering',
+    bootcampName: 'Data Engineering',
     trainingDay: 23,
     sessionDate: '2026-02-18',
     dayOfWeek: 'Wednesday',
@@ -525,7 +525,7 @@ export const COMPANY_CALENDAR_SESSIONS: Session[] = [
   {
     id: 'cal-116',
     bootcampId: 'bc-4',
-    bootcampName: 'Enterprise Data Engineering',
+    bootcampName: 'Data Engineering',
     trainingDay: 26,
     sessionDate: '2026-02-23',
     dayOfWeek: 'Monday',
@@ -557,7 +557,7 @@ export const COMPANY_CALENDAR_SESSIONS: Session[] = [
   {
     id: 'cal-117',
     bootcampId: 'bc-4',
-    bootcampName: 'Enterprise Data Engineering',
+    bootcampName: 'Data Engineering',
     trainingDay: 31,
     sessionDate: '2026-03-02',
     dayOfWeek: 'Monday',
@@ -651,7 +651,7 @@ export const COMPANY_CALENDAR_SESSIONS: Session[] = [
   {
     id: 'cal-120',
     bootcampId: 'bc-4',
-    bootcampName: 'Enterprise Data Engineering',
+    bootcampName: 'Data Engineering',
     trainingDay: 46,
     sessionDate: '2026-03-23',
     dayOfWeek: 'Monday',
@@ -681,7 +681,7 @@ export const COMPANY_CALENDAR_SESSIONS: Session[] = [
   {
     id: 'cal-121',
     bootcampId: 'bc-4',
-    bootcampName: 'Enterprise Data Engineering',
+    bootcampName: 'Data Engineering',
     trainingDay: 48,
     sessionDate: '2026-03-25',
     dayOfWeek: 'Wednesday',
@@ -741,7 +741,7 @@ export const COMPANY_CALENDAR_SESSIONS: Session[] = [
   {
     id: 'cal-123',
     bootcampId: 'bc-4',
-    bootcampName: 'Enterprise Data Engineering',
+    bootcampName: 'Data Engineering',
     trainingDay: 51,
     sessionDate: '2026-03-30',
     dayOfWeek: 'Monday',
@@ -774,7 +774,7 @@ export const COMPANY_CALENDAR_SESSIONS: Session[] = [
   {
     id: 'cal-124',
     bootcampId: 'bc-4',
-    bootcampName: 'Enterprise Data Engineering',
+    bootcampName: 'Data Engineering',
     trainingDay: 60,
     sessionDate: '2026-04-10',
     dayOfWeek: 'Friday',

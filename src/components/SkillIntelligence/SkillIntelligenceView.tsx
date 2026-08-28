@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Brain,
@@ -13,16 +13,15 @@ import {
   UserCheck,
   Zap,
   Target,
-  X,
   Bot,
   Crown,
-  HelpCircle,
   Check,
-  FileCheck,
   TrendingUp,
   Database,
-  Activity,
-  FileText,
+  BarChart3,
+  Route,
+  UsersRound,
+  ChevronLeft,
 } from 'lucide-react';
 import {
   skillIntelligenceService,
@@ -31,8 +30,71 @@ import {
 } from '../../services/skillIntelligenceService';
 import { useBootcamps } from '../../context/BootcampContext';
 
+type SkillIntelligenceFeature =
+  | 'copilot'
+  | 'skill-matrix'
+  | 'project-fit'
+  | 'track-allocation'
+  | 'cohort-coverage'
+  | 'talent-snapshot';
+
+const FEATURE_CONFIG: Array<{
+  id: SkillIntelligenceFeature;
+  title: string;
+  description: string;
+  action: string;
+  icon: React.ElementType;
+}> = [
+  { id: 'copilot', title: 'AI Skill Copilot', description: 'Ask questions about trainees, skills, readiness and development areas.', action: 'Open Copilot', icon: Brain },
+  { id: 'skill-matrix', title: 'Trainee Skill Matrix', description: 'Compare trainee proficiency across SQL, Python, Databricks, dbt, modeling and problem solving.', action: 'View Skill Matrix', icon: Layers },
+  { id: 'project-fit', title: 'Project Fit Intelligence', description: 'Find the trainees whose skills best match a project requirement.', action: 'Find Project Match', icon: Target },
+  { id: 'track-allocation', title: 'Track Allocation', description: 'Recommend the most suitable learning track using trainee performance evidence.', action: 'View Track Recommendations', icon: Route },
+  { id: 'cohort-coverage', title: 'Cohort Skill Coverage', description: 'Understand cohort strengths, weaknesses and skill development priorities.', action: 'View Cohort Coverage', icon: BarChart3 },
+  { id: 'talent-snapshot', title: 'Talent Snapshot', description: 'See project-ready trainees, top performers and trainees needing attention.', action: 'View Talent Snapshot', icon: UsersRound },
+];
+
+const getFeatureFromUrl = (): SkillIntelligenceFeature | null => {
+  const requestedView = new URLSearchParams(window.location.search).get('view');
+  return FEATURE_CONFIG.some((feature) => feature.id === requestedView)
+    ? requestedView as SkillIntelligenceFeature
+    : null;
+};
+
 export const SkillIntelligenceView: React.FC = () => {
   const { bootcamps } = useBootcamps();
+  const openedFromHubRef = useRef(false);
+  const [activeFeature, setActiveFeature] = useState<SkillIntelligenceFeature | null>(getFeatureFromUrl);
+
+  const resetPageScroll = () => {
+    document.querySelector<HTMLElement>('.shell-main-viewport')?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
+  };
+
+  const openFeature = (feature: SkillIntelligenceFeature) => {
+    openedFromHubRef.current = true;
+    window.history.pushState(null, '', `/skill-intelligence?view=${feature}`);
+    setActiveFeature(feature);
+  };
+
+  const returnToHub = () => {
+    if (openedFromHubRef.current) {
+      openedFromHubRef.current = false;
+      window.history.back();
+      return;
+    }
+    window.history.replaceState(null, '', '/skill-intelligence');
+    setActiveFeature(null);
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      openedFromHubRef.current = false;
+      setActiveFeature(getFeatureFromUrl());
+    };
+    window.addEventListener('popstate', handlePopState);
+    return () => window.removeEventListener('popstate', handlePopState);
+  }, []);
+
+  useLayoutEffect(resetPageScroll, [activeFeature]);
 
   // Centralized Single Source of Truth Datasets
   const readinessRanking = skillIntelligenceService.getOverallReadinessRanking();
@@ -107,6 +169,8 @@ export const SkillIntelligenceView: React.FC = () => {
       transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
       className="skill-intelligence-page"
     >
+      {!activeFeature ? (
+        <>
       {/* 1. HERO SECTION WITH ANIMATED ORBIT NETWORK */}
       <section className="ski-hero-glass-card">
         <div className="ski-hero-left">
@@ -115,31 +179,8 @@ export const SkillIntelligenceView: React.FC = () => {
           </span>
           <h1 className="ski-hero-title">Skill Intelligence</h1>
           <p className="ski-hero-subtitle">
-            Transform assessment, feedback and learning data into actionable talent and deployment insights.
+            Turn trainee performance, skills and feedback into actionable talent decisions.
           </p>
-
-          <div className="ski-hero-actions">
-            <button
-              type="button"
-              className="ski-hero-btn-primary"
-              onClick={() => {
-                const el = document.getElementById('copilot-workspace');
-                el?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              <Bot size={16} /> Ask Skill Copilot
-            </button>
-            <button
-              type="button"
-              className="ski-hero-btn-secondary"
-              onClick={() => {
-                const el = document.getElementById('skill-matrix-section');
-                el?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              <Layers size={16} /> Explore Skill Matrix
-            </button>
-          </div>
         </div>
 
         {/* RIGHT: ANIMATED SKILL ORBIT NETWORK */}
@@ -157,21 +198,25 @@ export const SkillIntelligenceView: React.FC = () => {
               <circle cx="150" cy="150" r="65" className="ski-orbit-path-2" />
             </svg>
 
-            {/* Orbiting Skill Pills */}
-            <div className="ski-orbit-node node-1">SQL</div>
-            <div className="ski-orbit-node node-2">Python</div>
-            <div className="ski-orbit-node node-3">Databricks</div>
-            <div className="ski-orbit-node node-4">dbt</div>
-            <div className="ski-orbit-node node-5">Snowflake</div>
-            <div className="ski-orbit-node node-6">Modeling</div>
-            <div className="ski-orbit-node node-7">Problem Solving</div>
-            <div className="ski-orbit-node node-8">Communication</div>
+            {/* Skill rails keep every label in its own lane, even at narrow widths. */}
+            <div className="ski-orbit-rail ski-orbit-rail-left" aria-label="Core technical skills">
+              <div className="ski-orbit-node">SQL</div>
+              <div className="ski-orbit-node">Modeling</div>
+              <div className="ski-orbit-node">Communication</div>
+              <div className="ski-orbit-node">Snowflake</div>
+            </div>
+            <div className="ski-orbit-rail ski-orbit-rail-right" aria-label="Applied technical skills">
+              <div className="ski-orbit-node">Python</div>
+              <div className="ski-orbit-node">Problem Solving</div>
+              <div className="ski-orbit-node">Databricks</div>
+              <div className="ski-orbit-node">dbt</div>
+            </div>
           </div>
         </div>
       </section>
 
-      {/* 2. 5 EQUAL INTELLIGENCE KPI CARDS */}
-      <section className="asm-kpi-cards-5row">
+      {/* 2. QUICK SUMMARY */}
+      <section className="ski-hub-kpi-grid" aria-label="Skill intelligence quick summary">
         {/* KPI 1: Project Ready */}
         <motion.div whileHover={{ y: -2, scale: 1.01 }} transition={{ duration: 0.18 }} className="asm-kpi-card-box">
           <div className="kpi-card-header">
@@ -224,22 +269,61 @@ export const SkillIntelligenceView: React.FC = () => {
           <span className="kpi-desc-text">Requiring focused improvement</span>
         </motion.div>
 
-        {/* KPI 5: Track Decisions */}
-        <motion.div whileHover={{ y: -2, scale: 1.01 }} transition={{ duration: 0.18 }} className="asm-kpi-card-box">
-          <div className="kpi-card-header">
-            <span className="kpi-label-text">TRACK DECISIONS</span>
-            <div className="kpi-icon-badge indigo">
-              <Layers size={16} />
-            </div>
-          </div>
-          <div className="kpi-num-display">4</div>
-          <span className="kpi-desc-text">Awaiting track allocation</span>
-        </motion.div>
       </section>
 
+      <section className="ski-feature-launcher-section">
+        <div className="ski-feature-launcher-heading">
+          <h2>Explore Skill Intelligence</h2>
+          <p>Choose an intelligence capability to explore.</p>
+        </div>
+        <div className="ski-feature-launcher-grid">
+          {FEATURE_CONFIG.map((feature) => {
+            const FeatureIcon = feature.icon;
+            return (
+              <button
+                key={feature.id}
+                type="button"
+                className="ski-feature-launcher-card"
+                onClick={() => openFeature(feature.id)}
+              >
+                <span className="ski-feature-icon"><FeatureIcon size={22} /></span>
+                <span className="ski-feature-title">{feature.title}</span>
+                <span className="ski-feature-description">{feature.description}</span>
+                <span className="ski-feature-action">{feature.action} <ArrowRight size={15} /></span>
+              </button>
+            );
+          })}
+        </div>
+      </section>
+        </>
+      ) : (
+        <header className="ski-feature-detail-header">
+          <button type="button" className="ski-feature-back-button" onClick={returnToHub}>
+            <ChevronLeft size={16} /> Back to Skill Intelligence
+          </button>
+          <div className="ski-feature-detail-title-row">
+            {(() => {
+              const feature = FEATURE_CONFIG.find((item) => item.id === activeFeature)!;
+              const FeatureIcon = feature.icon;
+              return (
+                <>
+                  <span className="ski-feature-icon"><FeatureIcon size={22} /></span>
+                  <div>
+                    <h1>{feature.title}</h1>
+                    <p>{feature.description}</p>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+        </header>
+      )}
+
       {/* 3. MAIN INTELLIGENCE WORKSPACE (COPILOT + TALENT SNAPSHOT) */}
-      <section id="copilot-workspace" className="ski-main-workspace-grid">
+      {(activeFeature === 'copilot' || activeFeature === 'talent-snapshot') && (
+      <section id="copilot-workspace" className={`ski-main-workspace-grid ski-single-feature-${activeFeature}`}>
         {/* LEFT: AI SKILL COPILOT */}
+        {activeFeature === 'copilot' && (
         <div className="ski-copilot-card">
           <div className="ski-copilot-header">
             <div className="flex items-center gap-2">
@@ -416,8 +500,10 @@ export const SkillIntelligenceView: React.FC = () => {
             </div>
           </form>
         </div>
+        )}
 
         {/* RIGHT: TALENT SNAPSHOT PANEL (REBUILT WITH 78px MINI CARDS & PERFECT ROW GRID) */}
+        {activeFeature === 'talent-snapshot' && (
         <div className="ski-talent-snapshot-card">
           <div className="flex items-center justify-between relative">
             <div>
@@ -547,9 +633,12 @@ export const SkillIntelligenceView: React.FC = () => {
             })}
           </div>
         </div>
+        )}
       </section>
+      )}
 
       {/* 4. TRAINEE SKILL MATRIX SECTION */}
+      {activeFeature === 'skill-matrix' && (
       <section id="skill-matrix-section" className="ski-section-card">
         <div className="ski-section-header">
           <div className="ski-section-title-group">
@@ -672,8 +761,10 @@ export const SkillIntelligenceView: React.FC = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* 5. PROJECT FIT INTELLIGENCE (340px LEFT + MINMAX RIGHT WORKSPACE) */}
+      {activeFeature === 'project-fit' && (
       <section className="ski-section-card">
         <div className="ski-section-header">
           <div className="ski-section-title-group">
@@ -743,8 +834,8 @@ export const SkillIntelligenceView: React.FC = () => {
               {matchingStep === 1
                 ? 'Analyzing Talent...'
                 : matchingStep === 2
-                ? 'Evaluating Readiness...'
-                : '⚡ Run Talent Match'}
+                  ? 'Evaluating Readiness...'
+                  : '⚡ Run Talent Match'}
             </button>
           </div>
 
@@ -773,18 +864,19 @@ export const SkillIntelligenceView: React.FC = () => {
                   <div className="space-y-3 text-xs border-t border-slate-100 pt-3">
                     <div>
                       <span className="font-bold text-slate-700 block mb-1">STRONG MATCHES</span>
-                      <div className="flex gap-1.5 flex-wrap">
+                      <div className="ski-strong-match-list">
                         {m.strongMatches.map((sm) => (
-                          <span key={sm.skill} className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded font-bold">
-                            {sm.skill}: {sm.score}%
-                          </span>
+                          <div key={sm.skill} className="ski-strong-match-row">
+                            <span>{sm.skill}</span>
+                            <strong>{sm.score}%</strong>
+                          </div>
                         ))}
                       </div>
                     </div>
 
-                    <div>
+                    <div className="ski-development-gap-row">
                       <span className="font-bold text-slate-700 block mb-1">DEVELOPMENT GAP</span>
-                      <span className="text-slate-600 block">{m.developmentGap}</span>
+                      <strong>{m.developmentGap}</strong>
                     </div>
                   </div>
                 </div>
@@ -800,8 +892,10 @@ export const SkillIntelligenceView: React.FC = () => {
           </div>
         </div>
       </section>
+      )}
 
       {/* 6. TRACK ALLOCATION INTELLIGENCE (REBUILT COMPACT CARDS, NO HUGE EMPTY SPACE) */}
+      {activeFeature === 'track-allocation' && (
       <section className="ski-track-section-card">
         <div className="ski-section-header">
           <div className="ski-section-title-group">
@@ -910,8 +1004,10 @@ export const SkillIntelligenceView: React.FC = () => {
           ))}
         </div>
       </section>
+      )}
 
       {/* 7. COHORT SKILL COVERAGE & INSIGHTS (TWO COLUMNS) */}
+      {activeFeature === 'cohort-coverage' && (
       <section className="ski-cohort-intelligence-layout">
         {/* LEFT COL: SKILL COVERAGE */}
         <div className="ski-section-card">
@@ -934,29 +1030,27 @@ export const SkillIntelligenceView: React.FC = () => {
 
                 <div className="ski-skill-progress-container">
                   <div
-                    className={`ski-skill-progress-fill ${
-                      item.avgScore >= 85
+                    className={`ski-skill-progress-fill ${item.avgScore >= 85
                         ? 'strong'
                         : item.avgScore >= 70
-                        ? 'proficient'
-                        : item.avgScore >= 60
-                        ? 'developing'
-                        : 'gap'
-                    }`}
+                          ? 'proficient'
+                          : item.avgScore >= 60
+                            ? 'developing'
+                            : 'gap'
+                      }`}
                     style={{ width: `${item.avgScore}%` }}
                   />
                 </div>
 
                 <span
-                  className={`ski-skill-level-badge ${
-                    item.avgScore >= 85
+                  className={`ski-skill-level-badge ${item.avgScore >= 85
                       ? 'strong'
                       : item.avgScore >= 70
-                      ? 'proficient'
-                      : item.avgScore >= 60
-                      ? 'developing'
-                      : 'gap'
-                  }`}
+                        ? 'proficient'
+                        : item.avgScore >= 60
+                          ? 'developing'
+                          : 'gap'
+                    }`}
                 >
                   {item.classification.toUpperCase()}
                 </span>
@@ -1003,32 +1097,8 @@ export const SkillIntelligenceView: React.FC = () => {
           </button>
         </div>
       </section>
+      )}
 
-      {/* 8. INTELLIGENCE DATA SOURCES */}
-      <section className="ski-data-sources-card">
-        <div className="flex items-center gap-2">
-          <FileCheck size={16} className="text-teal-700" />
-          <span className="text-xs font-bold text-slate-800">INTELLIGENCE DATA SOURCES</span>
-        </div>
-        <div className="ski-data-sources-pills">
-          {[
-            { label: 'Assessments', active: true },
-            { label: 'Trainer Feedback', active: true },
-            { label: 'Attendance', active: true },
-            { label: 'Bootcamp Progress', active: true },
-            { label: 'Assignments', active: false },
-            { label: 'Projects', active: false },
-            { label: 'Certifications', active: false },
-          ].map((src) => (
-            <span
-              key={src.label}
-              className={`ski-source-pill-item ${src.active ? 'active' : 'muted'}`}
-            >
-              {src.active ? <Check size={12} className="text-teal-700" /> : '○'} {src.label}
-            </span>
-          ))}
-        </div>
-      </section>
     </motion.div>
   );
 };

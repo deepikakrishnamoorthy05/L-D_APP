@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { CommandCenterView } from './CommandCenterView';
 import { BootcampManagement } from '../Bootcamps/BootcampManagement';
@@ -21,6 +21,8 @@ interface AppShellProps {
 }
 
 export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
+  const mainViewportRef = useRef<HTMLElement>(null);
+
   const getNavFromPath = () => {
     const rawPath = window.location.pathname.replace(/^\//, '');
     const validNavs = [
@@ -38,6 +40,16 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
   };
 
   const [currentNav, setCurrentNav] = useState<string>(getNavFromPath);
+
+  // The window is fixed; this element owns page scrolling. Reset it before
+  // the newly selected view is painted so every navigation starts at the top.
+  useLayoutEffect(() => {
+    mainViewportRef.current?.scrollTo({
+      top: 0,
+      left: 0,
+      behavior: 'auto',
+    });
+  }, [currentNav]);
 
   // Sync with browser navigation (back / forward buttons)
   React.useEffect(() => {
@@ -122,7 +134,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
       />
 
       {/* Main Viewport Content Area */}
-      <main className="shell-main-viewport">
+      <main ref={mainViewportRef} className="shell-main-viewport">
         {currentNav === 'command-center' && (
           <CommandCenterView />
         )}

@@ -88,7 +88,7 @@ export const INITIAL_SESSIONS: Session[] = [
   {
     id: 'ses-4',
     bootcampId: 'bc-4',
-    bootcampName: 'Enterprise Data Engineering',
+    bootcampName: 'Data Engineering',
     moduleId: 'm-de-1',
     moduleName: 'Azure Synapse Data Engineering',
     title: 'Enterprise Azure Data Pipelines & Synapse Orchestration',

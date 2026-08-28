@@ -50,7 +50,7 @@ const PREDEFINED_MODULE_TAGS = [
   'SQL Data Architecture',
   'Python Data Engineering',
   'Power BI & DAX Intelligence',
-  'Enterprise Data Engineering',
+  'Data Engineering',
   'Azure Synapse & Data Factory',
   'Databricks Delta Lake',
   'dbt Transformations & Snowflake',

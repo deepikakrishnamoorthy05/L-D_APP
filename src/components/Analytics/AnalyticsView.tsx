@@ -10,6 +10,11 @@ import {
   Filter,
   RefreshCw,
   Sparkles,
+  ArrowRight,
+  X,
+  Trophy,
+  Rocket,
+  Target,
 } from 'lucide-react';
 import { useTrainees } from '../../context/TraineeContext';
 import { useBootcamps } from '../../context/BootcampContext';
@@ -65,6 +70,9 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = () => {
     trainees.length > 0 ? trainees[0].id : ''
   );
   const [traineeSearchQuery, setTraineeSearchQuery] = useState<string>('');
+  const [executiveDetail, setExecutiveDetail] = useState<
+    null | 'skills' | 'cohorts' | 'performers' | 'ready' | 'attention'
+  >(null);
 
   // FILTERED TRAINEES COMPUTATION FOR OVERALL VIEW
   const filteredTrainees = useMemo(() => {
@@ -143,6 +151,45 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = () => {
       (t) => t.learningStatus === 'Needs Attention' || t.learningStatus === 'At Risk'
     );
   }, [filteredTrainees]);
+
+  const projectReadyList = useMemo(
+    () => filteredTrainees.filter((t) => t.learningStatus === 'Project Ready'),
+    [filteredTrainees]
+  );
+
+  const skillPerformance = [
+    { skill: 'SQL', score: 86, status: 'Strong' },
+    { skill: 'Python', score: 82, status: 'Strong' },
+    { skill: 'PySpark', score: 78, status: 'Proficient' },
+    { skill: 'Databricks', score: 74, status: 'Proficient' },
+    { skill: 'dbt', score: 71, status: 'Proficient' },
+    { skill: 'Snowflake', score: 76, status: 'Proficient' },
+    { skill: 'Power BI', score: 84, status: 'Strong' },
+    { skill: 'Data Modeling', score: 79, status: 'Proficient' },
+    { skill: 'Problem Solving', score: 69, status: 'Developing' },
+    { skill: 'Communication', score: 81, status: 'Strong' },
+  ];
+
+  const cohortPerformance = useMemo(() => bootcamps.map((b) => {
+    const cohortTrainees = filteredTrainees.filter((t) => t.bootcampName === b.name || t.bootcampId === b.id);
+    const cohortTotal = cohortTrainees.length;
+    const average = (field: 'avgScorePercent' | 'attendancePercent' | 'progressPercent') => cohortTotal > 0
+      ? Math.round(cohortTrainees.reduce((sum, trainee) => sum + (trainee[field] || 0), 0) / cohortTotal)
+      : 0;
+    const ready = cohortTrainees.filter((t) => t.learningStatus === 'Project Ready').length;
+    const selected = cohortTrainees.filter((t) => t.companyOutcome === 'Selected').length;
+    return {
+      id: b.id,
+      name: b.name,
+      total: cohortTotal,
+      assessment: average('avgScorePercent'),
+      attendance: average('attendancePercent'),
+      completion: average('progressPercent'),
+      ready,
+      selected,
+      conversion: cohortTotal > 0 ? Math.round((selected / cohortTotal) * 100) : 0,
+    };
+  }), [bootcamps, filteredTrainees]);
 
   // INDIVIDUAL VIEW: CURRENT SELECTED TRAINEE
   const currentTrainee = useMemo(() => {
@@ -323,6 +370,105 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = () => {
             </div>
           </div>
 
+          <div className="executive-analytics-summary">
+            <div className="executive-primary-grid">
+              <section className="analytics-panel executive-card">
+                <div className="panel-hdr-group">
+                  <h3 className="panel-title">Training Outcome</h3>
+                  <p className="panel-sub">Progress from enrollment to workforce selection</p>
+                </div>
+                <div className="executive-outcome-list">
+                  {[
+                    { label: 'Enrolled', value: totalCount, percent: 100 },
+                    { label: 'Completed', value: completedCount, percent: totalCount ? (completedCount / totalCount) * 100 : 0 },
+                    { label: 'Project Ready', value: projectReadyCount, percent: totalCount ? (projectReadyCount / totalCount) * 100 : 0 },
+                    { label: 'Company Selected', value: selectedCount, percent: totalCount ? (selectedCount / totalCount) * 100 : 0 },
+                  ].map((stage) => (
+                    <div key={stage.label} className="executive-outcome-row">
+                      <div><span>{stage.label}</span><strong>{stage.value}</strong></div>
+                      <div className="executive-progress-track"><span style={{ width: `${stage.percent}%` }} /></div>
+                    </div>
+                  ))}
+                </div>
+              </section>
+
+              <section className="analytics-panel executive-card">
+                <div className="panel-hdr-group">
+                  <h3 className="panel-title">Performance Snapshot</h3>
+                  <p className="panel-sub">Key learning and readiness indicators</p>
+                </div>
+                <div className="executive-metric-grid">
+                  {[
+                    ['Average Assessment', `${avgAssessment}%`],
+                    ['Attendance', `${avgAttendance}%`],
+                    ['Completion', `${avgCompletion}%`],
+                    ['Trainer Feedback', '4.4 / 5'],
+                    ['Certification Ready', certReadyCount],
+                    ['Need Attention', needAttentionCount],
+                  ].map(([label, value]) => (
+                    <div key={label} className="executive-metric-tile"><span>{label}</span><strong>{value}</strong></div>
+                  ))}
+                </div>
+              </section>
+            </div>
+
+            <div className="executive-secondary-grid">
+              <section className="analytics-panel executive-card executive-snapshot-card">
+                <div className="panel-hdr-group">
+                  <h3 className="panel-title">Skill Snapshot</h3>
+                  <p className="panel-sub">Organization-wide strengths and priority</p>
+                </div>
+                <div className="executive-snapshot-list">
+                  <div><span>Strongest Skill</span><strong>SQL <em>86%</em></strong></div>
+                  <div><span>Strong Skills</span><strong>Power BI <em>84%</em> &nbsp; Python <em>82%</em></strong></div>
+                  <div><span>Development Priority</span><strong>Problem Solving <em>69%</em></strong></div>
+                </div>
+                <button type="button" className="executive-link-button" onClick={() => setExecutiveDetail('skills')}>
+                  View Full Skill Analysis <ArrowRight size={14} />
+                </button>
+              </section>
+
+              <section className="analytics-panel executive-card executive-cohort-card">
+                <div className="panel-hdr-group">
+                  <h3 className="panel-title">Cohort Performance</h3>
+                  <p className="panel-sub">Top active cohorts at a glance</p>
+                </div>
+                <div className="executive-cohort-list">
+                  {cohortPerformance.slice(0, 3).map((cohort) => (
+                    <div key={cohort.id} className="executive-cohort-row">
+                      <div><strong>{cohort.name}</strong><span>{cohort.total} trainees · {cohort.ready} project ready</span></div>
+                      <b>{cohort.assessment}%</b>
+                    </div>
+                  ))}
+                </div>
+                <button type="button" className="executive-link-button" onClick={() => setExecutiveDetail('cohorts')}>
+                  View All Cohorts <ArrowRight size={14} />
+                </button>
+              </section>
+            </div>
+
+            <section className="analytics-panel executive-talent-section">
+              <div className="panel-hdr-group">
+                <h3 className="panel-title">Talent Overview</h3>
+                <p className="panel-sub">Open a focused people analytics view</p>
+              </div>
+              <div className="executive-talent-grid">
+                {[
+                  { key: 'performers' as const, title: 'Top Performers', count: topPerformers.length, icon: <Trophy size={18} /> },
+                  { key: 'ready' as const, title: 'Project Ready', count: projectReadyCount, icon: <Rocket size={18} /> },
+                  { key: 'attention' as const, title: 'Need Attention', count: needAttentionCount, icon: <Target size={18} /> },
+                ].map((item) => (
+                  <button key={item.key} type="button" className="executive-talent-card" onClick={() => setExecutiveDetail(item.key)}>
+                    <span className="executive-talent-icon">{item.icon}</span>
+                    <span><strong>{item.title}</strong><small>{item.count} trainees</small></span>
+                    <ArrowRight size={16} />
+                  </button>
+                ))}
+              </div>
+            </section>
+          </div>
+
+          <div className="analytics-legacy-overall-content" aria-hidden="true">
           {/* SECTION 1 & 2: OUTCOME FUNNEL & COMPANY CONVERSION ANALYSIS */}
           <div className="analytics-dashboard-grid">
             {/* SECTION 1 — TRAINING OUTCOME FUNNEL (SPAN 8) */}
@@ -811,6 +957,53 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = () => {
               </table>
             </div>
           </div>
+          </div>
+
+          {executiveDetail && (
+            <div className="executive-detail-backdrop" role="presentation" onMouseDown={() => setExecutiveDetail(null)}>
+              <section className="executive-detail-panel" role="dialog" aria-modal="true" aria-label="Analytics detail" onMouseDown={(event) => event.stopPropagation()}>
+                <div className="executive-detail-header">
+                  <div>
+                    <span>ANALYTICS DETAIL</span>
+                    <h2>{executiveDetail === 'skills' ? 'Full Skill Analysis' : executiveDetail === 'cohorts' ? 'Cohort Performance' : executiveDetail === 'performers' ? 'Top 5 Overall Performers' : executiveDetail === 'ready' ? 'Project-Ready Trainees' : 'L&D Attention Center'}</h2>
+                  </div>
+                  <button type="button" onClick={() => setExecutiveDetail(null)} aria-label="Close analytics detail"><X size={18} /></button>
+                </div>
+
+                <div className="executive-detail-body">
+                  {executiveDetail === 'skills' && (
+                    <div className="skills-2col-grid">
+                      {skillPerformance.map((item) => (
+                        <div key={item.skill} className="skill-item-card">
+                          <div className="skill-item-hdr"><span className="skill-name">{item.skill}</span><div className="skill-score-group"><span className="skill-val">{item.score}%</span><span className={`skill-status-tag ${item.status.toLowerCase()}`}>{item.status}</span></div></div>
+                          <div className="skill-bar-bg"><div className="skill-bar-fill" style={{ width: `${item.score}%` }} /></div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {executiveDetail === 'cohorts' && (
+                    <div className="table-responsive-container"><table className="analytics-data-table"><thead><tr><th>Cohort</th><th>Trainees</th><th>Assessment</th><th>Attendance</th><th>Completion</th><th>Project Ready</th><th>Selected</th><th>Conversion</th></tr></thead><tbody>{cohortPerformance.map((cohort) => <tr key={cohort.id}><td className="font-bold">{cohort.name}</td><td>{cohort.total}</td><td>{cohort.assessment}%</td><td>{cohort.attendance}%</td><td>{cohort.completion}%</td><td>{cohort.ready}</td><td>{cohort.selected}</td><td>{cohort.conversion}%</td></tr>)}</tbody></table></div>
+                  )}
+
+                  {(executiveDetail === 'performers' || executiveDetail === 'ready') && (
+                    <div className="executive-people-list">
+                      {(executiveDetail === 'performers' ? topPerformers : projectReadyList).map((trainee, index) => (
+                        <div key={trainee.id} className="executive-person-row">
+                          <div className="executive-person-main">{executiveDetail === 'performers' && <span className="rank-badge">0{index + 1}</span>}<div className="avatar-circle">{getInitials(trainee.name)}</div><div><strong>{trainee.name}</strong><span>{trainee.employeeId}</span><small>{trainee.bootcampName}</small></div></div>
+                          <div className="executive-person-score"><strong>{calculateWeightedScore(trainee)}%</strong><span>{trainee.companyOutcome || trainee.learningStatus}</span></div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+
+                  {executiveDetail === 'attention' && (
+                    <div className="table-responsive-container"><table className="analytics-data-table"><thead><tr><th>Trainee</th><th>Primary Gap</th><th>Current Score</th><th>Status</th><th>Recommended Action</th></tr></thead><tbody>{attentionList.map((trainee) => <tr key={trainee.id}><td><div className="executive-table-person"><div className="avatar-circle small">{getInitials(trainee.name)}</div><span><strong>{trainee.name}</strong><small>{trainee.employeeId}</small></span></div></td><td>Databricks &amp; PySpark</td><td>{trainee.avgScorePercent}%</td><td><span className="status-badge amber">{trainee.learningStatus}</span></td><td>Assign Databricks practical optimization lab</td></tr>)}</tbody></table></div>
+                  )}
+                </div>
+              </section>
+            </div>
+          )}
         </motion.div>
       )}
 

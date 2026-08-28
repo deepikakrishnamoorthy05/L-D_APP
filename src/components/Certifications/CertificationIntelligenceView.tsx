@@ -19,7 +19,6 @@ import {
   HelpCircle,
   Check,
   FileCheck,
-  TrendingUp,
   Database,
   Calendar,
   MoreVertical,
@@ -110,6 +109,13 @@ export const CertificationIntelligenceView: React.FC = () => {
     const matchesReadiness = selectedReadinessFilter === 'All' || r.readinessLevel === selectedReadinessFilter;
     return matchesSearch && matchesCert && matchesReadiness;
   });
+
+  const recommendationSummary = {
+    total: filteredRecommendations.length,
+    ready: filteredRecommendations.filter((r) => r.readinessLevel === 'READY TO SCHEDULE').length,
+    preparing: filteredRecommendations.filter((r) => r.readinessLevel === 'PREPARING').length,
+    highMatch: filteredRecommendations.filter((r) => r.matchScore >= 88).length,
+  };
 
   // Filtered Tracker Items
   const filteredTrackerItems = trackerItems.filter((t) => {
@@ -275,9 +281,9 @@ export const CertificationIntelligenceView: React.FC = () => {
           TAB 1: OVERVIEW
           ========================================================================= */}
       {activeTab === 'overview' && (
-        <div className="space-y-6">
+        <div className="space-y-6 crt-overview-layout">
           {/* CERTIFICATION CATALOG PORTFOLIO (3-COLUMN GRID) */}
-          <section className="ski-section-card">
+          <section className="ski-section-card crt-portfolio-section">
             <div className="ski-section-header">
               <div className="ski-section-title-group">
                 <h3 className="ski-section-title">
@@ -344,84 +350,10 @@ export const CertificationIntelligenceView: React.FC = () => {
             </div>
           </section>
 
-          {/* ANIMATED CERTIFICATION LIFECYCLE PIPELINE */}
-          <section className="ski-section-card">
-            <div className="ski-section-header">
-              <div className="ski-section-title-group">
-                <h3 className="ski-section-title">
-                  <TrendingUp size={18} className="text-teal-700" /> Certification Lifecycle Pipeline
-                </h3>
-                <span className="ski-section-subtitle">Cohort progression across credential stages</span>
-              </div>
-            </div>
-
-            {/* HORIZONTAL VISUAL CONNECTOR NODES */}
-            <div className="crt-pipeline-container">
-              <div className="crt-pipeline-line">
-                <div className="crt-pipeline-fill" style={{ width: '75%' }} />
-              </div>
-
-              <div className="crt-pipeline-step-node">
-                <div className="crt-pipeline-circle">4</div>
-                <span className="crt-pipeline-node-lbl">Recommended</span>
-              </div>
-
-              <div className="crt-pipeline-step-node">
-                <div className="crt-pipeline-circle">3</div>
-                <span className="crt-pipeline-node-lbl">Preparing</span>
-              </div>
-
-              <div className="crt-pipeline-step-node">
-                <div className="crt-pipeline-circle">2</div>
-                <span className="crt-pipeline-node-lbl">Ready</span>
-              </div>
-
-              <div className="crt-pipeline-step-node">
-                <div className="crt-pipeline-circle">1</div>
-                <span className="crt-pipeline-node-lbl">Scheduled</span>
-              </div>
-
-              <div className="crt-pipeline-step-node">
-                <div className="crt-pipeline-circle certified">
-                  <Check size={18} />
-                </div>
-                <span className="crt-pipeline-node-lbl font-black text-emerald-800">Certified (2)</span>
-              </div>
-            </div>
-
-            {/* CONVERSION INSIGHT TILES */}
-            <div className="crt-pipeline-stats-grid">
-              <div className="crt-pipeline-stat-card teal">
-                <div className="crt-stat-num-badge teal">50%</div>
-                <div className="crt-stat-info">
-                  <strong className="crt-stat-title">Readiness Conversion</strong>
-                  <span className="crt-stat-sub">of recommended trainees reached certification-ready status</span>
-                </div>
-              </div>
-
-              <div className="crt-pipeline-stat-card emerald">
-                <div className="crt-stat-num-badge emerald">2</div>
-                <div className="crt-stat-info">
-                  <strong className="crt-stat-title">Credentials Passed</strong>
-                  <span className="crt-stat-sub">Microsoft official certifications successfully completed</span>
-                </div>
-              </div>
-
-              <div className="crt-pipeline-stat-card indigo">
-                <div className="crt-stat-num-badge indigo">1</div>
-                <div className="crt-stat-info">
-                  <strong className="crt-stat-title">Upcoming Exam</strong>
-                  <span className="crt-stat-sub">Scheduled for Sep 5, 2026</span>
-                </div>
-              </div>
-            </div>
-          </section>
-
-          {/* TWO-COLUMN CERTIFICATION COPILOT + QUICK INTELLIGENCE */}
-          <section className="grid grid-cols-3 gap-5 align-start">
-            {/* LEFT: AI CHAT PANEL (2 COLS) */}
-            <div className="col-span-2 ski-copilot-card">
-              <div className="ski-copilot-header">
+          {/* CERTIFICATION COPILOT + RESPONSIVE QUICK INTELLIGENCE */}
+          <section className="crt-intelligence-workspace">
+            <div className="ski-copilot-card crt-copilot-panel">
+              <div className="ski-copilot-header crt-copilot-header">
                 <div className="flex items-center gap-2">
                   <Bot size={20} className="text-teal-700" />
                   <div>
@@ -435,43 +367,43 @@ export const CertificationIntelligenceView: React.FC = () => {
               </div>
 
               {/* CHAT DISPLAY BODY */}
-              <div className="ski-copilot-chat-body">
+              <div className="ski-copilot-chat-body crt-copilot-chat-body">
                 {!copilotResponse && !isCopilotThinking ? (
                   <div className="ski-copilot-empty-state">
-                    <Brain size={36} className="text-teal-700 mb-2" />
+                    <div className="crt-copilot-hero-icon"><Award size={25} /></div>
                     <h4 className="ski-empty-prompt-title">How can I assist with certification planning?</h4>
                     <p className="ski-empty-prompt-sub">
                       Click a suggested question below or type a query to evaluate exam readiness.
                     </p>
 
-                    <div className="ski-suggestions-grid">
+                    <div className="crt-copilot-questions-grid">
                       <button
                         type="button"
-                        className="ski-suggestion-chip"
+                        className="crt-copilot-question-card"
                         onClick={() => handleCopilotQuery('Who is ready for DP-700?')}
                       >
-                        Who is ready for DP-700?
+                        <span><Sparkles size={14} /> Who is ready for DP-700?</span><ChevronRight size={15} />
                       </button>
                       <button
                         type="button"
-                        className="ski-suggestion-chip"
+                        className="crt-copilot-question-card"
                         onClick={() => handleCopilotQuery('Which certification is best for Kaviram?')}
                       >
-                        Which certification is best for Kaviram?
+                        <span><Sparkles size={14} /> Which certification is best for Kaviram?</span><ChevronRight size={15} />
                       </button>
                       <button
                         type="button"
-                        className="ski-suggestion-chip"
+                        className="crt-copilot-question-card"
                         onClick={() => handleCopilotQuery('Who has completed certifications?')}
                       >
-                        Who has completed certifications?
+                        <span><Sparkles size={14} /> Who has completed certifications?</span><ChevronRight size={15} />
                       </button>
                       <button
                         type="button"
-                        className="ski-suggestion-chip"
+                        className="crt-copilot-question-card"
                         onClick={() => handleCopilotQuery('Which trainees need more preparation?')}
                       >
-                        Which trainees need more preparation?
+                        <span><Sparkles size={14} /> Which trainees need more preparation?</span><ChevronRight size={15} />
                       </button>
                     </div>
                   </div>
@@ -486,41 +418,57 @@ export const CertificationIntelligenceView: React.FC = () => {
                       <strong>Query:</strong> &ldquo;{copilotResponse?.question}&rdquo;
                     </div>
 
-                    <div className="ski-response-card">
+                    <div className="ski-response-card crt-copilot-response-card">
                       <h4 className="ski-response-headline">{copilotResponse?.headline}</h4>
-                      <p className="text-xs text-slate-600 my-1">{copilotResponse?.summaryText}</p>
+                      <p className="crt-copilot-response-summary">{copilotResponse?.summaryText}</p>
 
-                      <div className="ski-response-items-list">
-                        {copilotResponse?.results.map((r) => (
-                          <div key={r.traineeName + r.rank} className="ski-response-item-box">
-                            <div className="flex items-center justify-between mb-1">
-                              <div className="flex items-center gap-2">
-                                <div className="w-7 h-7 rounded-full bg-teal-700 text-white font-bold text-xs flex items-center justify-center">
-                                  {r.avatarInitials}
-                                </div>
-                                <div className="flex flex-col">
-                                  <strong className="text-xs font-bold text-slate-900 leading-tight">{r.traineeName}</strong>
-                                  <span className="text-[10px] text-slate-500">{r.employeeId} • {r.examCode}</span>
+                      <div className="crt-copilot-results-grid">
+                        {copilotResponse?.results.map((r) => {
+                          const certificationTitle = catalog.find((cert) => cert.examCode === r.examCode)?.title || r.examCode;
+                          const developmentGap = r.gapAction?.startsWith('Development Focus:')
+                            ? r.gapAction.replace('Development Focus:', '').trim()
+                            : 'No critical readiness gap identified';
+                          const nextAction = r.gapAction || r.statusBadge;
+
+                          return (
+                          <div key={r.traineeName + r.rank} className="crt-copilot-result-card">
+                            <div className="crt-copilot-result-header">
+                              <div className="crt-copilot-result-person">
+                                <div className="crt-copilot-result-avatar">{r.avatarInitials}</div>
+                                <div className="crt-copilot-result-identity">
+                                  <strong>{r.traineeName}</strong>
+                                  <span>{r.employeeId}</span>
                                 </div>
                               </div>
-                              <span className="ski-match-percent-badge">{r.score}% {r.scoreLabel}</span>
-                            </div>
-
-                            <div className="flex gap-2 flex-wrap my-1.5">
-                              {r.evidence.map((ev, i) => (
-                                <span key={i} className="text-[11px] bg-slate-100 text-slate-700 px-2 py-0.5 rounded font-semibold border border-slate-200">
-                                  {ev}
-                                </span>
-                              ))}
-                            </div>
-
-                            {r.gapAction && (
-                              <div className="text-[11px] text-teal-800 bg-teal-50 border border-teal-200 p-2 rounded-lg mt-1">
-                                <strong>Action:</strong> {r.gapAction}
+                              <div className="crt-copilot-result-score">
+                                <strong>{r.score}%</strong><span>{r.scoreLabel}</span>
                               </div>
-                            )}
+                            </div>
+
+                            <div className="crt-copilot-certification-row">
+                              <Award size={15} />
+                              <div><span>{r.examCode}</span><strong>{certificationTitle}</strong></div>
+                            </div>
+
+                            <div className="crt-copilot-result-details">
+                              <div>
+                                <span className="crt-result-detail-label">Strengths &amp; evidence</span>
+                                <div className="crt-result-evidence-list">
+                                  {r.evidence.map((ev, i) => <span key={i}>{ev}</span>)}
+                                </div>
+                              </div>
+                              <div>
+                                <span className="crt-result-detail-label">Development gap</span>
+                                <p>{developmentGap}</p>
+                              </div>
+                            </div>
+
+                            <div className="crt-copilot-next-action">
+                              <Target size={14} /><span><strong>Recommended next action</strong>{nextAction}</span>
+                            </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
 
                       <button
@@ -536,8 +484,8 @@ export const CertificationIntelligenceView: React.FC = () => {
               </div>
 
               {/* COMPOSER INPUT */}
-              <form className="ski-copilot-composer" onSubmit={handleCustomSubmit}>
-                <div className="ski-composer-input-wrapper">
+              <form className="ski-copilot-composer crt-copilot-composer" onSubmit={handleCustomSubmit}>
+                <div className="ski-composer-input-wrapper crt-copilot-input-bar">
                   <Bot size={16} className="text-teal-700 flex-shrink-0" />
                   <input
                     type="text"
@@ -546,21 +494,25 @@ export const CertificationIntelligenceView: React.FC = () => {
                     value={customCopilotInput}
                     onChange={(e) => setCustomCopilotInput(e.target.value)}
                   />
-                  <button type="submit" className="ski-composer-send-btn">
+                  <button type="submit" className="ski-composer-send-btn crt-copilot-send-button" aria-label="Send certification query">
                     <Send size={14} />
                   </button>
                 </div>
               </form>
             </div>
 
-            {/* RIGHT: QUICK INTELLIGENCE PANEL */}
-            <div className="ski-section-card flex flex-col justify-between">
-              <div>
-                <span className="text-[10px] font-extrabold text-teal-700 uppercase tracking-wider block">CERTIFICATION INSIGHTS</span>
-                <h3 className="ski-section-title mt-1 mb-3">Quick Intelligence</h3>
+            <div className="crt-insights-section">
+              <div className="crt-insights-heading">
+                <div>
+                  <span>CERTIFICATION INSIGHTS</span>
+                  <h3>Quick Intelligence</h3>
+                </div>
+                <p>Credential readiness and exam planning at a glance.</p>
+              </div>
 
                 <div className="crt-quick-insights-grid">
                   <div className="crt-insight-card teal">
+                    <div className="crt-insight-icon"><Award size={17} /></div>
                     <span className="crt-insight-header">MOST READY CREDENTIAL</span>
                     <strong className="crt-insight-code">DP-600</strong>
                     <span className="crt-insight-name">Fabric Analytics Engineer Associate</span>
@@ -568,6 +520,7 @@ export const CertificationIntelligenceView: React.FC = () => {
                   </div>
 
                   <div className="crt-insight-card emerald">
+                    <div className="crt-insight-icon"><UserCheck size={17} /></div>
                     <span className="crt-insight-header">READY CANDIDATES</span>
                     <strong className="crt-insight-code text-emerald">2 Trainees</strong>
                     <span className="crt-insight-name">Above 85% readiness threshold</span>
@@ -575,6 +528,7 @@ export const CertificationIntelligenceView: React.FC = () => {
                   </div>
 
                   <div className="crt-insight-card amber">
+                    <div className="crt-insight-icon"><AlertTriangle size={17} /></div>
                     <span className="crt-insight-header">LARGEST READINESS GAP</span>
                     <strong className="crt-insight-code text-amber">DP-750</strong>
                     <span className="crt-insight-name">Unity Catalog Governance</span>
@@ -582,13 +536,13 @@ export const CertificationIntelligenceView: React.FC = () => {
                   </div>
 
                   <div className="crt-insight-card indigo">
+                    <div className="crt-insight-icon"><Calendar size={17} /></div>
                     <span className="crt-insight-header">NEXT SCHEDULED EXAM</span>
                     <strong className="crt-insight-code text-indigo">DP-600</strong>
                     <span className="crt-insight-name">Pavithra Annadurai</span>
                     <span className="crt-insight-meta text-indigo">Scheduled for Sep 5, 2026</span>
                   </div>
                 </div>
-              </div>
             </div>
           </section>
         </div>
@@ -598,10 +552,10 @@ export const CertificationIntelligenceView: React.FC = () => {
           TAB 2: RECOMMENDATIONS
           ========================================================================= */}
       {activeTab === 'recommendations' && (
-        <div className="space-y-5">
+        <div className="space-y-5 crt-recommendations-view">
           {/* FILTER TOOLBAR */}
-          <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4">
-            <div className="search-input-wrapper h-9 flex-1 max-w-sm">
+          <div className="bg-white border border-slate-200 rounded-2xl p-4 flex items-center justify-between gap-4 crt-recommendation-filters">
+            <div className="search-input-wrapper h-9 flex-1 max-w-sm crt-recommendation-search">
               <Search size={14} className="text-teal-700" />
               <input
                 type="text"
@@ -612,9 +566,9 @@ export const CertificationIntelligenceView: React.FC = () => {
               />
             </div>
 
-            <div className="flex items-center gap-3">
+            <div className="flex items-center gap-3 crt-recommendation-filter-selects">
               <select
-                className="asm-select-field h-9 text-xs"
+                className="asm-select-field h-9 text-xs crt-recommendation-select"
                 value={selectedCertFilter}
                 onChange={(e) => setSelectedCertFilter(e.target.value)}
               >
@@ -625,7 +579,7 @@ export const CertificationIntelligenceView: React.FC = () => {
               </select>
 
               <select
-                className="asm-select-field h-9 text-xs"
+                className="asm-select-field h-9 text-xs crt-recommendation-select"
                 value={selectedReadinessFilter}
                 onChange={(e) => setSelectedReadinessFilter(e.target.value)}
               >
@@ -638,25 +592,40 @@ export const CertificationIntelligenceView: React.FC = () => {
             </div>
           </div>
 
-          {/* RECOMMENDATION CARDS (2-COLUMN GRID WITH TWO CIRCULAR RINGS) */}
+          <div className="crt-recommendation-summary" aria-label="Recommendation summary">
+            {[
+              { label: 'Total Recommendations', value: recommendationSummary.total, icon: <Layers size={15} /> },
+              { label: 'Ready to Schedule', value: recommendationSummary.ready, icon: <CheckCircle2 size={15} /> },
+              { label: 'Preparing', value: recommendationSummary.preparing, icon: <BookOpen size={15} /> },
+              { label: 'High Match Candidates', value: recommendationSummary.highMatch, icon: <Target size={15} />, note: '88%+' },
+            ].map((item) => (
+              <div key={item.label} className="crt-recommendation-summary-card">
+                <span className="crt-rec-summary-icon">{item.icon}</span>
+                <span><small>{item.label}</small><strong>{item.value}</strong></span>
+                {item.note && <em>{item.note}</em>}
+              </div>
+            ))}
+          </div>
+
+          {/* RECOMMENDATION CARDS (2-COLUMN COMPACT GRID) */}
           <div className="crt-recommendations-grid">
             {filteredRecommendations.map((rec) => (
               <div key={rec.traineeId} className="crt-recommendation-card">
                 <div>
                   {/* TRAINEE HEADER */}
-                  <div className="flex items-center justify-between mb-3">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-teal-700 text-white font-black text-sm flex items-center justify-center">
+                  <div className="flex items-center justify-between mb-3 crt-rec-card-header">
+                    <div className="flex items-center gap-3 crt-rec-person">
+                      <div className="w-10 h-10 rounded-full bg-teal-700 text-white font-black text-sm flex items-center justify-center crt-rec-avatar">
                         {rec.avatarInitials}
                       </div>
-                      <div className="flex flex-col">
+                      <div className="flex flex-col crt-rec-identity">
                         <strong className="text-base font-black text-slate-900 leading-tight">{rec.name}</strong>
                         <span className="text-xs text-slate-500">{rec.employeeId} • {rec.bootcampName}</span>
                       </div>
                     </div>
 
                     <span
-                      className={`text-xs font-black px-2.5 py-1 rounded-xl border ${
+                      className={`text-xs font-black px-2.5 py-1 rounded-xl border crt-rec-status ${
                         rec.readinessLevel === 'READY TO SCHEDULE'
                           ? 'bg-emerald-100 text-emerald-900 border-emerald-300'
                           : rec.readinessLevel === 'PREPARING'
@@ -669,16 +638,20 @@ export const CertificationIntelligenceView: React.FC = () => {
                   </div>
 
                   {/* BEST MATCH PANEL */}
-                  <div className="bg-teal-50/70 border border-teal-200 p-3.5 rounded-xl mb-3">
+                  <div className="bg-teal-50/70 border border-teal-200 p-3.5 rounded-xl mb-3 crt-rec-match-panel">
                     <span className="text-[10px] font-black text-teal-800 uppercase block tracking-wide">BEST CERTIFICATION MATCH</span>
+                    <div className="crt-rec-certification-identity">
+                      <strong>{rec.examCode}</strong>
+                      <span>{rec.certificationTitle}</span>
+                    </div>
                     <h4 className="text-base font-black text-slate-900 m-0 mt-0.5">
                       {rec.examCode} • {rec.certificationTitle}
                     </h4>
                   </div>
 
                   {/* MATCH SCORE VS READINESS SCORE (TWO CIRCULAR PROGRESS RINGS) */}
-                  <div className="grid grid-cols-2 gap-3 mb-3">
-                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center gap-3">
+                  <div className="grid grid-cols-2 gap-3 mb-3 crt-rec-metrics">
+                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center gap-3 crt-rec-metric">
                       <div className="relative w-10 h-10 flex items-center justify-center">
                         <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
                           <path className="text-teal-100 stroke-current" strokeWidth="3.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -692,7 +665,7 @@ export const CertificationIntelligenceView: React.FC = () => {
                       </div>
                     </div>
 
-                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center gap-3">
+                    <div className="bg-slate-50 border border-slate-200 p-3 rounded-xl flex items-center gap-3 crt-rec-metric readiness">
                       <div className="relative w-10 h-10 flex items-center justify-center">
                         <svg className="w-10 h-10 transform -rotate-90" viewBox="0 0 36 36">
                           <path className="text-emerald-100 stroke-current" strokeWidth="3.5" fill="none" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
@@ -708,25 +681,25 @@ export const CertificationIntelligenceView: React.FC = () => {
                   </div>
 
                   {/* EVIDENCE & GAPS */}
-                  <div className="space-y-2 text-xs border-t border-slate-100 pt-3">
-                    <div>
+                  <div className="space-y-2 text-xs border-t border-slate-100 pt-3 crt-rec-evidence-grid">
+                    <div className="crt-rec-evidence-section strong">
                       <strong className="text-slate-800 block mb-1">STRONG EVIDENCE:</strong>
-                      <div className="flex gap-1.5 flex-wrap">
+                      <div className="flex gap-1.5 flex-wrap crt-rec-skill-list">
                         {rec.strongEvidence.map((ev) => (
                           <span key={ev.skill} className="bg-emerald-50 text-emerald-800 border border-emerald-200 px-2 py-0.5 rounded font-bold">
-                            {ev.skill}: {ev.score}%
+                            <span>{ev.skill}</span><strong>{ev.score}%</strong>
                           </span>
                         ))}
                       </div>
                     </div>
 
                     {rec.developmentGaps.length > 0 && (
-                      <div>
+                      <div className="crt-rec-evidence-section development">
                         <strong className="text-slate-800 block mb-1">DEVELOPMENT BEFORE EXAM:</strong>
-                        <div className="flex gap-1.5 flex-wrap">
+                        <div className="flex gap-1.5 flex-wrap crt-rec-skill-list">
                           {rec.developmentGaps.map((gap) => (
                             <span key={gap.skill} className="bg-rose-50 text-rose-800 border border-rose-200 px-2 py-0.5 rounded font-bold">
-                              {gap.skill}: {gap.score}%
+                              <span>{gap.skill}</span><strong>{gap.score}%</strong>
                             </span>
                           ))}
                         </div>
@@ -737,7 +710,7 @@ export const CertificationIntelligenceView: React.FC = () => {
 
                 <button
                   type="button"
-                  className="ui-button-secondary w-full justify-center mt-2"
+                  className="ui-button-secondary w-full justify-center mt-2 crt-rec-readiness-button"
                   onClick={() => setSelectedReadinessTrainee(rec.traineeId)}
                 >
                   View Readiness Breakdown &rarr;
@@ -906,7 +879,7 @@ export const CertificationIntelligenceView: React.FC = () => {
       {/* =========================================================================
           INTELLIGENCE DATA SOURCES INDICATOR
           ========================================================================= */}
-      <section className="ski-data-sources-card">
+      {false && <section className="ski-data-sources-card">
         <div className="flex items-center gap-2">
           <FileCheck size={16} className="text-teal-700" />
           <span className="text-xs font-bold text-slate-800">CERTIFICATION INTELLIGENCE SOURCES</span>
@@ -926,7 +899,7 @@ export const CertificationIntelligenceView: React.FC = () => {
             </span>
           ))}
         </div>
-      </section>
+      </section>}
 
       {/* =========================================================================
           MODAL 1: CENTERED CERTIFICATION DETAILS MODAL COMPONENT

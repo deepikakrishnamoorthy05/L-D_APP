@@ -185,7 +185,7 @@ export const BOOTCAMP_PERFORMANCE_DOMAINS: BootcampDomain[] = [
   },
   {
     id: 'b-4',
-    name: 'Enterprise Data Engineering',
+    name: 'Data Engineering',
     code: 'DE-B03',
     traineesCount: 22,
     avgScore: 84,

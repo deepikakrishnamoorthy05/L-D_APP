@@ -46,6 +46,7 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
   const [selectedLearningStatus, setSelectedLearningStatus] = useState<string>('All');
   const [selectedEnrollmentStatus, setSelectedEnrollmentStatus] = useState<string>('All');
   const [selectedTrack, setSelectedTrack] = useState<string>('All');
+  const [kpiFilter, setKpiFilter] = useState<'active' | 'project-ready' | 'needs-attention' | null>(null);
 
   // View Mode: Table or Cards
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');
@@ -124,7 +125,14 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
     const matchesTrack =
       selectedTrack === 'All' || (t.primaryTech && t.primaryTech.toLowerCase().includes(selectedTrack.toLowerCase()));
 
-    return matchesSearch && matchesBootcamp && matchesLearningStatus && matchesEnrollmentStatus && matchesTrack;
+    const matchesKpiFilter =
+      kpiFilter === null ||
+      (kpiFilter === 'active' && t.enrollmentStatus === 'Active') ||
+      (kpiFilter === 'project-ready' && t.learningStatus === 'Project Ready') ||
+      (kpiFilter === 'needs-attention' &&
+        (t.learningStatus === 'Needs Attention' || t.learningStatus === 'At Risk'));
+
+    return matchesSearch && matchesBootcamp && matchesLearningStatus && matchesEnrollmentStatus && matchesTrack && matchesKpiFilter;
   });
 
   const isFilterActive =
@@ -132,7 +140,8 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
     selectedBootcamp !== 'All' ||
     selectedLearningStatus !== 'All' ||
     selectedEnrollmentStatus !== 'All' ||
-    selectedTrack !== 'All';
+    selectedTrack !== 'All' ||
+    kpiFilter !== null;
 
   const clearFilters = () => {
     setSearchQuery('');
@@ -140,7 +149,17 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
     setSelectedLearningStatus('All');
     setSelectedEnrollmentStatus('All');
     setSelectedTrack('All');
+    setKpiFilter(null);
   };
+
+  const kpiFilterLabel =
+    kpiFilter === 'active'
+      ? 'Active'
+      : kpiFilter === 'project-ready'
+        ? 'Project Ready'
+        : kpiFilter === 'needs-attention'
+          ? 'Need Attention'
+          : null;
 
   return (
     <motion.div
@@ -186,10 +205,14 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
 
       {/* 2. KPI ROW (4 Equal Metric Cards with 3D Depth & Count Up) */}
       <section className="kpi-cards-grid grid-4-cols mt-4" aria-label="Trainee Statistics">
-        <motion.div
-          whileHover={{ y: -4, scale: 1.01 }}
+        <motion.button
+          type="button"
+          whileHover={{ y: -2 }}
           transition={{ duration: 0.2 }}
-          className="metric-card-3d cyan-tint"
+          className={`metric-card-3d trainee-kpi-filter-card cyan-tint ${kpiFilter === null ? 'is-active' : ''}`}
+          onClick={() => setKpiFilter(null)}
+          aria-pressed={kpiFilter === null}
+          aria-label="Show all trainees"
         >
           <div className="card-top-row">
             <span className="metric-label">TOTAL TRAINEES</span>
@@ -201,12 +224,16 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
             <AnimatedCounter value={totalCount} />
           </div>
           <span className="metric-subtext">Total enrolled talent</span>
-        </motion.div>
+        </motion.button>
 
-        <motion.div
-          whileHover={{ y: -4, scale: 1.01 }}
+        <motion.button
+          type="button"
+          whileHover={{ y: -2 }}
           transition={{ duration: 0.2 }}
-          className="metric-card-3d indigo-tint"
+          className={`metric-card-3d trainee-kpi-filter-card indigo-tint ${kpiFilter === 'active' ? 'is-active' : ''}`}
+          onClick={() => setKpiFilter('active')}
+          aria-pressed={kpiFilter === 'active'}
+          aria-label="Filter to active trainees"
         >
           <div className="card-top-row">
             <span className="metric-label">ACTIVE LEARNERS</span>
@@ -218,12 +245,16 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
             <AnimatedCounter value={activeCount} />
           </div>
           <span className="metric-subtext">Currently in active cohorts</span>
-        </motion.div>
+        </motion.button>
 
-        <motion.div
-          whileHover={{ y: -4, scale: 1.01 }}
+        <motion.button
+          type="button"
+          whileHover={{ y: -2 }}
           transition={{ duration: 0.2 }}
-          className="metric-card-3d green-tint"
+          className={`metric-card-3d trainee-kpi-filter-card green-tint ${kpiFilter === 'project-ready' ? 'is-active' : ''}`}
+          onClick={() => setKpiFilter('project-ready')}
+          aria-pressed={kpiFilter === 'project-ready'}
+          aria-label="Filter to project ready trainees"
         >
           <div className="card-top-row">
             <span className="metric-label">PROJECT READY</span>
@@ -235,12 +266,16 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
             <AnimatedCounter value={readyCount} />
           </div>
           <span className="metric-subtext">Qualified for deployment</span>
-        </motion.div>
+        </motion.button>
 
-        <motion.div
-          whileHover={{ y: -4, scale: 1.01 }}
+        <motion.button
+          type="button"
+          whileHover={{ y: -2 }}
           transition={{ duration: 0.2 }}
-          className="metric-card-3d amber-tint"
+          className={`metric-card-3d trainee-kpi-filter-card amber-tint ${kpiFilter === 'needs-attention' ? 'is-active' : ''}`}
+          onClick={() => setKpiFilter('needs-attention')}
+          aria-pressed={kpiFilter === 'needs-attention'}
+          aria-label="Filter to trainees needing attention"
         >
           <div className="card-top-row">
             <span className="metric-label">NEED ATTENTION</span>
@@ -252,7 +287,7 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
             <AnimatedCounter value={attentionCount} />
           </div>
           <span className="metric-subtext">Requiring support / intervention</span>
-        </motion.div>
+        </motion.button>
       </section>
 
       {/* 3. FILTER TOOLBAR (Single Compact Flex Row) */}
@@ -321,6 +356,19 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
           </button>
         )}
       </section>
+
+      {kpiFilterLabel && (
+        <div className="trainee-kpi-active-filter" role="status">
+          <span>Active Filter: <strong>{kpiFilterLabel}</strong></span>
+          <button
+            type="button"
+            onClick={() => setKpiFilter(null)}
+            aria-label={`Clear ${kpiFilterLabel} KPI filter`}
+          >
+            <X size={13} />
+          </button>
+        </div>
+      )}
 
       {/* 4. WORKSPACE CONTAINER WITH HEADER & VIEW TOGGLE */}
       <section className="trainee-workspace-card mt-4">
