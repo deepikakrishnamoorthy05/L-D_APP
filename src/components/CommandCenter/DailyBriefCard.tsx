@@ -1,5 +1,5 @@
 import React from 'react';
-import { Sparkles, ArrowRight, ShieldCheck } from 'lucide-react';
+import { Sparkles, ArrowRight } from 'lucide-react';
 import { useTrainees } from '../../context/TraineeContext';
 
 interface DailyBriefCardProps {
@@ -47,32 +47,33 @@ export const DailyBriefCard: React.FC<DailyBriefCardProps> = ({ onNavigate }) =>
           ))}
         </ul>
 
-        {/* 2-3 Recommended Actions */}
-        <div className="recommended-actions-block mt-3 pt-2 border-t">
-          <span className="block text-xs font-bold text-slate-500 mb-1.5 uppercase tracking-wider">
-            RECOMMENDED ACTIONS
-          </span>
-          <div className="action-buttons-flex flex flex-col gap-1.5">
+        {/* Recommended Actions */}
+        <div className="recommended-actions-block">
+          <span className="rec-actions-title">RECOMMENDED ACTIONS</span>
+          <div className="rec-actions-list">
             <button
               type="button"
-              className="rec-act-btn text-left text-xs font-semibold text-teal-700 hover:text-teal-900 transition-colors flex items-center gap-1"
+              className="rec-action-tile"
               onClick={() => onNavigate?.('trainees', 'needs-attention')}
             >
-              → Review trainees requiring attention
+              <ArrowRight size={13} className="rec-action-icon" />
+              <span>Review trainees requiring attention</span>
             </button>
             <button
               type="button"
-              className="rec-act-btn text-left text-xs font-semibold text-teal-700 hover:text-teal-900 transition-colors flex items-center gap-1"
+              className="rec-action-tile"
               onClick={() => onNavigate?.('skill-intelligence')}
             >
-              → Review pending track allocation
+              <ArrowRight size={13} className="rec-action-icon" />
+              <span>Review pending track allocation</span>
             </button>
             <button
               type="button"
-              className="rec-act-btn text-left text-xs font-semibold text-teal-700 hover:text-teal-900 transition-colors flex items-center gap-1"
+              className="rec-action-tile"
               onClick={() => onNavigate?.('bootcamps')}
             >
-              → Plan focused Databricks reinforcement
+              <ArrowRight size={13} className="rec-action-icon" />
+              <span>Plan focused Databricks reinforcement</span>
             </button>
           </div>
         </div>
