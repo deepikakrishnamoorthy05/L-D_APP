@@ -14,7 +14,8 @@ import { SkillIntelligenceView } from '../SkillIntelligence/SkillIntelligenceVie
 import { CertificationIntelligenceView } from '../Certifications/CertificationIntelligenceView';
 import { AnalyticsView } from '../Analytics/AnalyticsView';
 import { useBootcamps } from '../../context/BootcampContext';
-import { CheckCircle2 } from 'lucide-react';
+import { CheckCircle2, Menu } from 'lucide-react';
+import systechLogo from '../../assets/systech-logo.png';
 
 interface AppShellProps {
   onLogout: () => void;
@@ -22,6 +23,7 @@ interface AppShellProps {
 
 export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
   const mainViewportRef = useRef<HTMLElement>(null);
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
 
   const getNavFromPath = () => {
     const rawPath = window.location.pathname.replace(/^\//, '');
@@ -41,8 +43,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
 
   const [currentNav, setCurrentNav] = useState<string>(getNavFromPath);
 
-  // The window is fixed; this element owns page scrolling. Reset it before
-  // the newly selected view is painted so every navigation starts at the top.
+  // Reset viewport scroll position before rendering new page
   useLayoutEffect(() => {
     mainViewportRef.current?.scrollTo({
       top: 0,
@@ -51,7 +52,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
     });
   }, [currentNav]);
 
-  // Sync with browser navigation (back / forward buttons)
+  // Sync with browser navigation
   React.useEffect(() => {
     const handlePopState = () => {
       setCurrentNav(getNavFromPath());
@@ -62,6 +63,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
 
   const handleNavChange = (navId: string) => {
     setCurrentNav(navId);
+    setMobileMenuOpen(false);
     if (window.location.pathname !== `/${navId}`) {
       window.history.pushState(null, '', `/${navId}`);
     }
@@ -127,6 +129,22 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
       ? 'sessions'
       : currentNav;
 
+  const pageTitleMap: Record<string, string> = {
+    'command-center': 'Command Center',
+    'bootcamps': 'Bootcamps',
+    'bootcamp-details': 'Cohort Details',
+    'trainees': 'Trainees',
+    'trainee-profile': 'Trainee Profile',
+    'sessions': 'Sessions',
+    'session-details': 'Session Details',
+    'attendance-record': 'Attendance',
+    'assessments': 'Assessments',
+    'feedback': 'Feedback',
+    'skill-intelligence': 'Skill Intelligence',
+    'certifications': 'Certifications',
+    'analytics': 'Analytics',
+  };
+
   return (
     <div className="app-shell-layout">
       {/* Toast Notification Banner */}
@@ -137,7 +155,24 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
         </div>
       )}
 
-      {/* Left Navigation Sidebar */}
+      {/* Compact Mobile Top Bar Header */}
+      <header className="mobile-app-header">
+        <button
+          type="button"
+          className="mobile-hamburger-btn"
+          onClick={() => setMobileMenuOpen(true)}
+          aria-label="Open navigation menu"
+        >
+          <Menu size={22} />
+        </button>
+
+        <div className="mobile-brand-title">
+          <img src={systechLogo} alt="Systech" className="mobile-brand-logo" />
+          <span className="mobile-page-name">{pageTitleMap[currentNav] || 'L&D Platform'}</span>
+        </div>
+      </header>
+
+      {/* Left Navigation Sidebar / Mobile Drawer */}
       <Sidebar
         currentNav={activeSidebarItem}
         onSelectNav={(navId) => {
@@ -145,6 +180,8 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
           handleNavChange(navId);
         }}
         onLogout={onLogout}
+        mobileOpen={mobileMenuOpen}
+        onCloseMobile={() => setMobileMenuOpen(false)}
       />
 
       {/* Main Viewport Content Area */}
