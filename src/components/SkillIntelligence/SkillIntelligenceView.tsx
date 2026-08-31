@@ -29,6 +29,9 @@ import {
   CopilotQueryResult,
 } from '../../services/skillIntelligenceService';
 import { useBootcamps } from '../../context/BootcampContext';
+import { EvidenceExplanationModal } from '../Common/EvidenceExplanationModal';
+import { CompareTraineesModal } from './CompareTraineesModal';
+import { ReadinessSimulatorModal } from './ReadinessSimulatorModal';
 
 type SkillIntelligenceFeature =
   | 'copilot'
@@ -36,7 +39,9 @@ type SkillIntelligenceFeature =
   | 'project-fit'
   | 'track-allocation'
   | 'cohort-coverage'
-  | 'talent-snapshot';
+  | 'talent-snapshot'
+  | 'compare-trainees'
+  | 'readiness-simulator';
 
 const FEATURE_CONFIG: Array<{
   id: SkillIntelligenceFeature;
@@ -51,6 +56,8 @@ const FEATURE_CONFIG: Array<{
   { id: 'track-allocation', title: 'Track Allocation', description: 'Recommend the most suitable learning track using trainee performance evidence.', action: 'View Track Recommendations', icon: Route },
   { id: 'cohort-coverage', title: 'Cohort Skill Coverage', description: 'Understand cohort strengths, weaknesses and skill development priorities.', action: 'View Cohort Coverage', icon: BarChart3 },
   { id: 'talent-snapshot', title: 'Talent Snapshot', description: 'See project-ready trainees, top performers and trainees needing attention.', action: 'View Talent Snapshot', icon: UsersRound },
+  { id: 'compare-trainees', title: 'Compare Trainees', description: 'Compare skill, readiness and performance evidence side-by-side.', action: 'Compare →', icon: UsersRound },
+  { id: 'readiness-simulator', title: 'Readiness Simulator', description: 'Explore how targeted skill improvement could affect trainee readiness.', action: 'Simulate →', icon: Zap },
 ];
 
 const getFeatureFromUrl = (): SkillIntelligenceFeature | null => {
@@ -65,11 +72,24 @@ export const SkillIntelligenceView: React.FC = () => {
   const openedFromHubRef = useRef(false);
   const [activeFeature, setActiveFeature] = useState<SkillIntelligenceFeature | null>(getFeatureFromUrl);
 
+  // Intelligence Modals State
+  const [selectedEvidenceTraineeId, setSelectedEvidenceTraineeId] = useState<string | null>(null);
+  const [showCompareModal, setShowCompareModal] = useState(false);
+  const [showSimulatorModal, setShowSimulatorModal] = useState(false);
+
   const resetPageScroll = () => {
     document.querySelector<HTMLElement>('.shell-main-viewport')?.scrollTo({ top: 0, left: 0, behavior: 'auto' });
   };
 
   const openFeature = (feature: SkillIntelligenceFeature) => {
+    if (feature === 'compare-trainees') {
+      setShowCompareModal(true);
+      return;
+    }
+    if (feature === 'readiness-simulator') {
+      setShowSimulatorModal(true);
+      return;
+    }
     openedFromHubRef.current = true;
     window.history.pushState(null, '', `/skill-intelligence?view=${feature}`);
     setActiveFeature(feature);
@@ -1099,6 +1119,27 @@ export const SkillIntelligenceView: React.FC = () => {
       </section>
       )}
 
+      {/* INTELLIGENCE MODALS */}
+      {selectedEvidenceTraineeId && (
+        <EvidenceExplanationModal
+          traineeId={selectedEvidenceTraineeId}
+          onClose={() => setSelectedEvidenceTraineeId(null)}
+        />
+      )}
+
+      {showCompareModal && (
+        <CompareTraineesModal
+          onClose={() => setShowCompareModal(false)}
+          onViewEvidence={(id) => {
+            setShowCompareModal(false);
+            setSelectedEvidenceTraineeId(id);
+          }}
+        />
+      )}
+
+      {showSimulatorModal && (
+        <ReadinessSimulatorModal onClose={() => setShowSimulatorModal(false)} />
+      )}
     </motion.div>
   );
 };

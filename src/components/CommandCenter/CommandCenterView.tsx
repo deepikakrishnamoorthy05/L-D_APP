@@ -19,7 +19,7 @@ export const CommandCenterView: React.FC<CommandCenterViewProps> = ({
   return (
     <div className="command-center-content-wrapper executive-dashboard-view">
       {/* 1. Compact Page Header */}
-      <Header />
+      <Header onNavigate={onNavigate} />
 
       {/* 2. Top 4 Summary KPI Cards */}
       <section className="dashboard-section compact-section" aria-label="Key Action Metrics">

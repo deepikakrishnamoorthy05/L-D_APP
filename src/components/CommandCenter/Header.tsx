@@ -1,12 +1,14 @@
 import React, { useState } from 'react';
-import { Bell, ShieldCheck, ChevronRight, X } from 'lucide-react';
-import { RECENT_ACTIVITIES } from '../../data/mockData';
+import { Bell, ShieldCheck, ChevronRight } from 'lucide-react';
+import { NotificationDropdown } from '../Common/NotificationDropdown';
 
-interface HeaderProps {}
+interface HeaderProps {
+  onNavigate?: (navId: string, filter?: any) => void;
+}
 
-export const Header: React.FC<HeaderProps> = () => {
+export const Header: React.FC<HeaderProps> = ({ onNavigate }) => {
   const [showNotifications, setShowNotifications] = useState(false);
-  const unreadCount = 3;
+  const unreadCount = 4;
 
   return (
     <header className="app-top-header">
@@ -48,34 +50,10 @@ export const Header: React.FC<HeaderProps> = () => {
 
           {/* Notification Drawer Dropdown */}
           {showNotifications && (
-            <div className="notification-dropdown">
-              <div className="dropdown-header">
-                <div className="dropdown-title">
-                  <Bell size={14} />
-                  <span>System Notifications</span>
-                </div>
-                <button
-                  type="button"
-                  className="close-dropdown-btn"
-                  onClick={() => setShowNotifications(false)}
-                >
-                  <X size={14} />
-                </button>
-              </div>
-
-              <div className="dropdown-list">
-                {RECENT_ACTIVITIES.map((act) => (
-                  <div key={act.id} className="dropdown-item">
-                    <div className="item-icon-dot" />
-                    <div className="item-content">
-                      <span className="item-title">{act.title}</span>
-                      <p className="item-desc">{act.description}</p>
-                      <span className="item-time">{act.timestamp}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
+            <NotificationDropdown
+              onClose={() => setShowNotifications(false)}
+              onNavigate={onNavigate}
+            />
           )}
         </div>
 

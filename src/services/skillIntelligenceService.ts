@@ -615,4 +615,149 @@ export const skillIntelligenceService = {
       })),
     };
   },
+
+  // 8. Get Evidence Explanation for a Trainee
+  getEvidenceExplanation: (traineeId: string, contextTitle?: string) => {
+    const list = skillIntelligenceService.getTrainees();
+    const trainee =
+      list.find(
+        (t) =>
+          t.traineeId === traineeId ||
+          t.employeeId.toLowerCase() === traineeId.toLowerCase() ||
+          t.name.toLowerCase().includes(traineeId.toLowerCase())
+      ) || list[0];
+
+    const projectMatches = skillIntelligenceService.getProjectFitRanking();
+    const matchObj = projectMatches.find((m) => m.traineeId === trainee.traineeId) || {
+      projectFitScore: trainee.overallReadinessScore,
+    };
+
+    const projectMatchPercent = matchObj.projectFitScore;
+
+    return {
+      traineeId: trainee.traineeId,
+      name: trainee.name,
+      employeeId: trainee.employeeId,
+      avatarInitials: trainee.avatarInitials,
+      role: trainee.role,
+      department: trainee.department,
+      bootcampName: trainee.bootcampName,
+      contextTitle: contextTitle || 'Databricks Project Match',
+      projectMatchPercent: projectMatchPercent,
+      overallReadinessScore: trainee.overallReadinessScore,
+      readinessStatus: trainee.readinessStatus,
+
+      evidence: [
+        { label: 'Databricks', value: `${trainee.skills.Databricks}%` },
+        { label: 'Python', value: `${trainee.skills.Python}%` },
+        { label: 'Problem Solving', value: `${trainee.skills['Problem Solving']}%` },
+        { label: 'Assessment Average', value: `${trainee.assessmentScore}%` },
+        { label: 'Attendance', value: `${trainee.attendancePercent}%` },
+        { label: 'Trainer Feedback', value: `${trainee.trainerFeedbackRating} / 5` },
+      ],
+
+      developmentGap: trainee.primaryGap,
+      recommendationText: `Strong candidate for the ${trainee.recommendedTrack} because Databricks and Python proficiency are above the required enterprise threshold. ${trainee.primaryGap.split('(')[0]} should be strengthened before final project deployment.`,
+      disclaimer: 'Decision support — final allocation remains with L&D',
+    };
+  },
+
+  // 9. Compare 2-3 Trainees Side-by-Side
+  compareTrainees: (traineeIds: string[]) => {
+    const list = skillIntelligenceService.getTrainees();
+    const selected = list.filter(
+      (t) => traineeIds.includes(t.traineeId) || traineeIds.includes(t.employeeId)
+    );
+
+    const traineesToCompare = selected.length > 0 ? selected : list.slice(0, 3);
+
+    const metricsRows = [
+      { key: 'SQL', label: 'SQL', isSkill: true },
+      { key: 'Python', label: 'Python', isSkill: true },
+      { key: 'Databricks', label: 'Databricks', isSkill: true },
+      { key: 'Modeling', label: 'Data Modeling', isSkill: true },
+      { key: 'Problem Solving', label: 'Problem Solving', isSkill: true },
+      { key: 'assessmentScore', label: 'Assessment Avg', suffix: '%' },
+      { key: 'attendancePercent', label: 'Attendance', suffix: '%' },
+      { key: 'overallReadinessScore', label: 'Project Readiness', suffix: '%' },
+    ];
+
+    // Determine suitability per capability
+    const suitability = {
+      databricksProject: traineesToCompare.reduce((prev, curr) =>
+        curr.skills.Databricks > prev.skills.Databricks ? curr : prev
+      ).name,
+      sqlArchitecture: traineesToCompare.reduce((prev, curr) =>
+        curr.skills.SQL > prev.skills.SQL ? curr : prev
+      ).name,
+      dataModeling: traineesToCompare.reduce((prev, curr) =>
+        curr.skills.Modeling > prev.skills.Modeling ? curr : prev
+      ).name,
+    };
+
+    return {
+      trainees: traineesToCompare,
+      metricsRows,
+      suitability,
+      disclaimer: 'Decision support — final allocation remains with L&D',
+    };
+  },
+
+  // 10. Readiness What-If Simulator (Temporary Local State Only)
+  simulateReadiness: (
+    traineeId: string,
+    adjustments: { Databricks?: number; dbt?: number; assessmentScore?: number }
+  ) => {
+    const list = skillIntelligenceService.getTrainees();
+    const trainee =
+      list.find(
+        (t) =>
+          t.traineeId === traineeId ||
+          t.employeeId.toLowerCase() === traineeId.toLowerCase() ||
+          t.name.toLowerCase().includes(traineeId.toLowerCase())
+      ) || list[0];
+
+    const currentReadiness = trainee.overallReadinessScore;
+
+    // Create simulated record
+    const simulatedSkills = {
+      ...trainee.skills,
+      Databricks: adjustments.Databricks !== undefined ? adjustments.Databricks : trainee.skills.Databricks,
+      dbt: adjustments.dbt !== undefined ? adjustments.dbt : trainee.skills.dbt,
+    };
+
+    const simulatedAssessment =
+      adjustments.assessmentScore !== undefined ? adjustments.assessmentScore : trainee.assessmentScore;
+
+    const tempRecord: TraineeTelemetryRecord = {
+      ...trainee,
+      skills: simulatedSkills,
+      assessmentScore: simulatedAssessment,
+    };
+
+    const projectedReadiness = computeReadinessScore(tempRecord);
+    let projectedStatus: TraineeTelemetryRecord['readinessStatus'] = 'Needs Attention';
+    if (projectedReadiness >= 85) projectedStatus = 'Project Ready';
+    else if (projectedReadiness >= 75) projectedStatus = 'On Track';
+    else if (projectedReadiness >= 65) projectedStatus = 'Needs Attention';
+    else projectedStatus = 'At Risk';
+
+    return {
+      traineeId: trainee.traineeId,
+      name: trainee.name,
+      employeeId: trainee.employeeId,
+      currentReadiness,
+      currentStatus: trainee.readinessStatus,
+      projectedReadiness,
+      projectedStatus,
+      suggestedFocus: [
+        '1. Databricks practical optimization lab & PySpark drills',
+        '2. dbt transformation exercise & data pipeline modularization',
+        '3. Reassessment after focused training completion',
+      ],
+      isSimulationOnlyNotice:
+        'Simulation only — does not change the trainee’s actual stored performance data.',
+    };
+  },
 };
+

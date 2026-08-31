@@ -1,7 +1,8 @@
-import React from 'react';
-import { AlertTriangle, ArrowRight } from 'lucide-react';
+import React, { useState } from 'react';
+import { AlertTriangle, ArrowRight, HelpCircle } from 'lucide-react';
 import { useTrainees } from '../../context/TraineeContext';
 import { StatusBadge } from '../ui';
+import { EvidenceExplanationModal } from '../Common/EvidenceExplanationModal';
 
 interface AttentionRequiredCardProps {
   onNavigate?: (navId: string, filter?: 'active' | 'project-ready' | 'needs-attention' | null) => void;
@@ -13,6 +14,7 @@ export const AttentionRequiredCard: React.FC<AttentionRequiredCardProps> = ({
   onSelectTrainee,
 }) => {
   const { trainees } = useTrainees();
+  const [evidenceTraineeId, setEvidenceTraineeId] = useState<string | null>(null);
 
   // Filter trainees that need attention or are at risk
   const attentionTrainees = trainees.filter(
@@ -25,17 +27,17 @@ export const AttentionRequiredCard: React.FC<AttentionRequiredCardProps> = ({
       ? attentionTrainees.slice(0, 3)
       : [
           {
-            id: 't-1',
+            id: 'te-3',
             name: 'Amuthanilavan',
-            employeeId: 'EMP-1021',
-            bootcampName: 'Databricks & PySpark',
+            employeeId: 'EMP003',
+            bootcampName: 'Python Data Engineering',
             learningStatus: 'Needs Attention' as const,
           },
           {
-            id: 't-3',
+            id: 'te-6',
             name: 'Aakash Duraisamy',
-            employeeId: 'EMP-1034',
-            bootcampName: 'Databricks & PySpark',
+            employeeId: 'EMP006',
+            bootcampName: 'Python Data Engineering',
             learningStatus: 'At Risk' as const,
           },
         ];
@@ -89,13 +91,31 @@ export const AttentionRequiredCard: React.FC<AttentionRequiredCardProps> = ({
                 <span className="trainee-tech-sub">{item.bootcampName}</span>
               </div>
 
-              <div className="trainee-status-col">
+              <div className="trainee-status-col flex items-center gap-2">
                 <StatusBadge status={item.learningStatus} />
+                <button
+                  type="button"
+                  className="text-xs text-teal-700 font-bold hover:underline flex items-center gap-0.5"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setEvidenceTraineeId(item.id);
+                  }}
+                  title="View evidence rationale"
+                >
+                  <HelpCircle size={13} /> Why?
+                </button>
               </div>
             </div>
           ))}
         </div>
       </div>
+
+      {evidenceTraineeId && (
+        <EvidenceExplanationModal
+          traineeId={evidenceTraineeId}
+          onClose={() => setEvidenceTraineeId(null)}
+        />
+      )}
     </div>
   );
 };
