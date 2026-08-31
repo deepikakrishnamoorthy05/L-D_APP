@@ -26801,5 +26801,210 @@ input, select, textarea, button {
   }
 }
 
+/* ============================================================ */
+/* ASSESSMENT DIRECTORY MOBILE RESPONSIVE CARD LAYOUT           */
+/* ============================================================ */
+
+.asm-desktop-table-only {
+  display: block;
+  width: 100%;
+}
+
+.asm-mobile-stacked-cards-list {
+  display: none;
+  width: 100%;
+  padding: 12px;
+  box-sizing: border-box;
+}
+
+@media (max-width: 768px) {
+  .asm-desktop-table-only {
+    display: none !important;
+  }
+
+  .asm-mobile-stacked-cards-list {
+    display: flex !important;
+    flex-direction: column;
+    gap: 14px;
+  }
+
+  /* Assessment Header Responsive Mobile Layout */
+  .asm-header-glass-card {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+    gap: 14px;
+    border-radius: 16px;
+  }
+
+  .header-right-action {
+    width: 100%;
+  }
+
+  .create-asm-primary-btn {
+    width: 100%;
+    justify-content: center;
+  }
+
+  /* Assessment KPI 5-Row Responsive Grid */
+  .asm-kpi-cards-5row {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 10px !important;
+  }
+
+  /* Filter Workspace Responsive Controls */
+  .asm-filter-workspace-card {
+    padding: 14px;
+    border-radius: 16px;
+  }
+
+  .filter-grid-row-1 {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    gap: 10px;
+  }
+
+  .search-input-wrapper {
+    width: 100%;
+  }
+
+  .asm-select-field {
+    width: 100%;
+    height: 44px;
+  }
+
+  .more-filters-toggle-btn,
+  .clear-filters-btn {
+    width: 100%;
+    justify-content: center;
+    height: 40px;
+  }
+
+  /* Assessment Directory Mobile Card Shell */
+  .asm-mobile-card-stacked {
+    background: var(--bg-surface, #ffffff);
+    border: 1px solid var(--border-soft, #e2e8f0);
+    border-radius: 16px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    box-shadow: 0 4px 14px rgba(15, 23, 42, 0.04);
+    box-sizing: border-box;
+  }
+
+  [data-theme="dark"] .asm-mobile-card-stacked {
+    background: #0f172a;
+    border-color: #1e293b;
+    box-shadow: 0 4px 14px rgba(0, 0, 0, 0.3);
+  }
+
+  .asm-mobile-card-stacked .card-top-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 8px;
+  }
+
+  .asm-mobile-card-stacked .card-asm-title {
+    font-size: 1.05rem;
+    font-weight: 800;
+    color: var(--text-primary, #0f172a);
+    margin: 0;
+    line-height: 1.3;
+    word-break: break-word;
+  }
+
+  [data-theme="dark"] .asm-mobile-card-stacked .card-asm-title {
+    color: #f8fafc;
+  }
+
+  .asm-mobile-card-stacked .card-asm-subtitle {
+    font-size: 0.82rem;
+    color: var(--text-muted, #64748b);
+    margin: 0;
+  }
+
+  .asm-mobile-card-stacked .card-divider {
+    height: 1px;
+    background: var(--border-soft, #e2e8f0);
+    margin-block: 4px;
+  }
+
+  [data-theme="dark"] .asm-mobile-card-stacked .card-divider {
+    background: #1e293b;
+  }
+
+  .asm-mobile-card-stacked .card-meta-pairs {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+
+  .asm-mobile-card-stacked .pair-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 0.82rem;
+    gap: 12px;
+  }
+
+  .asm-mobile-card-stacked .pair-row .lbl {
+    color: var(--text-muted, #64748b);
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+
+  .asm-mobile-card-stacked .pair-row .val {
+    color: var(--text-primary, #0f172a);
+    font-weight: 700;
+    text-align: right;
+    word-break: break-word;
+  }
+
+  [data-theme="dark"] .asm-mobile-card-stacked .pair-row .val {
+    color: #f8fafc;
+  }
+
+  .asm-mobile-card-stacked .card-footer-action-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 6px;
+    padding-top: 8px;
+    border-top: 1px dashed var(--border-soft, #e2e8f0);
+  }
+
+  [data-theme="dark"] .asm-mobile-card-stacked .card-footer-action-row {
+    border-top-color: #1e293b;
+  }
+
+  .asm-mobile-card-stacked .card-view-link-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.84rem;
+    font-weight: 700;
+    color: var(--color-primary, #0d9488);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 6px 0;
+  }
+
+  [data-theme="dark"] .asm-mobile-card-stacked .card-view-link-btn {
+    color: #38bdf8;
+  }
+}
+
+@media (max-width: 480px) {
+  .asm-kpi-cards-5row {
+    grid-template-columns: 1fr !important;
+  }
+}
+
+
 
 

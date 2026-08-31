@@ -539,257 +539,430 @@ export const AssessmentManagement: React.FC = () => {
           </div>
         </div>
 
-        {/* WORKSPACE VIEW: TABLE OR CARDS */}
+        {/* WORKSPACE VIEW: DESKTOP TABLE & MOBILE STACKED CARDS */}
         {viewMode === 'table' ? (
-          <div className="table-responsive-wrapper">
-            <table className="asm-fixed-proportional-table">
-              <thead>
-                <tr>
-                  <th style={{ width: '24%' }}>ASSESSMENT</th>
-                  <th style={{ width: '17%' }}>MODULE / TRACK</th>
-                  <th style={{ width: '16%' }}>BOOTCAMP</th>
-                  <th style={{ width: '9%' }}>DATE</th>
-                  <th style={{ width: '11%' }}>EVALUATOR</th>
-                  <th style={{ width: '9%' }}>PARTICIPANTS</th>
-                  <th style={{ width: '9%' }}>RESULT</th>
-                  <th style={{ width: '8%' }}>STATUS</th>
-                  <th style={{ width: '7%' }} className="text-right">ACTIONS</th>
-                </tr>
-              </thead>
-              <tbody>
-                {filteredAssessments.length === 0 ? (
+          <>
+            {/* DESKTOP TABLE VIEW (DISPLAYED ON LARGER SCREENS) */}
+            <div className="table-responsive-wrapper asm-desktop-table-only">
+              <table className="asm-fixed-proportional-table">
+                <thead>
                   <tr>
-                    <td colSpan={9} className="empty-results-cell">
-                      <div className="empty-state-content">
-                        <CheckSquare size={36} className="text-teal-700 mb-2" />
-                        <h4 className="empty-title">No Assessments Found</h4>
-                        <p className="empty-desc">
-                          No assessment entries match your search criteria. Try resetting active filters.
-                        </p>
-                      </div>
-                    </td>
+                    <th style={{ width: '24%' }}>ASSESSMENT</th>
+                    <th style={{ width: '17%' }}>MODULE / TRACK</th>
+                    <th style={{ width: '16%' }}>BOOTCAMP</th>
+                    <th style={{ width: '9%' }}>DATE</th>
+                    <th style={{ width: '11%' }}>EVALUATOR</th>
+                    <th style={{ width: '9%' }}>PARTICIPANTS</th>
+                    <th style={{ width: '9%' }}>RESULT</th>
+                    <th style={{ width: '8%' }}>STATUS</th>
+                    <th style={{ width: '7%' }} className="text-right">ACTIONS</th>
                   </tr>
-                ) : (
-                  filteredAssessments.map((a) => {
-                    const bootcampObj = bootcamps.find((b) => b.id === a.bootcampId);
-                    const programCode = bootcampObj ? bootcampObj.code : `DE-B-${a.bootcampYear}-B01`;
+                </thead>
+                <tbody>
+                  {filteredAssessments.length === 0 ? (
+                    <tr>
+                      <td colSpan={9} className="empty-results-cell">
+                        <div className="empty-state-content">
+                          <CheckSquare size={36} className="text-teal-700 mb-2" />
+                          <h4 className="empty-title">No Assessments Found</h4>
+                          <p className="empty-desc">
+                            No assessment entries match your search criteria. Try resetting active filters.
+                          </p>
+                        </div>
+                      </td>
+                    </tr>
+                  ) : (
+                    filteredAssessments.map((a) => {
+                      const bootcampObj = bootcamps.find((b) => b.id === a.bootcampId);
+                      const programCode = bootcampObj ? bootcampObj.code : `DE-B-${a.bootcampYear}-B01`;
 
-                    return (
-                      <tr key={a.id} className="asm-table-row-item">
-                        {/* ASSESSMENT CELL */}
-                        <td>
-                          <div className="cell-assessment-stack">
-                            <strong className="title-text">{a.name}</strong>
-                            <span className="subtitle-text">{a.moduleName}</span>
-                            <div className="badge-row mt-1">
-                              <span className="type-badge-pill">{a.type}</span>
+                      return (
+                        <tr key={a.id} className="asm-table-row-item">
+                          {/* ASSESSMENT CELL */}
+                          <td>
+                            <div className="cell-assessment-stack">
+                              <strong className="title-text">{a.name}</strong>
+                              <span className="subtitle-text">{a.moduleName}</span>
+                              <div className="badge-row mt-1">
+                                <span className="type-badge-pill">{a.type}</span>
+                              </div>
                             </div>
-                          </div>
-                        </td>
+                          </td>
 
-                        {/* MODULE / TRACK CELL */}
-                        <td>
-                          <div className="cell-module-track-stack">
-                            <span className="module-name-text">{a.moduleName}</span>
-                            <span className="track-badge-pill">{a.track}</span>
-                          </div>
-                        </td>
+                          {/* MODULE / TRACK CELL */}
+                          <td>
+                            <div className="cell-module-track-stack">
+                              <span className="module-name-text">{a.moduleName}</span>
+                              <span className="track-badge-pill">{a.track}</span>
+                            </div>
+                          </td>
 
-                        {/* BOOTCAMP CELL */}
-                        <td>
-                          <div className="cell-bootcamp-stack">
-                            <span className="bootcamp-name-text">{a.bootcampName}</span>
-                            <span className="program-code-text">{programCode}</span>
-                          </div>
-                        </td>
+                          {/* BOOTCAMP CELL */}
+                          <td>
+                            <div className="cell-bootcamp-stack">
+                              <span className="bootcamp-name-text">{a.bootcampName}</span>
+                              <span className="program-code-text">{programCode}</span>
+                            </div>
+                          </td>
 
-                        {/* DATE CELL */}
-                        <td className="white-space-nowrap">
-                          <div className="cell-date-stack">
-                            <span className="date-main-text">{formatDateDisplay(a.date)}</span>
-                            {a.startTime && (
-                              <span className="time-sub-text">
-                                {a.startTime} – {a.endTime || '12:30'}
+                          {/* DATE CELL */}
+                          <td className="white-space-nowrap">
+                            <div className="cell-date-stack">
+                              <span className="date-main-text">{formatDateDisplay(a.date)}</span>
+                              {a.startTime && (
+                                <span className="time-sub-text">
+                                  {a.startTime} – {a.endTime || '12:30'}
+                                </span>
+                              )}
+                            </div>
+                          </td>
+
+                          {/* EVALUATOR CELL */}
+                          <td>
+                            <div className="cell-evaluator-flex">
+                              <div className="evaluator-avatar-34px">
+                                {getInitials(a.evaluatorName)}
+                              </div>
+                              <span className="evaluator-name-single">{a.evaluatorName}</span>
+                            </div>
+                          </td>
+
+                          {/* PARTICIPANTS CELL */}
+                          <td>
+                            <div className="participants-compact-pill">
+                              <Users size={13} className="text-teal-700" />
+                              <strong>{a.totalParticipants}</strong>
+                              <span>Trainees</span>
+                            </div>
+                          </td>
+
+                          {/* RESULT CELL */}
+                          <td>
+                            {a.averageScore !== undefined ? (
+                              <div className="cell-result-block">
+                                <span className="score-percent-num">{a.averageScore}%</span>
+                                <div className="result-mini-progress">
+                                  <div
+                                    className="progress-fill-teal"
+                                    style={{ width: `${Math.min(a.averageScore, 100)}%` }}
+                                  />
+                                </div>
+                                <span className="pass-rate-subtext">Pass Rate {passRate}%</span>
+                              </div>
+                            ) : (
+                              <span className="pending-results-chip">
+                                <span className="live-dot-amber" /> Pending Results
                               </span>
                             )}
-                          </div>
-                        </td>
+                          </td>
 
-                        {/* EVALUATOR CELL */}
-                        <td>
-                          <div className="cell-evaluator-flex">
-                            <div className="evaluator-avatar-34px">
-                              {getInitials(a.evaluatorName)}
-                            </div>
-                            <span className="evaluator-name-single">{a.evaluatorName}</span>
-                          </div>
-                        </td>
-
-                        {/* PARTICIPANTS CELL */}
-                        <td>
-                          <div className="participants-compact-pill">
-                            <Users size={13} className="text-teal-700" />
-                            <strong>{a.totalParticipants}</strong>
-                            <span>Trainees</span>
-                          </div>
-                        </td>
-
-                        {/* RESULT CELL */}
-                        <td>
-                          {a.averageScore !== undefined ? (
-                            <div className="cell-result-block">
-                              <span className="score-percent-num">{a.averageScore}%</span>
-                              <div className="result-mini-progress">
-                                <div
-                                  className="progress-fill-teal"
-                                  style={{ width: `${Math.min(a.averageScore, 100)}%` }}
-                                />
-                              </div>
-                              <span className="pass-rate-subtext">Pass Rate {passRate}%</span>
-                            </div>
-                          ) : (
-                            <span className="pending-results-chip">
-                              <span className="live-dot-amber" /> Pending Results
-                            </span>
-                          )}
-                        </td>
-
-                        {/* STATUS CELL */}
-                        <td>
-                          <span
-                            className={`status-pill-badge ${
-                              a.status === 'Completed' || a.status === 'Published'
-                                ? 'completed'
-                                : a.status === 'In Progress'
-                                ? 'in-progress'
-                                : a.status === 'Scheduled'
-                                ? 'scheduled'
-                                : 'draft'
-                            }`}
-                          >
-                            {a.status}
-                          </span>
-                        </td>
-
-                        {/* ACTIONS CELL */}
-                        <td className="text-right relative">
-                          <div className="action-menu-anchor">
-                            <button
-                              type="button"
-                              className="action-icon-38px-btn"
-                              onClick={() => setActiveMenuId(activeMenuId === a.id ? null : a.id)}
-                              title="Actions"
+                          {/* STATUS CELL */}
+                          <td>
+                            <span
+                              className={`status-pill-badge ${
+                                a.status === 'Completed' || a.status === 'Published'
+                                  ? 'completed'
+                                  : a.status === 'In Progress'
+                                  ? 'in-progress'
+                                  : a.status === 'Scheduled'
+                                  ? 'scheduled'
+                                  : 'draft'
+                              }`}
                             >
-                              <MoreVertical size={16} />
-                            </button>
+                              {a.status}
+                            </span>
+                          </td>
 
-                            {/* POLISHED 220px DROPDOWN POPOVER MENU */}
-                            <AnimatePresence>
-                              {activeMenuId === a.id && (
-                                <motion.div
-                                  initial={{ opacity: 0, scale: 0.96, y: -4 }}
-                                  animate={{ opacity: 1, scale: 1, y: 0 }}
-                                  exit={{ opacity: 0, scale: 0.96, y: -4 }}
-                                  transition={{ duration: 0.15 }}
-                                  className="action-dropdown-popover-220px"
-                                >
-                                  <button
-                                    type="button"
-                                    className="menu-row-item"
-                                    onClick={() => {
-                                      setActiveMenuId(null);
-                                      setDetailsAssessment(a);
-                                    }}
+                          {/* ACTIONS CELL */}
+                          <td className="text-right relative">
+                            <div className="action-menu-anchor">
+                              <button
+                                type="button"
+                                className="action-icon-38px-btn"
+                                onClick={() => setActiveMenuId(activeMenuId === a.id ? null : a.id)}
+                                title="Actions"
+                              >
+                                <MoreVertical size={16} />
+                              </button>
+
+                              <AnimatePresence>
+                                {activeMenuId === a.id && (
+                                  <motion.div
+                                    initial={{ opacity: 0, scale: 0.96, y: -4 }}
+                                    animate={{ opacity: 1, scale: 1, y: 0 }}
+                                    exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                                    transition={{ duration: 0.15 }}
+                                    className="action-dropdown-popover-220px"
                                   >
-                                    <Eye size={14} /> View Assessment
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    className="menu-row-item"
-                                    onClick={() => {
-                                      setActiveMenuId(null);
-                                      setEditingAssessment(a);
-                                      setShowCreateModal(true);
-                                    }}
-                                  >
-                                    <Edit size={14} /> Edit Assessment
-                                  </button>
-
-                                  <div className="popover-divider" />
-
-                                  <button
-                                    type="button"
-                                    className="menu-row-item"
-                                    onClick={() => {
-                                      setActiveMenuId(null);
-                                      setScoreEntryAssessment(a);
-                                    }}
-                                  >
-                                    <CheckCircle2 size={14} /> Enter Scores
-                                  </button>
-
-                                  <button
-                                    type="button"
-                                    className="menu-row-item"
-                                    onClick={() => {
-                                      setActiveMenuId(null);
-                                      setDetailsAssessment(a);
-                                    }}
-                                  >
-                                    <BarChart2 size={14} /> View Results
-                                  </button>
-
-                                  {a.status !== 'Published' && (
                                     <button
                                       type="button"
                                       className="menu-row-item"
                                       onClick={() => {
                                         setActiveMenuId(null);
-                                        publishResults(a.id);
+                                        setDetailsAssessment(a);
                                       }}
                                     >
-                                      <CheckSquare size={14} /> Publish Results
+                                      <Eye size={14} /> View Assessment
                                     </button>
-                                  )}
 
-                                  <div className="popover-divider" />
+                                    <button
+                                      type="button"
+                                      className="menu-row-item"
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        setEditingAssessment(a);
+                                        setShowCreateModal(true);
+                                      }}
+                                    >
+                                      <Edit size={14} /> Edit Assessment
+                                    </button>
 
+                                    <div className="popover-divider" />
+
+                                    <button
+                                      type="button"
+                                      className="menu-row-item"
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        setScoreEntryAssessment(a);
+                                      }}
+                                    >
+                                      <CheckCircle2 size={14} /> Enter Scores
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      className="menu-row-item"
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        setDetailsAssessment(a);
+                                      }}
+                                    >
+                                      <BarChart2 size={14} /> View Results
+                                    </button>
+
+                                    {a.status !== 'Published' && (
+                                      <button
+                                        type="button"
+                                        className="menu-row-item"
+                                        onClick={() => {
+                                          setActiveMenuId(null);
+                                          publishResults(a.id);
+                                        }}
+                                      >
+                                        <CheckSquare size={14} /> Publish Results
+                                      </button>
+                                    )}
+
+                                    <div className="popover-divider" />
+
+                                    <button
+                                      type="button"
+                                      className="menu-row-item"
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        duplicateAssessment(a.id);
+                                      }}
+                                    >
+                                      <Copy size={14} /> Duplicate
+                                    </button>
+
+                                    <button
+                                      type="button"
+                                      className="menu-row-item danger"
+                                      onClick={() => {
+                                        setActiveMenuId(null);
+                                        archiveAssessment(a.id);
+                                      }}
+                                    >
+                                      <Archive size={14} /> Archive
+                                    </button>
+                                  </motion.div>
+                                )}
+                              </AnimatePresence>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* MOBILE STACKED CARDS VIEW (ALWAYS RENDERED ON SMALLER SCREENS) */}
+            <div className="asm-mobile-stacked-cards-list">
+              {filteredAssessments.length === 0 ? (
+                <div className="empty-state-content p-4 text-center">
+                  <CheckSquare size={36} className="text-teal-700 mx-auto mb-2" />
+                  <h4 className="empty-title">No Assessments Found</h4>
+                  <p className="empty-desc">No assessment entries match your search criteria.</p>
+                </div>
+              ) : (
+                filteredAssessments.map((a) => {
+                  const bootcampObj = bootcamps.find((b) => b.id === a.bootcampId);
+                  const programCode = bootcampObj ? bootcampObj.code : `DE-B-${a.bootcampYear}-B01`;
+
+                  return (
+                    <div key={a.id} className="asm-mobile-card-stacked">
+                      <div className="card-top-row">
+                        <span className="type-badge-pill">{a.type}</span>
+                        <span
+                          className={`status-pill-badge ${
+                            a.status === 'Completed' || a.status === 'Published'
+                              ? 'completed'
+                              : a.status === 'In Progress'
+                              ? 'in-progress'
+                              : a.status === 'Scheduled'
+                              ? 'scheduled'
+                              : 'draft'
+                          }`}
+                        >
+                          {a.status}
+                        </span>
+                      </div>
+
+                      <h4 className="card-asm-title">{a.name}</h4>
+                      <p className="card-asm-subtitle">{a.moduleName}</p>
+
+                      <div className="card-track-badge-row">
+                        <span className="track-badge-pill">{a.track}</span>
+                      </div>
+
+                      <div className="card-divider" />
+
+                      <div className="card-meta-pairs">
+                        <div className="pair-row">
+                          <span className="lbl">Bootcamp:</span>
+                          <span className="val">{a.bootcampName} ({programCode})</span>
+                        </div>
+                        <div className="pair-row">
+                          <span className="lbl">Date &amp; Time:</span>
+                          <span className="val highlight">
+                            {formatDateDisplay(a.date)} {a.startTime ? `• ${a.startTime} – ${a.endTime || '12:30'}` : ''}
+                          </span>
+                        </div>
+                        <div className="pair-row">
+                          <span className="lbl">Evaluator:</span>
+                          <div className="eval-inline">
+                            <span className="eval-chip">{getInitials(a.evaluatorName)}</span>
+                            <span>{a.evaluatorName}</span>
+                          </div>
+                        </div>
+                        <div className="pair-row">
+                          <span className="lbl">Participants:</span>
+                          <span className="val"><strong>{a.totalParticipants}</strong> Trainees</span>
+                        </div>
+                        <div className="pair-row">
+                          <span className="lbl">Result:</span>
+                          <span className="val">
+                            {a.averageScore !== undefined ? (
+                              <strong>{a.averageScore}% Avg</strong>
+                            ) : (
+                              <span className="pending-results-chip">Pending</span>
+                            )}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div className="card-footer-action-row">
+                        <button
+                          type="button"
+                          className="card-view-link-btn"
+                          onClick={() => setDetailsAssessment(a)}
+                        >
+                          View Assessment <ArrowRight size={14} />
+                        </button>
+
+                        <div className="action-menu-anchor">
+                          <button
+                            type="button"
+                            className="action-icon-38px-btn"
+                            onClick={() => setActiveMenuId(activeMenuId === a.id ? null : a.id)}
+                            title="Actions"
+                          >
+                            <MoreVertical size={16} />
+                          </button>
+
+                          <AnimatePresence>
+                            {activeMenuId === a.id && (
+                              <motion.div
+                                initial={{ opacity: 0, scale: 0.96, y: -4 }}
+                                animate={{ opacity: 1, scale: 1, y: 0 }}
+                                exit={{ opacity: 0, scale: 0.96, y: -4 }}
+                                transition={{ duration: 0.15 }}
+                                className="action-dropdown-popover-220px"
+                              >
+                                <button
+                                  type="button"
+                                  className="menu-row-item"
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    setDetailsAssessment(a);
+                                  }}
+                                >
+                                  <Eye size={14} /> View Assessment
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="menu-row-item"
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    setEditingAssessment(a);
+                                    setShowCreateModal(true);
+                                  }}
+                                >
+                                  <Edit size={14} /> Edit Assessment
+                                </button>
+
+                                <button
+                                  type="button"
+                                  className="menu-row-item"
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    setScoreEntryAssessment(a);
+                                  }}
+                                >
+                                  <CheckCircle2 size={14} /> Enter Scores
+                                </button>
+
+                                {a.status !== 'Published' && (
                                   <button
                                     type="button"
                                     className="menu-row-item"
                                     onClick={() => {
                                       setActiveMenuId(null);
-                                      duplicateAssessment(a.id);
+                                      publishResults(a.id);
                                     }}
                                   >
-                                    <Copy size={14} /> Duplicate
+                                    <CheckSquare size={14} /> Publish Results
                                   </button>
+                                )}
 
-                                  <button
-                                    type="button"
-                                    className="menu-row-item danger"
-                                    onClick={() => {
-                                      setActiveMenuId(null);
-                                      archiveAssessment(a.id);
-                                    }}
-                                  >
-                                    <Archive size={14} /> Archive
-                                  </button>
-                                </motion.div>
-                              )}
-                            </AnimatePresence>
-                          </div>
-                        </td>
-                      </tr>
-                    );
-                  })
-                )}
-              </tbody>
-            </table>
-          </div>
+                                <button
+                                  type="button"
+                                  className="menu-row-item danger"
+                                  onClick={() => {
+                                    setActiveMenuId(null);
+                                    archiveAssessment(a.id);
+                                  }}
+                                >
+                                  <Archive size={14} /> Archive
+                                </button>
+                              </motion.div>
+                            )}
+                          </AnimatePresence>
+                        </div>
+                      </div>
+                    </div>
+                  );
+                })
+              )}
+            </div>
+          </>
         ) : (
-          /* CARDS VIEW (3 COLUMNS DESKTOP) */
+          /* CARDS VIEW (3 COLUMNS DESKTOP, 1 COLUMN MOBILE) */
           <div className="cards-grid-3col p-4">
             {filteredAssessments.length === 0 ? (
               <div className="col-span-3 p-5 text-center">
