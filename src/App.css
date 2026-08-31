@@ -26495,17 +26495,34 @@ html, body, #root {
   }
 }
 
-/* RESPONSIVE PAGE HEADERS & ACTION BARS (STRICT LEFT ALIGNED) */
+/* RESPONSIVE PAGE HEADERS & ACTION BARS (ELEGANT GLASS CARD CONTAINER & STRICT LEFT ALIGNED) */
 .page-header,
 .app-top-header,
 .calendar-compact-header,
-.asm-header-glass-card {
+.asm-header-glass-card,
+.trainee-header-card {
   display: flex;
-  align-items: flex-start;
+  align-items: center;
   justify-content: space-between;
   gap: 16px;
   flex-wrap: wrap;
   width: 100%;
+  background: var(--bg-surface, #ffffff);
+  border: 1px solid var(--border-soft, #e2e8f0);
+  border-radius: 18px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.04);
+  box-sizing: border-box;
+}
+
+[data-theme="dark"] .page-header,
+[data-theme="dark"] .app-top-header,
+[data-theme="dark"] .calendar-compact-header,
+[data-theme="dark"] .asm-header-glass-card,
+[data-theme="dark"] .trainee-header-card {
+  background: #0f172a;
+  border-color: #1e293b;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3);
 }
 
 .header-left,
