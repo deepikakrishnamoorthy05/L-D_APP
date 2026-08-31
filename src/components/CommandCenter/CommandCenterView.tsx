@@ -1,54 +1,60 @@
 import React from 'react';
 import { Header } from './Header';
 import { KpiCards } from './KpiCards';
-import { LearningOverviewChart } from './LearningOverviewChart';
-import { BootcampPerformance } from './BootcampPerformance';
-import { AiIntelligencePanel } from './AiIntelligencePanel';
-import { TraineesAttentionTable } from './TraineesAttentionTable';
-import { UpcomingActivity } from './UpcomingActivity';
-import { CertificationSnapshot } from './CertificationSnapshot';
-import { RecentActivityFeed } from './RecentActivityFeed';
+import { QuickActionsBar } from './QuickActionsBar';
+import { TodaysPriorities } from './TodaysPriorities';
+import { DailyBriefCard } from './DailyBriefCard';
+import { UpcomingMilestonesCard } from './UpcomingMilestonesCard';
+import { ExecutiveRecentActivity } from './ExecutiveRecentActivity';
 
-interface CommandCenterViewProps {}
+interface CommandCenterViewProps {
+  onNavigate?: (navId: string, filter?: 'active' | 'project-ready' | 'needs-attention' | null) => void;
+  onSelectTrainee?: (traineeId: string, initialTab?: string) => void;
+  onSelectBootcamp?: (bootcampId: string, initialTab?: string) => void;
+}
 
-export const CommandCenterView: React.FC<CommandCenterViewProps> = () => {
+export const CommandCenterView: React.FC<CommandCenterViewProps> = ({
+  onNavigate,
+}) => {
   return (
-    <div className="command-center-content-wrapper">
-      {/* Top Header */}
+    <div className="command-center-content-wrapper executive-dashboard-view">
+      {/* 1. Compact Page Header */}
       <Header />
 
-      {/* Section 1 — 6 KPI Cards */}
-      <section className="dashboard-section" aria-label="Key Performance Indicators">
-        <KpiCards />
+      {/* 2. Top 4 Summary KPI Cards */}
+      <section className="dashboard-section compact-section" aria-label="Key Action Metrics">
+        <KpiCards onNavigate={onNavigate} pendingActionsCount={10} />
       </section>
 
-      {/* Section 2 & 3 — Learning Overview Chart & Bootcamp Performance Matrix */}
-      <section className="dashboard-grid-row two-cols-grid" aria-label="Learning Performance Analytics">
-        <div className="grid-col-flex-2">
-          <LearningOverviewChart />
-        </div>
-        <div className="grid-col-flex-1">
-          <BootcampPerformance />
+      {/* 3. Quick Administrative Actions */}
+      <section className="dashboard-section compact-section" aria-label="Quick Actions">
+        <QuickActionsBar onNavigate={onNavigate} />
+      </section>
+
+      {/* 4. Action Center Core Sections */}
+      <section className="dashboard-section compact-section" aria-label="Action Center Operations">
+        <div className="exec-dashboard-ops-grid">
+          {/* Section A: Today's Priorities */}
+          <div className="ops-grid-row-1col">
+            <TodaysPriorities onNavigate={onNavigate} />
+          </div>
+
+          {/* Section B & C: L&D Daily Brief & Upcoming Milestones */}
+          <div className="ops-grid-row-2cols">
+            <DailyBriefCard onNavigate={onNavigate} />
+            <UpcomingMilestonesCard onNavigate={onNavigate} />
+          </div>
+
+          {/* Section D: Recent Activity Timeline */}
+          <div className="ops-grid-row-1col">
+            <ExecutiveRecentActivity onNavigate={onNavigate} />
+          </div>
         </div>
       </section>
 
-      {/* Section 4 — Primary AI Learning Intelligence Engine Panel */}
-      <section className="dashboard-section" aria-label="AI Intelligence Engine">
-        <AiIntelligencePanel />
-      </section>
-
-      {/* Section 5, 6, 7 & 8 — Trainees Attention Table & Side Activity Widgets */}
-      <section className="dashboard-grid-row main-side-split" aria-label="Trainee Interventions & Activities">
-        <div className="main-table-col">
-          <TraineesAttentionTable />
-        </div>
-
-        <div className="side-widgets-col">
-          <UpcomingActivity />
-          <CertificationSnapshot />
-          <RecentActivityFeed />
-        </div>
-      </section>
+      {/* STOP THE MAIN PAGE HERE. Clean Action Center with zero duplicate dashboards */}
     </div>
   );
 };
+
+export default CommandCenterView;

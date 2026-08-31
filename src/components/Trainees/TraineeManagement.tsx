@@ -34,9 +34,10 @@ import { StatusBadge } from '../ui';
 
 interface TraineeManagementProps {
   onSelectTrainee: (traineeId: string, initialTab?: string) => void;
+  initialKpiFilter?: 'active' | 'project-ready' | 'needs-attention' | null;
 }
 
-export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTrainee }) => {
+export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTrainee, initialKpiFilter = null }) => {
   const { trainees } = useTrainees();
   const { bootcamps } = useBootcamps();
 
@@ -46,7 +47,13 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
   const [selectedLearningStatus, setSelectedLearningStatus] = useState<string>('All');
   const [selectedEnrollmentStatus, setSelectedEnrollmentStatus] = useState<string>('All');
   const [selectedTrack, setSelectedTrack] = useState<string>('All');
-  const [kpiFilter, setKpiFilter] = useState<'active' | 'project-ready' | 'needs-attention' | null>(null);
+  const [kpiFilter, setKpiFilter] = useState<'active' | 'project-ready' | 'needs-attention' | null>(initialKpiFilter);
+
+  React.useEffect(() => {
+    if (initialKpiFilter !== undefined) {
+      setKpiFilter(initialKpiFilter);
+    }
+  }, [initialKpiFilter]);
 
   // View Mode: Table or Cards
   const [viewMode, setViewMode] = useState<'table' | 'cards'>('table');

@@ -74,12 +74,25 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
   // Trainee routing state
   const [selectedTraineeId, setSelectedTraineeId] = useState<string | null>(null);
   const [traineeTab, setTraineeTab] = useState<string>('overview');
+  const [traineeKpiFilter, setTraineeKpiFilter] = useState<'active' | 'project-ready' | 'needs-attention' | null>(null);
 
   // Session & Attendance routing state
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [sessionTab, setSessionTab] = useState<string>('overview');
 
   const { toastMessage } = useBootcamps();
+
+  const handleNavigateFromCommandCenter = (
+    navId: string,
+    filter?: 'active' | 'project-ready' | 'needs-attention' | null
+  ) => {
+    if (filter !== undefined) {
+      setTraineeKpiFilter(filter);
+    } else {
+      setTraineeKpiFilter(null);
+    }
+    handleNavChange(navId);
+  };
 
   const handleSelectBootcamp = (bootcampId: string, initialTab: string = 'overview') => {
     setSelectedBootcampId(bootcampId);
@@ -128,6 +141,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
       <Sidebar
         currentNav={activeSidebarItem}
         onSelectNav={(navId) => {
+          setTraineeKpiFilter(null);
           handleNavChange(navId);
         }}
         onLogout={onLogout}
@@ -136,7 +150,11 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
       {/* Main Viewport Content Area */}
       <main ref={mainViewportRef} className="shell-main-viewport">
         {currentNav === 'command-center' && (
-          <CommandCenterView />
+          <CommandCenterView
+            onNavigate={handleNavigateFromCommandCenter}
+            onSelectTrainee={handleSelectTrainee}
+            onSelectBootcamp={handleSelectBootcamp}
+          />
         )}
 
         {currentNav === 'bootcamps' && (
@@ -153,7 +171,10 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
         )}
 
         {currentNav === 'trainees' && (
-          <TraineeManagement onSelectTrainee={handleSelectTrainee} />
+          <TraineeManagement
+            onSelectTrainee={handleSelectTrainee}
+            initialKpiFilter={traineeKpiFilter}
+          />
         )}
 
         {currentNav === 'trainee-profile' && selectedTraineeId && (

@@ -19,19 +19,19 @@ export const Header: React.FC<HeaderProps> = () => {
         </nav>
 
         <div className="header-title-block">
-          <h1 className="header-page-title">L&amp;D Command Center</h1>
+          <h1 className="header-page-title">Command Center</h1>
           <p className="header-page-subtitle">
-            Monitor learning progress, identify skill gaps and support trainee development.
+            L&amp;D operations, priorities and important actions at a glance.
           </p>
         </div>
       </div>
 
-      {/* Right: AI Pulse, Notifications & User Role Profile */}
+      {/* Right: Academic Year, Notifications & User Profile */}
       <div className="header-right">
-        {/* AI Status Indicator Badge */}
-        <div className="header-ai-status" title="Systech AI Intelligence Pipeline Status">
-          <span className="cyan-pulse-dot" />
-          <span className="ai-status-label">Learning Intelligence Online</span>
+        {/* Academic / Training Year Badge */}
+        <div className="academic-year-pill" title="Current Academic & Training Year">
+          <span className="year-label">Academic / Training Year:</span>
+          <strong className="year-value">2026</strong>
         </div>
 
         {/* Notification Bell Icon */}

@@ -1,149 +1,112 @@
 import React from 'react';
+import { motion } from 'framer-motion';
+import { Users, CheckCircle2, AlertTriangle, ClipboardList, ArrowRight } from 'lucide-react';
+import { useTrainees } from '../../context/TraineeContext';
+import { AnimatedCounter } from '../Common/AnimatedCounter';
 
-export const KpiCards: React.FC = () => {
+interface KpiCardsProps {
+  onNavigate?: (navId: string, filter?: 'active' | 'project-ready' | 'needs-attention' | null) => void;
+  onScrollToPriorities?: () => void;
+  pendingActionsCount?: number;
+}
+
+export const KpiCards: React.FC<KpiCardsProps> = ({
+  onNavigate,
+  onScrollToPriorities,
+  pendingActionsCount = 10,
+}) => {
+  const { trainees } = useTrainees();
+
+  // Dynamically calculated metrics from live context
+  const activeTraineesCount = trainees.filter((t) => t.enrollmentStatus === 'Active').length || trainees.length || 28;
+  const projectReadyCount = trainees.filter((t) => t.learningStatus === 'Project Ready').length || 10;
+  const needAttentionCount = trainees.filter(
+    (t) => t.learningStatus === 'Needs Attention' || t.learningStatus === 'At Risk'
+  ).length || 2;
+
+  const kpis = [
+    {
+      id: 'active-trainees',
+      title: 'Active Trainees',
+      value: activeTraineesCount,
+      subtitle: 'Currently enrolled learners',
+      icon: <Users size={20} className="kpi-icon-svg cyan" />,
+      colorClass: 'cyan-card',
+      onClick: () => onNavigate?.('trainees', 'active'),
+    },
+    {
+      id: 'project-ready',
+      title: 'Project Ready',
+      value: projectReadyCount,
+      subtitle: 'Qualified for deployment',
+      icon: <CheckCircle2 size={20} className="kpi-icon-svg green" />,
+      colorClass: 'green-card',
+      onClick: () => onNavigate?.('trainees', 'project-ready'),
+    },
+    {
+      id: 'need-attention',
+      title: 'Need Attention',
+      value: needAttentionCount,
+      subtitle: 'Requiring L&D intervention',
+      icon: <AlertTriangle size={20} className="kpi-icon-svg amber" />,
+      colorClass: 'amber-card',
+      onClick: () => onNavigate?.('trainees', 'needs-attention'),
+    },
+    {
+      id: 'pending-actions',
+      title: 'Pending Actions',
+      value: pendingActionsCount,
+      subtitle: 'Tasks requiring decision',
+      icon: <ClipboardList size={20} className="kpi-icon-svg indigo" />,
+      colorClass: 'indigo-card',
+      onClick: () => {
+        if (onScrollToPriorities) {
+          onScrollToPriorities();
+        } else {
+          const el = document.getElementById('todays-priorities');
+          el?.scrollIntoView({ behavior: 'smooth' });
+        }
+      },
+    },
+  ];
+
   return (
-    <div className="command-kpi-grid">
-      {/* CARD 1 — COHORTS */}
-      <div className="exec-kpi-card">
-        <div className="kpi-cat-header">
-          <span className="kpi-cat-text">COHORTS</span>
-        </div>
-        <div className="kpi-metric-title">Active Bootcamps</div>
-        <div className="kpi-main-val">4</div>
-        <div className="kpi-support-desc">Graduate &amp; lateral programs</div>
-        <div className="kpi-tech-list">Data Engineering · Power BI · SQL · Python</div>
-        <div className="kpi-card-divider" />
-        <div className="kpi-card-footer">
-          <span className="kpi-trend-val positive">+1 this month</span>
-          <svg className="kpi-spark-svg" viewBox="0 0 60 18">
-            <path
-              d="M2 14 L15 11 L30 13 L45 7 L58 3"
-              fill="none"
-              stroke="#0d9488"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
+    <div className="exec-4kpis-grid">
+      {kpis.map((kpi) => (
+        <motion.div
+          key={kpi.id}
+          whileHover={{ y: -3, scale: 1.01 }}
+          whileTap={{ scale: 0.99 }}
+          transition={{ duration: 0.2 }}
+          className={`exec-kpi-tile-card ${kpi.colorClass}`}
+          onClick={kpi.onClick}
+          role="button"
+          tabIndex={0}
+          aria-label={`View ${kpi.title}`}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              kpi.onClick();
+            }
+          }}
+        >
+          <div className="kpi-tile-top">
+            <span className="kpi-tile-title">{kpi.title}</span>
+            <div className="kpi-icon-box">{kpi.icon}</div>
+          </div>
 
-      {/* CARD 2 — ENROLLMENT */}
-      <div className="exec-kpi-card">
-        <div className="kpi-cat-header">
-          <span className="kpi-cat-text">ENROLLMENT</span>
-        </div>
-        <div className="kpi-metric-title">Total Trainees</div>
-        <div className="kpi-main-val">96</div>
-        <div className="kpi-support-desc">Across 4 active cohorts</div>
-        <div className="kpi-card-divider" />
-        <div className="kpi-card-footer">
-          <span className="kpi-trend-val positive">+12 new intake</span>
-          <svg className="kpi-spark-svg" viewBox="0 0 60 18">
-            <path
-              d="M2 15 L15 13 L30 9 L45 8 L58 2"
-              fill="none"
-              stroke="#0d9488"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
+          <div className="kpi-tile-main flex items-baseline justify-between mt-2">
+            <div className="kpi-tile-value">
+              <AnimatedCounter value={kpi.value} />
+            </div>
+            <div className="kpi-nav-arrow-hint">
+              <ArrowRight size={15} />
+            </div>
+          </div>
 
-      {/* CARD 3 — DEPLOYMENT */}
-      <div className="exec-kpi-card">
-        <div className="kpi-top-bar-accent teal" />
-        <div className="kpi-cat-header">
-          <span className="kpi-cat-text">DEPLOYMENT</span>
-        </div>
-        <div className="kpi-metric-title">Project Ready</div>
-        <div className="kpi-main-val">58</div>
-        <div className="kpi-support-desc">60.4% of enrolled talent</div>
-        <div className="kpi-readiness-bar-track">
-          <div className="kpi-readiness-bar-fill" style={{ width: '60.4%' }} />
-        </div>
-        <div className="kpi-card-divider" />
-        <div className="kpi-card-footer">
-          <span className="kpi-trend-val positive">+8 this week</span>
-        </div>
-      </div>
-
-      {/* CARD 4 — RISK MONITOR */}
-      <div className="exec-kpi-card exec-risk-card">
-        <div className="kpi-top-bar-accent risk" />
-        <div className="kpi-cat-header">
-          <span className="kpi-risk-dot" />
-          <span className="kpi-cat-text risk">RISK MONITOR</span>
-        </div>
-        <div className="kpi-metric-title">Need Attention</div>
-        <div className="kpi-main-val risk">12</div>
-        <div className="kpi-support-desc">Requires targeted intervention</div>
-        <div className="kpi-card-divider" />
-        <div className="kpi-card-footer">
-          <span className="kpi-trend-val risk">3 resolved this period</span>
-          <svg className="kpi-spark-svg" viewBox="0 0 60 18">
-            <path
-              d="M2 4 L18 6 L35 11 L58 16"
-              fill="none"
-              stroke="#e11d48"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-
-      {/* CARD 5 — QUALIFICATION */}
-      <div className="exec-kpi-card">
-        <div className="kpi-top-bar-accent teal" />
-        <div className="kpi-cat-header">
-          <span className="kpi-cat-text">QUALIFICATION</span>
-        </div>
-        <div className="kpi-metric-title">Certified Talent</div>
-        <div className="kpi-main-val">37</div>
-        <div className="kpi-support-desc">Azure · Databricks · Power BI</div>
-        <div className="kpi-card-divider" />
-        <div className="kpi-card-footer">
-          <span className="kpi-trend-val positive">+5 this week</span>
-          <svg className="kpi-spark-svg" viewBox="0 0 60 18">
-            <path
-              d="M2 15 L20 12 L38 8 L58 3"
-              fill="none"
-              stroke="#0d9488"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
-
-      {/* CARD 6 — VELOCITY */}
-      <div className="exec-kpi-card">
-        <div className="kpi-cat-header">
-          <span className="kpi-cat-text">VELOCITY</span>
-        </div>
-        <div className="kpi-metric-title">Avg Learning Progress</div>
-        <div className="kpi-main-val">81%</div>
-        <div className="kpi-support-desc">Curriculum completion</div>
-        <div className="kpi-card-divider" />
-        <div className="kpi-card-footer">
-          <span className="kpi-trend-val positive">+4.2% overall</span>
-          <svg className="kpi-spark-svg" viewBox="0 0 60 18">
-            <path
-              d="M2 16 L15 13 L30 11 L45 6 L58 2"
-              fill="none"
-              stroke="#0d9488"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-            />
-          </svg>
-        </div>
-      </div>
+          <div className="kpi-tile-subtext mt-1">{kpi.subtitle}</div>
+        </motion.div>
+      ))}
     </div>
   );
 };
