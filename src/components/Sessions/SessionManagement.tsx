@@ -21,7 +21,6 @@ import { RescheduleSessionModal } from './RescheduleSessionModal';
 import { CancelSessionModal } from './CancelSessionModal';
 import { ImportCalendarModal } from './ImportCalendarModal';
 import { AIEmailPreviewModal } from './AIEmailPreviewModal';
-import { LearningJourneyPipeline } from './LearningJourneyPipeline';
 import { HeaderOrbitWidget } from './HeaderOrbitWidget';
 import { AnimatedCounter } from '../Common/AnimatedCounter';
 
@@ -150,12 +149,7 @@ export const SessionManagement: React.FC<SessionManagementProps> = ({
         </div>
       </header>
 
-      {/* 2. COMPACT BOOTCAMP LEARNING JOURNEY (COLLAPSIBLE) */}
-      <section className="pipeline-section mt-2">
-        <LearningJourneyPipeline />
-      </section>
-
-      {/* 3. COMPACT GLASS METRIC TILES STRIP */}
+      {/* 2. COMPACT GLASS METRIC TILES STRIP */}
       <section className="compact-glass-metrics-strip my-2">
         <div className="glass-metric-tile">
           <span className="metric-tile-val"><AnimatedCounter value={totalEvents} /></span>
