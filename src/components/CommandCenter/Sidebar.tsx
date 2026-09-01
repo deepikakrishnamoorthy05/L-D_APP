@@ -16,6 +16,8 @@ import {
   X,
 } from 'lucide-react';
 
+import systechLogo from '../../assets/systech-logo.png';
+
 interface SidebarProps {
   currentNav: string;
   onSelectNav: (navId: string) => void;
@@ -36,43 +38,6 @@ interface NavGroup {
   items: NavItem[];
 }
 
-// Minimal Systech Logo Mark SVG Component
-const SystechLogoMark: React.FC<{ size?: number; className?: string }> = ({
-  size = 28,
-  className = '',
-}) => (
-  <svg
-    width={size}
-    height={size}
-    viewBox="0 0 32 32"
-    fill="none"
-    xmlns="http://www.w3.org/2000/svg"
-    className={className}
-    aria-hidden="true"
-  >
-    <rect width="32" height="32" rx="8" fill="url(#systech_mark_grad)" />
-    <path
-      d="M16 6.5L24.5 16L16 25.5L7.5 16L16 6.5Z"
-      fill="white"
-      fillOpacity="0.95"
-    />
-    <circle cx="16" cy="16" r="3.5" fill="#0F766E" />
-    <defs>
-      <linearGradient
-        id="systech_mark_grad"
-        x1="0"
-        y1="0"
-        x2="32"
-        y2="32"
-        gradientUnits="userSpaceOnUse"
-      >
-        <stop stopColor="#0F766E" />
-        <stop offset="1" stopColor="#0D9488" />
-      </linearGradient>
-    </defs>
-  </svg>
-);
-
 export const Sidebar: React.FC<SidebarProps> = ({
   currentNav,
   onSelectNav,
@@ -82,6 +47,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 }) => {
   const [collapsed, setCollapsed] = useState(false);
   const [activeToast, setActiveToast] = useState<string | null>(null);
+  const [logoFailed, setLogoFailed] = useState(false);
 
   const NAV_GROUPS: NavGroup[] = [
     {
@@ -204,10 +170,18 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* 1. TOP BRAND AREA */}
         <div className="sidebar-header">
           <div className="brand-wrapper">
-            <SystechLogoMark size={28} className="brand-mark-svg" />
+            {!logoFailed ? (
+              <img
+                src={systechLogo}
+                alt="Systech Solutions"
+                className="sidebar-brand-logo-img"
+                onError={() => setLogoFailed(true)}
+              />
+            ) : (
+              <span className="brand-title-main">Systech</span>
+            )}
             {!isCollapsedMode && (
               <div className="brand-text-block">
-                <span className="brand-title-main">Systech</span>
                 <span className="brand-subtitle-sub">L&amp;D Platform</span>
               </div>
             )}
