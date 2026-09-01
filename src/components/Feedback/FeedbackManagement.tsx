@@ -36,6 +36,7 @@ import { StatusBadge } from '../ui';
 import { FeedbackRecord, FeedbackStatus } from '../../types/feedback';
 import { AddTrainerFeedbackModal } from './AddTrainerFeedbackModal';
 import { ImportTrainerFeedbackModal } from './ImportTrainerFeedbackModal';
+import { FeedbackDetailModal } from './FeedbackDetailModal';
 
 export const FeedbackManagement: React.FC = () => {
   const {
@@ -68,6 +69,14 @@ export const FeedbackManagement: React.FC = () => {
   const [showAddModal, setShowAddModal] = useState(false);
   const [showImportModal, setShowImportModal] = useState(false);
   const [selectedFeedbackDetails, setSelectedFeedbackDetails] = useState<FeedbackRecord | null>(null);
+  const [detailModalMode, setDetailModalMode] = useState<'view' | 'edit'>('view');
+
+  // Close popover when clicking outside
+  React.useEffect(() => {
+    const handleOutsideClick = () => setActiveMenuId(null);
+    window.addEventListener('click', handleOutsideClick);
+    return () => window.removeEventListener('click', handleOutsideClick);
+  }, []);
 
   // Unique Filter Options
   const uniqueTrainers = Array.from(new Set(feedbackRecords.map((f) => f.trainerName)));
@@ -507,8 +516,10 @@ export const FeedbackManagement: React.FC = () => {
                                 <button
                                   type="button"
                                   className="dropdown-table-item"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setActiveMenuId(null);
+                                    setDetailModalMode('view');
                                     setSelectedFeedbackDetails(f);
                                   }}
                                 >
@@ -517,8 +528,10 @@ export const FeedbackManagement: React.FC = () => {
                                 <button
                                   type="button"
                                   className="dropdown-table-item"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setActiveMenuId(null);
+                                    setDetailModalMode('edit');
                                     setSelectedFeedbackDetails(f);
                                   }}
                                 >
@@ -658,7 +671,10 @@ export const FeedbackManagement: React.FC = () => {
                     <button
                       type="button"
                       className="card-view-link-btn"
-                      onClick={() => setSelectedFeedbackDetails(f)}
+                      onClick={() => {
+                        setDetailModalMode('view');
+                        setSelectedFeedbackDetails(f);
+                      }}
                     >
                       View Feedback <ArrowRight size={14} />
                     </button>
@@ -670,13 +686,21 @@ export const FeedbackManagement: React.FC = () => {
         )}
       </div>
 
-      {/* FULLY FUNCTIONAL MODALS FOR ADD & IMPORT */}
+      {/* FULLY FUNCTIONAL MODALS FOR ADD, IMPORT & VIEW/EDIT DETAILS */}
       {showAddModal && (
         <AddTrainerFeedbackModal onClose={() => setShowAddModal(false)} />
       )}
 
       {showImportModal && (
         <ImportTrainerFeedbackModal onClose={() => setShowImportModal(false)} />
+      )}
+
+      {selectedFeedbackDetails && (
+        <FeedbackDetailModal
+          record={selectedFeedbackDetails}
+          initialMode={detailModalMode}
+          onClose={() => setSelectedFeedbackDetails(null)}
+        />
       )}
     </motion.div>
   );
