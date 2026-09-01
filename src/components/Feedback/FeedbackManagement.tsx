@@ -64,6 +64,7 @@ export const FeedbackManagement: React.FC = () => {
 
   // Active Dropdown state
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const menuWrapperRef = React.useRef<HTMLDivElement | null>(null);
 
   // Modal States
   const [showAddModal, setShowAddModal] = useState(false);
@@ -73,9 +74,13 @@ export const FeedbackManagement: React.FC = () => {
 
   // Close popover when clicking outside
   React.useEffect(() => {
-    const handleOutsideClick = () => setActiveMenuId(null);
-    window.addEventListener('click', handleOutsideClick);
-    return () => window.removeEventListener('click', handleOutsideClick);
+    const handleOutsideClick = (e: MouseEvent) => {
+      if (menuWrapperRef.current && !menuWrapperRef.current.contains(e.target as Node)) {
+        setActiveMenuId(null);
+      }
+    };
+    document.addEventListener('mousedown', handleOutsideClick);
+    return () => document.removeEventListener('mousedown', handleOutsideClick);
   }, []);
 
   // Unique Filter Options
@@ -498,7 +503,10 @@ export const FeedbackManagement: React.FC = () => {
 
                         {/* ACTION COLUMN */}
                         <td className="text-right">
-                          <div className="action-popover-wrapper">
+                          <div
+                            className="action-popover-wrapper"
+                            ref={activeMenuId === f.id ? menuWrapperRef : null}
+                          >
                             <button
                               type="button"
                               className="table-action-icon-btn"
@@ -540,7 +548,8 @@ export const FeedbackManagement: React.FC = () => {
                                 <button
                                   type="button"
                                   className="dropdown-table-item"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setActiveMenuId(null);
                                     runAiAnalysis(f.id);
                                   }}
@@ -551,7 +560,8 @@ export const FeedbackManagement: React.FC = () => {
                                   <button
                                     type="button"
                                     className="dropdown-table-item"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       setActiveMenuId(null);
                                       approveFeedback(f.id);
                                     }}
@@ -563,7 +573,8 @@ export const FeedbackManagement: React.FC = () => {
                                   <button
                                     type="button"
                                     className="dropdown-table-item"
-                                    onClick={() => {
+                                    onClick={(e) => {
+                                      e.stopPropagation();
                                       setActiveMenuId(null);
                                       publishFeedback(f.id);
                                     }}
@@ -575,7 +586,8 @@ export const FeedbackManagement: React.FC = () => {
                                 <button
                                   type="button"
                                   className="dropdown-table-item danger"
-                                  onClick={() => {
+                                  onClick={(e) => {
+                                    e.stopPropagation();
                                     setActiveMenuId(null);
                                     archiveFeedback(f.id);
                                   }}
@@ -697,7 +709,10 @@ export const FeedbackManagement: React.FC = () => {
 
       {selectedFeedbackDetails && (
         <FeedbackDetailModal
-          record={selectedFeedbackDetails}
+          record={
+            feedbackRecords.find((r) => r.id === selectedFeedbackDetails.id) ||
+            selectedFeedbackDetails
+          }
           initialMode={detailModalMode}
           onClose={() => setSelectedFeedbackDetails(null)}
         />

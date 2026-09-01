@@ -54,6 +54,19 @@ export const FeedbackDetailModal: React.FC<FeedbackDetailModalProps> = ({
   const [isSaved, setIsSaved] = useState(false);
   const [isAnalyzing, setIsAnalyzing] = useState(false);
 
+  React.useEffect(() => {
+    setMode(initialMode);
+    setTechnicalRating(record.technicalRating || 4);
+    setParticipationRating(record.participationRating || 4);
+    setCommunicationRating(record.communicationRating || 4);
+    setProblemSolvingRating(record.problemSolvingRating || 4);
+    setOverallRating(record.overallRating || 4);
+    setStrengthComments(record.strengthComments || '');
+    setImprovementComments(record.improvementComments || '');
+    setGeneralComments(record.generalComments || '');
+    setStatus(record.status || 'Needs Review');
+  }, [record, initialMode]);
+
   const handleSave = () => {
     updateFeedback(record.id, {
       technicalRating,
