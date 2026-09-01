@@ -13867,7 +13867,9 @@
 .cell-evaluator-flex {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 10px;
+  min-width: 0;
+  overflow: hidden;
 }
 
 .evaluator-avatar-34px {
@@ -13890,6 +13892,10 @@
   font-weight: 700;
   color: #0F2A33;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 100%;
+  display: block;
 }
 
 .participants-compact-pill {

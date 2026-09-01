@@ -740,31 +740,45 @@ export const CertificationIntelligenceView: React.FC = () => {
               <table className="asm-fixed-proportional-table">
                 <thead>
                   <tr>
-                    <th style={{ width: '22%' }}>TRAINEE</th>
-                    <th style={{ width: '20%' }}>CERTIFICATION</th>
-                    <th style={{ width: '12%' }}>READINESS</th>
-                    <th style={{ width: '16%' }}>STATUS</th>
+                    <th style={{ width: '26%' }}>TRAINEE</th>
+                    <th style={{ width: '22%' }}>CERTIFICATION</th>
+                    <th style={{ width: '10%' }}>READINESS</th>
+                    <th style={{ width: '15%' }}>STATUS</th>
                     <th style={{ width: '15%' }}>NEXT ACTION</th>
-                    <th style={{ width: '15%' }}>ACTIONS</th>
+                    <th style={{ width: '12%' }}>ACTIONS</th>
                   </tr>
                 </thead>
                 <tbody>
                   {filteredTrackerItems.map((item) => (
                     <tr key={item.traineeId} className="asm-table-row-item">
                       <td>
-                        <div className="cell-evaluator-flex">
+                        <div className="cell-evaluator-flex min-w-0">
                           <div className="evaluator-avatar-34px">{item.avatarInitials}</div>
-                          <div className="flex flex-col">
-                            <strong className="evaluator-name-single">{item.name}</strong>
-                            <span className="text-xs text-slate-400">{item.employeeId}</span>
+                          <div className="flex flex-col min-w-0 overflow-hidden">
+                            <strong
+                              className="evaluator-name-single truncate block max-w-full"
+                              title={item.name}
+                            >
+                              {item.name}
+                            </strong>
+                            <span className="text-xs text-slate-400 block truncate">
+                              {item.employeeId}
+                            </span>
                           </div>
                         </div>
                       </td>
 
                       <td>
-                        <div className="flex flex-col">
-                          <span className="text-xs font-black text-teal-800">{item.examCode}</span>
-                          <span className="text-[11px] text-slate-500 truncate max-w-[200px]">{item.certificationTitle}</span>
+                        <div className="flex flex-col min-w-0 overflow-hidden">
+                          <span className="text-xs font-black text-teal-800 block truncate">
+                            {item.examCode}
+                          </span>
+                          <span
+                            className="text-[11px] font-medium text-slate-500 line-clamp-2 leading-snug block"
+                            title={item.certificationTitle}
+                          >
+                            {item.certificationTitle}
+                          </span>
                         </div>
                       </td>
 
