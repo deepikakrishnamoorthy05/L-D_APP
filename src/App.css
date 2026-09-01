@@ -1492,11 +1492,26 @@
   padding: 0 4px;
 }
 
+.app-sidebar.collapsed .sidebar-header {
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  height: auto;
+  margin-bottom: 14px;
+  padding: 0;
+}
+
 .brand-wrapper {
   display: flex;
   align-items: center;
   gap: 10px;
   overflow: hidden;
+}
+
+.app-sidebar.collapsed .brand-wrapper {
+  justify-content: center;
+  width: 100%;
 }
 
 .sidebar-brand-logo-img {
@@ -1509,8 +1524,9 @@
 }
 
 .app-sidebar.collapsed .sidebar-brand-logo-img {
-  height: 28px;
-  width: 28px;
+  height: 24px;
+  width: auto;
+  max-width: 48px;
   object-fit: contain;
 }
 
@@ -1542,6 +1558,11 @@
 .sidebar-header-actions {
   display: flex;
   align-items: center;
+}
+
+.app-sidebar.collapsed .sidebar-header-actions {
+  width: 100%;
+  justify-content: center;
 }
 
 .sidebar-icon-btn {

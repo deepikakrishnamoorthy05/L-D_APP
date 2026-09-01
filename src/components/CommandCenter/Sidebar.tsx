@@ -169,7 +169,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
 
         {/* 1. TOP BRAND AREA */}
         <div className="sidebar-header">
-          <div className="brand-wrapper">
+          <div className="brand-wrapper" title={isCollapsedMode ? 'Systech Solutions — L&D Platform' : undefined}>
             {!logoFailed ? (
               <img
                 src={systechLogo}
@@ -184,6 +184,9 @@ export const Sidebar: React.FC<SidebarProps> = ({
               <div className="brand-text-block">
                 <span className="brand-subtitle-sub">L&amp;D Platform</span>
               </div>
+            )}
+            {isCollapsedMode && (
+              <span className="sidebar-tooltip">Systech Solutions</span>
             )}
           </div>
 
