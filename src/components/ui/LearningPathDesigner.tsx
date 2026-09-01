@@ -27,7 +27,6 @@ export const LearningPathDesigner: React.FC<LearningPathDesignerProps> = ({
       {/* 1. COMMON FOUNDATION STAGE */}
       <div className="path-stage-container foundation-stage">
         <div className="stage-header-chip">
-          <Sparkles size={14} />
           <span>COMMON FOUNDATION</span>
         </div>
 
@@ -131,7 +130,7 @@ export const LearningPathDesigner: React.FC<LearningPathDesignerProps> = ({
         <div className="shared-nodes-row">
           <motion.div whileHover={{ y: -2 }} className="path-node-card shared">
             <div className="node-icon-box amber">
-              <Sparkles size={16} />
+              <Award size={16} />
             </div>
             <div className="node-text">
               <span className="node-title">Simulation Project</span>

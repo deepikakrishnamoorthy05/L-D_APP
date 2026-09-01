@@ -295,7 +295,6 @@ export const AssessmentManagement: React.FC = () => {
       {/* 3. ASSESSMENT INTELLIGENCE INSIGHT CARD */}
       <div className="asm-intelligence-card">
         <div className="intelligence-card-header">
-          <Sparkles size={16} className="text-teal-700" />
           <h4 className="intelligence-card-title">Assessment Intelligence</h4>
         </div>
 

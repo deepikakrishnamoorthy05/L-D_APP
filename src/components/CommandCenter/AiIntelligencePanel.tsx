@@ -133,7 +133,6 @@ export const AiIntelligencePanel: React.FC = () => {
           <div className="ai-detail-modal-card" onClick={(e) => e.stopPropagation()}>
             <div className="modal-header">
               <div className="modal-title-row">
-                <Sparkles size={18} className="modal-sparkle" />
                 <h3>AI Intelligence Analysis</h3>
               </div>
               <button

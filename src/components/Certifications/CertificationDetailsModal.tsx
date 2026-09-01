@@ -194,7 +194,7 @@ export const CertificationDetailsModal: React.FC<CertificationDetailsModalProps>
         {/* 5. CERTIFICATION READINESS INSIGHT CARD */}
         <section className="certification-insight-card">
           <div className="insight-header-title">
-            <Sparkles size={16} /> CERTIFICATION READINESS INSIGHT
+            CERTIFICATION READINESS INSIGHT
           </div>
           <p className="m-0 text-slate-700">
             2 trainees are currently closest to {certification.examCode} readiness. Cohort main development focus is on Lakehouse Monitoring and PySpark Optimization.

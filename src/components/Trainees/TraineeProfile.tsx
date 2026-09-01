@@ -342,7 +342,6 @@ export const TraineeProfile: React.FC<TraineeProfileProps> = ({
 
               <div className="card-header-line flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Sparkles size={18} className="text-teal-600" />
                   <span className="passport-badge-title">DIGITAL LEARNING PASSPORT</span>
                 </div>
                 <BadgeCheck size={18} className="text-teal-600" />
@@ -822,7 +821,6 @@ export const TraineeProfile: React.FC<TraineeProfileProps> = ({
               className="single-tab-content-wrapper mt-4"
             >
               <div className="nested-tiles-card text-center p-6">
-                <Sparkles size={36} className="text-teal-600 mb-2 mx-auto" />
                 <h3 className="card-title-text">{tabsList.find((t) => t.id === activeTab)?.label} Records</h3>
                 <p className="text-sm text-muted mt-1">
                   Synchronized with L&amp;D Learning Intelligence Engine for {trainee.name}.

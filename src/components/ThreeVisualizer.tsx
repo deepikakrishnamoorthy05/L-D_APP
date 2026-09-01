@@ -1,6 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three';
-import { Sparkles, Brain, Award, TrendingUp, CheckCircle, BarChart3, GraduationCap } from 'lucide-react';
+import { MessageSquare, Brain, Award, TrendingUp, CheckCircle, BarChart3, GraduationCap } from 'lucide-react';
 
 // Node data definitions
 interface LearningNode {
@@ -17,7 +17,7 @@ const NODES_DATA: LearningNode[] = [
   { title: 'BOOTCAMP', category: 'Foundation', icon: <GraduationCap size={16} />, angle: 0, radius: 4.8, heightOffset: 0.8, color: '#00f0ff' },
   { title: 'SKILLS', category: 'Core Matrix', icon: <Brain size={16} />, angle: Math.PI / 3, radius: 5.2, heightOffset: -0.6, color: '#00f0ff' },
   { title: 'ASSESSMENTS', category: 'Evaluation', icon: <BarChart3 size={16} />, angle: (2 * Math.PI) / 3, radius: 4.6, heightOffset: 1.2, color: '#00f0ff' },
-  { title: 'FEEDBACK', category: 'Continuous Loop', icon: <Sparkles size={16} />, angle: Math.PI, radius: 5.0, heightOffset: -1.0, color: '#00f0ff' },
+  { title: 'FEEDBACK', category: 'Continuous Loop', icon: <MessageSquare size={16} />, angle: Math.PI, radius: 5.0, heightOffset: -1.0, color: '#00f0ff' },
   { title: 'CERTIFICATIONS', category: 'Validation', icon: <Award size={16} />, angle: (4 * Math.PI) / 3, radius: 4.9, heightOffset: 0.9, color: '#00f0ff' },
   { title: 'UPSKILLING', category: 'Growth Engine', icon: <TrendingUp size={16} />, angle: (5 * Math.PI) / 3, radius: 5.3, heightOffset: -0.4, color: '#00f0ff' },
 ];

@@ -212,7 +212,6 @@ export const ImportCalendarModal: React.FC<ImportCalendarModalProps> = ({ onClos
               {/* REQUIRED COLUMNS COMPACT SECTION */}
               <div className="required-columns-section">
                 <span className="required-columns-title">
-                  <Sparkles size={13} className="text-teal-700 inline mr-1" />
                   Required Columns
                 </span>
                 <div className="required-chips-grid">

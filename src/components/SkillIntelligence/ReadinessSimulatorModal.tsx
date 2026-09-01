@@ -198,7 +198,6 @@ export const ReadinessSimulatorModal: React.FC<ReadinessSimulatorModalProps> = (
             {/* Suggested Development Focus */}
             <div className="suggested-focus-card mt-4 p-3 rounded-xl border">
               <h4 className="title-sm font-bold text-slate-800 flex items-center gap-2 mb-2">
-                <Sparkles size={15} className="text-teal-600" />
                 <span>SUGGESTED DEVELOPMENT FOCUS</span>
               </h4>
               <ul className="focus-list text-xs space-y-2">

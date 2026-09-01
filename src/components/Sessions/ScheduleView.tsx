@@ -104,7 +104,6 @@ export const ScheduleView: React.FC<ScheduleViewProps> = ({
       {/* 1. INTERACTIVE 3D BOOTCAMP LEARNING JOURNEY FLOWCHART */}
       <section className="learning-journey-card glass-panel-3d">
         <div className="journey-header">
-          <Sparkles size={16} className="icon-sparkle" />
           <h3>BOOTCAMP LEARNING JOURNEY PIPELINE</h3>
         </div>
 

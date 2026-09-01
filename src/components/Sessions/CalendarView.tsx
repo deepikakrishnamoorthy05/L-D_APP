@@ -384,7 +384,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
               </div>
             </div>
             <span className="board-session-badge">
-              <Sparkles size={12} className="inline mr-1" />
               {sessions.length} Scheduled Sessions
             </span>
           </div>

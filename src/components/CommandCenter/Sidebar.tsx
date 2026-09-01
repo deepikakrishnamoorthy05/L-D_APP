@@ -120,7 +120,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
         {/* Toast Notification for Non-Functional Nav Items */}
         {activeToast && (
           <div className="nav-toast-popup" role="status">
-            <Sparkles size={14} className="toast-sparkle" />
             <span>{activeToast}</span>
           </div>
         )}

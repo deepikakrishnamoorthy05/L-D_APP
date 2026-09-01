@@ -195,7 +195,7 @@ export const SkillIntelligenceView: React.FC = () => {
       <section className="ski-hero-glass-card">
         <div className="ski-hero-left">
           <span className="ski-hero-badge">
-            <Sparkles size={13} /> AI-Powered Talent Intelligence
+            AI-Powered Talent Intelligence
           </span>
           <h1 className="ski-hero-title">Skill Intelligence</h1>
           <p className="ski-hero-subtitle">
@@ -360,7 +360,6 @@ export const SkillIntelligenceView: React.FC = () => {
 
           {/* AI NOTICE CHIP */}
           <div className="ski-ai-notice-banner">
-            <Sparkles size={14} className="text-teal-700 flex-shrink-0" />
             <span>
               Responses currently use structured application data. OpenAI service connection will be added next.
             </span>
@@ -423,7 +422,6 @@ export const SkillIntelligenceView: React.FC = () => {
               </div>
             ) : isCopilotThinking ? (
               <div className="ski-copilot-thinking-state">
-                <Sparkles size={28} className="text-teal-700 animate-spin mb-2" />
                 <span className="text-sm font-bold text-slate-800">Querying centralized telemetry service...</span>
               </div>
             ) : (
@@ -538,7 +536,7 @@ export const SkillIntelligenceView: React.FC = () => {
               onClick={() => setShowFormulaTooltip(!showFormulaTooltip)}
               title="View readiness formula breakdown"
             >
-              <Sparkles size={15} />
+              <Brain size={15} />
             </button>
 
             {showFormulaTooltip && (

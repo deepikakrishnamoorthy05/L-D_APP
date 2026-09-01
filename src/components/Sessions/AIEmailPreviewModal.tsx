@@ -134,9 +134,6 @@ export const AIEmailPreviewModal: React.FC<AIEmailPreviewModalProps> = ({
         {/* 1. FIXED ELEGANT HEADER (88px) */}
         <div className="ai-modal-header-strip">
           <div className="header-left-title-block">
-            <div className="ai-spark-badge">
-              <Sparkles size={22} className="text-teal-700" />
-            </div>
             <div>
               <h2 className="ai-modal-main-title">AI Trainer Email Notification Preview</h2>
               <p className="ai-modal-subtitle">
@@ -316,7 +313,6 @@ export const AIEmailPreviewModal: React.FC<AIEmailPreviewModalProps> = ({
                 <div className="flex items-center gap-2">
                   <h4 className="canvas-title-text">Generated Email Draft</h4>
                   <span className="ai-generated-chip">
-                    <Sparkles size={11} className="inline mr-1" />
                     AI Generated Draft
                   </span>
                 </div>

@@ -244,9 +244,6 @@ export const CreateBootcampModal: React.FC<CreateBootcampModalProps> = ({
     >
       <div className="modal-header-custom">
         <div className="header-left">
-          <div className="header-icon-box">
-            <Sparkles size={20} className="header-icon-gradient" />
-          </div>
           <div>
             <h2 className="ui-modal-title">
               {isEdit ? `Edit Bootcamp — ${initialData?.code}` : 'Launch New Bootcamp Cohort'}

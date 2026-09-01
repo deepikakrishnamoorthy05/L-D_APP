@@ -626,8 +626,7 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({
                     {/* Composer Header */}
                     <div className="composer-header-bar">
                       <div className="flex items-center gap-2">
-                        <Sparkles size={16} className="text-teal-600" />
-                        <span className="composer-title-text">✨ AI TRAINER NOTIFICATION</span>
+                        <span className="composer-title-text">AI TRAINER NOTIFICATION</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <button

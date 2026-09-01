@@ -382,34 +382,33 @@ export const CertificationIntelligenceView: React.FC = () => {
                         className="crt-copilot-question-card"
                         onClick={() => handleCopilotQuery('Who is ready for DP-700?')}
                       >
-                        <span><Sparkles size={14} /> Who is ready for DP-700?</span><ChevronRight size={15} />
+                        <span>Who is ready for DP-700?</span><ChevronRight size={15} />
                       </button>
                       <button
                         type="button"
                         className="crt-copilot-question-card"
                         onClick={() => handleCopilotQuery('Which certification is best for Kaviram?')}
                       >
-                        <span><Sparkles size={14} /> Which certification is best for Kaviram?</span><ChevronRight size={15} />
+                        <span>Which certification is best for Kaviram?</span><ChevronRight size={15} />
                       </button>
                       <button
                         type="button"
                         className="crt-copilot-question-card"
                         onClick={() => handleCopilotQuery('Who has completed certifications?')}
                       >
-                        <span><Sparkles size={14} /> Who has completed certifications?</span><ChevronRight size={15} />
+                        <span>Who has completed certifications?</span><ChevronRight size={15} />
                       </button>
                       <button
                         type="button"
                         className="crt-copilot-question-card"
                         onClick={() => handleCopilotQuery('Which trainees need more preparation?')}
                       >
-                        <span><Sparkles size={14} /> Which trainees need more preparation?</span><ChevronRight size={15} />
+                        <span>Which trainees need more preparation?</span><ChevronRight size={15} />
                       </button>
                     </div>
                   </div>
                 ) : isCopilotThinking ? (
                   <div className="ski-copilot-thinking-state">
-                    <Sparkles size={26} className="text-teal-700 animate-spin mb-2" />
                     <span className="text-sm font-bold text-slate-800">Analyzing trainee evidence against certification standards...</span>
                   </div>
                 ) : (

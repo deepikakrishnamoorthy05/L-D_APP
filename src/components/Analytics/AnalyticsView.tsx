@@ -1263,7 +1263,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = () => {
           {/* AI PERFORMANCE INTELLIGENCE NARRATIVE */}
           <div className="analytics-panel ai-summary-panel">
             <div className="ai-summary-hdr">
-              <Sparkles size={16} /> AI Performance Intelligence Summary
+              AI Performance Intelligence Summary
             </div>
             <p className="ai-summary-text">
               "{currentTrainee.name} demonstrates strong overall capability ({calculateWeightedScore(currentTrainee)}% weighted index) with above-cohort assessment ({currentTrainee.avgScorePercent}%) and attendance ({currentTrainee.attendancePercent}%) performance in the {currentTrainee.bootcampName} program. Databricks optimization remains the primary technical development area. Current readiness indicates high suitability for client project deployment."

@@ -139,7 +139,6 @@ export const CompareTraineesModal: React.FC<CompareTraineesModalProps> = ({
             {/* Suitability / Best Fit Summary Section */}
             <div className="suitability-summary-card mt-4">
               <h4 className="card-section-title">
-                <Sparkles size={15} className="text-teal-600" />
                 <span>CAPABILITY SUITABILITY SUMMARY</span>
               </h4>
 

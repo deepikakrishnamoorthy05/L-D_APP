@@ -554,7 +554,7 @@ export const FeedbackManagement: React.FC = () => {
                                     runAiAnalysis(f.id);
                                   }}
                                 >
-                                  <Sparkles size={14} /> Regenerate AI Insight
+                                  <Brain size={14} /> Regenerate AI Insight
                                 </button>
                                 {f.status !== 'Approved' && f.status !== 'Published' && (
                                   <button

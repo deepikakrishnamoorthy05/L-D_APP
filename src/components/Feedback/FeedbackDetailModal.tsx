@@ -226,7 +226,7 @@ export const FeedbackDetailModal: React.FC<FeedbackDetailModalProps> = ({
               onClick={handleRegenerateAi}
               disabled={isAnalyzing}
             >
-              <Sparkles size={14} className={isAnalyzing ? 'animate-spin' : ''} />
+              <Brain size={14} className={isAnalyzing ? 'animate-spin' : ''} />
               {isAnalyzing ? 'Analyzing...' : 'AI Insight'}
             </button>
 

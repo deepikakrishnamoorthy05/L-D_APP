@@ -124,7 +124,6 @@ export const BootcampManagement: React.FC<BootcampManagementProps> = ({
             transition={{ duration: 0.3, delay: 0.1 }}
             className="hero-eyebrow-badge"
           >
-            <Sparkles size={13} className="text-teal-600" />
             <span>ENTERPRISE LEARNING OPERATIONS</span>
           </motion.div>
 
@@ -432,7 +431,7 @@ export const BootcampManagement: React.FC<BootcampManagementProps> = ({
                                 setOpenMenuId(null);
                               }}
                             >
-                              <Sparkles size={14} /> Duplicate Cohort
+                              Duplicate Cohort
                             </button>
                             <button
                               type="button"

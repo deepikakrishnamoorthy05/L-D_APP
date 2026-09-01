@@ -30,7 +30,6 @@ export const EvidenceExplanationModal: React.FC<EvidenceExplanationModalProps> =
           <header className="evidence-modal-header">
             <div className="header-badge-row">
               <span className="ai-intel-pill">
-                <Sparkles size={14} className="text-teal-600" />
                 <span>INTELLIGENCE EVIDENCE</span>
               </span>
               <button

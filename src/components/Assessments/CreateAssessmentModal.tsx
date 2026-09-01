@@ -466,7 +466,6 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
             </div>
 
             <div className="track-notice-pill mt-2">
-              <Sparkles size={14} />
               <span>
                 Track Selection: <strong>{track}</strong>. Trainees are filtered automatically to match track requirements.
               </span>

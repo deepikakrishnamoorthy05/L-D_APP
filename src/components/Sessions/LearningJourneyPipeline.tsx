@@ -41,7 +41,6 @@ export const LearningJourneyPipeline: React.FC = () => {
       <div className="pipeline-header-flex flex items-center justify-between py-1">
         <div className="flex items-center gap-3 min-w-0">
           <h4 className="pipeline-title flex items-center gap-2 text-xs font-bold text-teal-900 shrink-0">
-            <Sparkles size={14} className="text-teal-600" />
             <span>Bootcamp Roadmap</span>
           </h4>
 

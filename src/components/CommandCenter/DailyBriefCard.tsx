@@ -27,7 +27,6 @@ export const DailyBriefCard: React.FC<DailyBriefCardProps> = ({ onNavigate }) =>
       <div>
         <div className="ops-card-header flex items-center justify-between pb-2 mb-3 border-b">
           <div className="ops-card-title-group flex items-center gap-2">
-            <Sparkles size={16} className="ops-card-icon text-teal-600" />
             <h3 className="ops-card-title font-extrabold text-sm uppercase tracking-wider">
               L&amp;D DAILY BRIEF
             </h3>
