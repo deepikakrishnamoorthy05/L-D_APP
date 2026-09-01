@@ -113,14 +113,24 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
 
   // Filter Logic
   const filteredTrainees = trainees.filter((t) => {
+    const query = searchQuery.trim().toLowerCase();
     const matchesSearch =
-      t.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.employeeId.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      t.email.toLowerCase().includes(searchQuery.toLowerCase());
+      !query ||
+      t.name.toLowerCase().includes(query) ||
+      t.employeeId.toLowerCase().includes(query) ||
+      t.email.toLowerCase().includes(query) ||
+      t.bootcampName.toLowerCase().includes(query);
 
+    const selectedBcObj = bootcamps.find(
+      (b) => b.id === selectedBootcamp || b.name === selectedBootcamp
+    );
     const matchesBootcamp =
       selectedBootcamp === 'All' ||
       t.bootcampId === selectedBootcamp ||
+      t.bootcampName === selectedBootcamp ||
+      (selectedBcObj &&
+        (t.bootcampId === selectedBcObj.id ||
+          t.bootcampName.toLowerCase() === selectedBcObj.name.toLowerCase())) ||
       t.bootcampName.toLowerCase().includes(selectedBootcamp.toLowerCase());
 
     const matchesLearningStatus =
@@ -129,8 +139,9 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
     const matchesEnrollmentStatus =
       selectedEnrollmentStatus === 'All' || t.enrollmentStatus === selectedEnrollmentStatus;
 
+    const domainTechText = `${t.primaryDomain || ''} ${t.primaryTech || ''} ${t.bootcampName || ''}`.toLowerCase();
     const matchesTrack =
-      selectedTrack === 'All' || (t.primaryTech && t.primaryTech.toLowerCase().includes(selectedTrack.toLowerCase()));
+      selectedTrack === 'All' || domainTechText.includes(selectedTrack.toLowerCase());
 
     const matchesKpiFilter =
       kpiFilter === null ||
@@ -139,7 +150,14 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
       (kpiFilter === 'needs-attention' &&
         (t.learningStatus === 'Needs Attention' || t.learningStatus === 'At Risk'));
 
-    return matchesSearch && matchesBootcamp && matchesLearningStatus && matchesEnrollmentStatus && matchesTrack && matchesKpiFilter;
+    return (
+      matchesSearch &&
+      matchesBootcamp &&
+      matchesLearningStatus &&
+      matchesEnrollmentStatus &&
+      matchesTrack &&
+      matchesKpiFilter
+    );
   });
 
   const isFilterActive =
@@ -344,6 +362,7 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
           <option value="Active">Active</option>
           <option value="Completed">Completed</option>
           <option value="Not Assigned">Not Assigned</option>
+          <option value="Archived">Archived</option>
         </select>
 
         <select
@@ -355,6 +374,7 @@ export const TraineeManagement: React.FC<TraineeManagementProps> = ({ onSelectTr
           <option value="SQL">SQL</option>
           <option value="Python">Python</option>
           <option value="Power BI">Power BI</option>
+          <option value="Lateral">Lateral / Acceleration</option>
         </select>
 
         {isFilterActive && (

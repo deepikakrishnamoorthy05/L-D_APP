@@ -43,19 +43,52 @@ interface TraineeContextType {
 
 const LOCAL_STORAGE_KEY = 'ld_trainees';
 
+const normalizeTraineeBootcamps = (list: Trainee[]): Trainee[] => {
+  return list.map((t) => {
+    let bId = t.bootcampId;
+    let bName = t.bootcampName;
+
+    if (bName === 'Power BI & DAX Intelligence' || (bId === 'bc-4' && bName === 'Power BI & DAX Intelligence')) {
+      bId = 'bc-4';
+      bName = 'Power BI & DAX Intelligence';
+    } else if (bName === 'Power BI & DAX Intelligence') {
+      bId = 'bc-4';
+    } else if (
+      bName === 'Lateral Data Engineering Acceleration' ||
+      bName === 'Data Engineering' ||
+      (bId === 'bc-3' && (bName === 'Data Engineering' || bName === 'Lateral Data Engineering Acceleration'))
+    ) {
+      bId = 'bc-3';
+      bName = 'Lateral Data Engineering Acceleration';
+    } else if (bName === 'SQL Data Architecture' || bId === 'bc-1') {
+      bId = 'bc-1';
+      bName = 'SQL Data Architecture';
+    } else if (bName === 'Python Data Engineering' || bId === 'bc-2') {
+      bId = 'bc-2';
+      bName = 'Python Data Engineering';
+    }
+
+    return {
+      ...t,
+      bootcampId: bId,
+      bootcampName: bName,
+    };
+  });
+};
+
 const loadPersistedTrainees = (): Trainee[] => {
   try {
     const stored = localStorage.getItem(LOCAL_STORAGE_KEY);
     if (stored) {
       const parsed = JSON.parse(stored);
       if (Array.isArray(parsed) && parsed.length > 0) {
-        return parsed;
+        return normalizeTraineeBootcamps(parsed);
       }
     }
   } catch (err) {
     console.error('Failed to load trainees from localStorage:', err);
   }
-  return INITIAL_TRAINEES;
+  return normalizeTraineeBootcamps(INITIAL_TRAINEES);
 };
 
 const TraineeContext = createContext<TraineeContextType | undefined>(undefined);
