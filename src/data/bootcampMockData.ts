@@ -1,4 +1,5 @@
 import { Bootcamp, User, BootcampModule, BootcampEnrollment } from '../types/bootcamp';
+import { INITIAL_TRAINEES } from './traineeMockData';
 
 export const MOCK_USERS: User[] = [
   { id: 'tr-1', employeeId: 'EMP101', name: 'John Mathew', email: 'john.mathew@systechusa.com', role: 'Trainer' },
@@ -28,7 +29,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
     additionalTrainerName: 'Sarah David',
     coordinatorId: 'co-1',
     coordinatorName: 'Priya Sharma',
-    traineesCount: 28,
+    traineesCount: 7,
     modulesCount: 6,
     progressPercent: 92,
     attendancePercent: 96,
@@ -51,7 +52,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
     primaryTrainerName: 'Sarah David',
     coordinatorId: 'co-1',
     coordinatorName: 'Priya Sharma',
-    traineesCount: 24,
+    traineesCount: 8,
     modulesCount: 5,
     progressPercent: 78,
     attendancePercent: 94,
@@ -74,7 +75,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
     primaryTrainerName: 'Alex Thomas',
     coordinatorId: 'co-2',
     coordinatorName: 'Anusha Roy',
-    traineesCount: 16,
+    traineesCount: 7,
     modulesCount: 4,
     progressPercent: 84,
     attendancePercent: 98,
@@ -97,7 +98,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
     primaryTrainerName: 'Alex Thomas',
     coordinatorId: 'co-2',
     coordinatorName: 'Anusha Roy',
-    traineesCount: 22,
+    traineesCount: 6,
     modulesCount: 4,
     progressPercent: 0,
     attendancePercent: 100,
@@ -120,7 +121,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
     primaryTrainerName: 'Michael Paul',
     coordinatorId: 'co-1',
     coordinatorName: 'Priya Sharma',
-    traineesCount: 14,
+    traineesCount: 6,
     modulesCount: 5,
     progressPercent: 100,
     attendancePercent: 96,
@@ -143,7 +144,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
     primaryTrainerName: 'John Mathew',
     coordinatorId: 'co-1',
     coordinatorName: 'Priya Sharma',
-    traineesCount: 82,
+    traineesCount: 6,
     modulesCount: 6,
     progressPercent: 100,
     attendancePercent: 95,
@@ -169,3 +170,174 @@ export const INITIAL_BOOTCAMP_MODULES: Record<string, BootcampModule[]> = {
     { id: 'm-lat-2', bootcampId: 'bc-3', name: 'Databricks Lakehouse Platform', description: 'Delta Lake, Unity Catalog', sequence: 2, plannedDuration: '2 Weeks', status: 'In Progress', stage: 'Databricks' },
   ],
 };
+
+const buildInitialEnrollmentsMap = (): Record<string, BootcampEnrollment[]> => {
+  const map: Record<string, BootcampEnrollment[]> = {
+    'bc-1': [],
+    'bc-2': [],
+    'bc-3': [],
+    'bc-4': [],
+    'bc-5': [
+      {
+        id: 'en-bc5-1',
+        bootcampId: 'bc-5',
+        traineeId: 'te-501',
+        trainee: { id: 'te-501', employeeId: 'EMP-2025-01', name: 'Anand Kumar', email: 'anand.kumar@systechusa.com', role: 'Trainee', department: 'Cloud Solutions', primaryDomain: 'Azure Data Factory', companyOutcome: 'Selected', avgScorePercent: 94 },
+        enrollmentDate: '2025-08-01',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 98,
+      },
+      {
+        id: 'en-bc5-2',
+        bootcampId: 'bc-5',
+        traineeId: 'te-502',
+        trainee: { id: 'te-502', employeeId: 'EMP-2025-02', name: 'Nithya Ramesh', email: 'nithya.ramesh@systechusa.com', role: 'Trainee', department: 'Cloud Solutions', primaryDomain: 'Snowflake Architecture', companyOutcome: 'Selected', avgScorePercent: 91 },
+        enrollmentDate: '2025-08-01',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 96,
+      },
+      {
+        id: 'en-bc5-3',
+        bootcampId: 'bc-5',
+        traineeId: 'te-503',
+        trainee: { id: 'te-503', employeeId: 'EMP-2025-03', name: 'Vikramaditya V', email: 'vikram.v@systechusa.com', role: 'Trainee', department: 'Data Engineering', primaryDomain: 'Databricks Delta Lake', companyOutcome: 'Selected', avgScorePercent: 89 },
+        enrollmentDate: '2025-08-01',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 95,
+      },
+      {
+        id: 'en-bc5-4',
+        bootcampId: 'bc-5',
+        traineeId: 'te-504',
+        trainee: { id: 'te-504', employeeId: 'EMP-2025-04', name: 'Divya Bharathi', email: 'divya.bharathi@systechusa.com', role: 'Trainee', department: 'Cloud Solutions', primaryDomain: 'AWS Glue ETL', companyOutcome: 'Selected', avgScorePercent: 88 },
+        enrollmentDate: '2025-08-01',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 94,
+      },
+      {
+        id: 'en-bc5-5',
+        bootcampId: 'bc-5',
+        traineeId: 'te-505',
+        trainee: { id: 'te-505', employeeId: 'EMP-2025-05', name: 'Karthik Raja', email: 'karthik.raja@systechusa.com', role: 'Trainee', department: 'Data Engineering', primaryDomain: 'dbt Core', companyOutcome: 'Selected', avgScorePercent: 92 },
+        enrollmentDate: '2025-08-01',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 97,
+      },
+      {
+        id: 'en-bc5-6',
+        bootcampId: 'bc-5',
+        traineeId: 'te-506',
+        trainee: { id: 'te-506', employeeId: 'EMP-2025-06', name: 'Pooja Sharma', email: 'pooja.sharma@systechusa.com', role: 'Trainee', department: 'Cloud Solutions', primaryDomain: 'Synapse Analytics', companyOutcome: 'Selected', avgScorePercent: 90 },
+        enrollmentDate: '2025-08-01',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 96,
+      },
+    ],
+    'bc-6': [
+      {
+        id: 'en-bc6-1',
+        bootcampId: 'bc-6',
+        traineeId: 'te-601',
+        trainee: { id: 'te-601', employeeId: 'EMP-2025-11', name: 'Rajesh Kannan', email: 'rajesh.kannan@systechusa.com', role: 'Trainee', department: 'Data Engineering', primaryDomain: 'SQL & Python Data Pipelines', companyOutcome: 'Selected', avgScorePercent: 89 },
+        enrollmentDate: '2025-01-20',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 95,
+      },
+      {
+        id: 'en-bc6-2',
+        bootcampId: 'bc-6',
+        traineeId: 'te-602',
+        trainee: { id: 'te-602', employeeId: 'EMP-2025-12', name: 'Subashini M', email: 'subashini.m@systechusa.com', role: 'Trainee', department: 'Business Intelligence', primaryDomain: 'Power BI Analytics', companyOutcome: 'Selected', avgScorePercent: 93 },
+        enrollmentDate: '2025-01-20',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 97,
+      },
+      {
+        id: 'en-bc6-3',
+        bootcampId: 'bc-6',
+        traineeId: 'te-603',
+        trainee: { id: 'te-603', employeeId: 'EMP-2025-13', name: 'Venkatesh S', email: 'venkatesh.s@systechusa.com', role: 'Trainee', department: 'Data Engineering', primaryDomain: 'Database Warehousing', companyOutcome: 'Selected', avgScorePercent: 87 },
+        enrollmentDate: '2025-01-20',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 93,
+      },
+      {
+        id: 'en-bc6-4',
+        bootcampId: 'bc-6',
+        traineeId: 'te-604',
+        trainee: { id: 'te-604', employeeId: 'EMP-2025-14', name: 'Anitha Perumal', email: 'anitha.perumal@systechusa.com', role: 'Trainee', department: 'Data Engineering', primaryDomain: 'PySpark Fundamentals', companyOutcome: 'Selected', avgScorePercent: 91 },
+        enrollmentDate: '2025-01-20',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 96,
+      },
+      {
+        id: 'en-bc6-5',
+        bootcampId: 'bc-6',
+        traineeId: 'te-605',
+        trainee: { id: 'te-605', employeeId: 'EMP-2025-15', name: 'Balaji Natarajan', email: 'balaji.natarajan@systechusa.com', role: 'Trainee', department: 'Data Engineering', primaryDomain: 'SQL Modeling', companyOutcome: 'Selected', avgScorePercent: 88 },
+        enrollmentDate: '2025-01-20',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 94,
+      },
+      {
+        id: 'en-bc6-6',
+        bootcampId: 'bc-6',
+        traineeId: 'te-606',
+        trainee: { id: 'te-606', employeeId: 'EMP-2025-16', name: 'Gayathri Sundaram', email: 'gayathri.sundaram@systechusa.com', role: 'Trainee', department: 'Business Intelligence', primaryDomain: 'DAX & Reporting', companyOutcome: 'Selected', avgScorePercent: 92 },
+        enrollmentDate: '2025-01-20',
+        enrollmentStatus: 'Completed',
+        progressPercent: 100,
+        attendancePercent: 95,
+      },
+    ],
+  };
+
+  INITIAL_TRAINEES.forEach((t) => {
+    const bId = t.bootcampId || 'bc-1';
+    if (!map[bId]) {
+      map[bId] = [];
+    }
+
+    let status: any = t.learningStatus || 'On Track';
+    if (status === 'Project Ready') status = 'Project Ready';
+
+    map[bId].push({
+      id: `en-${bId}-${t.id}`,
+      bootcampId: bId,
+      traineeId: t.id,
+      trainee: {
+        id: t.id,
+        employeeId: t.employeeId,
+        name: t.name,
+        email: t.email,
+        role: 'Trainee',
+        avatar: t.avatar,
+        department: t.department,
+        primaryDomain: t.primaryDomain,
+        joiningDate: t.joiningDate,
+        companyOutcome: t.companyOutcome,
+        avgScorePercent: t.avgScorePercent,
+      },
+      enrollmentDate: t.enrollmentDate || '2026-07-01',
+      enrollmentStatus: status,
+      progressPercent: t.progressPercent,
+      attendancePercent: t.attendancePercent,
+    });
+  });
+
+  return map;
+};
+
+export const INITIAL_BOOTCAMP_ENROLLMENTS = buildInitialEnrollmentsMap();
+

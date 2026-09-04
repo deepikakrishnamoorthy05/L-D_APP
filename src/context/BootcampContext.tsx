@@ -11,6 +11,7 @@ import {
   MOCK_BOOTCAMPS,
   MOCK_USERS,
   INITIAL_BOOTCAMP_MODULES,
+  INITIAL_BOOTCAMP_ENROLLMENTS,
 } from '../data/bootcampMockData';
 import { INITIAL_TRAINEES } from '../data/traineeMockData';
 import { getCentralTrainerDirectory } from '../services/trainerService';
@@ -59,7 +60,9 @@ export const BootcampProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [modulesMap, setModulesMap] = useState<Record<string, BootcampModule[]>>(
     INITIAL_BOOTCAMP_MODULES
   );
-  const [enrollmentsMap, setEnrollmentsMap] = useState<Record<string, BootcampEnrollment[]>>({});
+  const [enrollmentsMap, setEnrollmentsMap] = useState<Record<string, BootcampEnrollment[]>>(
+    INITIAL_BOOTCAMP_ENROLLMENTS
+  );
   const [toastMessage, setToastMessage] = useState<string | null>(null);
 
   const centralDirectory = getCentralTrainerDirectory();
@@ -353,11 +356,16 @@ export const BootcampProvider: React.FC<{ children: React.ReactNode }> = ({ chil
           name: traineeObj.name,
           email: traineeObj.email,
           role: 'Trainee',
+          department: traineeObj.department,
+          primaryDomain: traineeObj.primaryDomain,
+          joiningDate: traineeObj.joiningDate,
+          companyOutcome: traineeObj.companyOutcome,
+          avgScorePercent: traineeObj.avgScorePercent,
         },
         enrollmentDate: new Date().toISOString().split('T')[0],
-        enrollmentStatus: 'On Track',
-        progressPercent: 0,
-        attendancePercent: 100,
+        enrollmentStatus: (traineeObj.learningStatus as any) || 'On Track',
+        progressPercent: traineeObj.progressPercent || 0,
+        attendancePercent: traineeObj.attendancePercent || 100,
       };
     });
 

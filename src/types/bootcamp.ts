@@ -5,7 +5,7 @@
 export type BootcampStatus = 'Planned' | 'Active' | 'Completed' | 'Archived';
 export type BootcampType = 'BOOTCAMP' | 'LATERAL';
 export type ModuleStatus = 'Not Started' | 'In Progress' | 'Completed';
-export type EnrollmentStatus = 'On Track' | 'Needs Attention' | 'At Risk';
+export type EnrollmentStatus = 'On Track' | 'Needs Attention' | 'At Risk' | 'Project Ready' | 'Completed' | 'Active';
 
 export interface User {
   id: string;
@@ -14,6 +14,11 @@ export interface User {
   email: string;
   role: 'L&D Team' | 'Trainer' | 'Coordinator' | 'Trainee';
   avatar?: string;
+  department?: string;
+  primaryDomain?: string;
+  joiningDate?: string;
+  companyOutcome?: 'Selected' | 'Not Selected' | 'Pending';
+  avgScorePercent?: number;
 }
 
 export interface BootcampModule {

@@ -32,6 +32,7 @@ import {
   Tabs,
   SearchInput,
   ProgressBar,
+  SegmentedControl,
 } from '../ui';
 
 interface BootcampDetailsProps {
@@ -84,17 +85,43 @@ export const BootcampDetails: React.FC<BootcampDetailsProps> = ({
   const enrollments = enrollmentsMap[bootcamp.id] || [];
   const cohortAssessmentStats = getBootcampAssessmentStats(bootcamp.id);
 
+  const [traineeStatusFilter, setTraineeStatusFilter] = useState('All');
+
   // Filter sessions belonging to this bootcamp
   const bootcampSessions = sessions.filter(
     (s) => s.bootcampId === bootcamp.id || s.bootcampName === bootcamp.name
   );
 
-  const filteredEnrollments = enrollments.filter(
-    (e) =>
+  const filteredEnrollments = enrollments.filter((e) => {
+    const matchesStatus =
+      traineeStatusFilter === 'All' || e.enrollmentStatus === traineeStatusFilter;
+    const matchesSearch =
       e.trainee.name.toLowerCase().includes(traineeSearch.toLowerCase()) ||
       e.trainee.employeeId.toLowerCase().includes(traineeSearch.toLowerCase()) ||
-      e.trainee.email.toLowerCase().includes(traineeSearch.toLowerCase())
-  );
+      e.trainee.email.toLowerCase().includes(traineeSearch.toLowerCase()) ||
+      (e.trainee.department && e.trainee.department.toLowerCase().includes(traineeSearch.toLowerCase())) ||
+      (e.trainee.primaryDomain && e.trainee.primaryDomain.toLowerCase().includes(traineeSearch.toLowerCase()));
+
+    return matchesStatus && matchesSearch;
+  });
+
+  const statusCounts = {
+    All: enrollments.length,
+    'On Track': enrollments.filter((e) => e.enrollmentStatus === 'On Track').length,
+    'Project Ready': enrollments.filter((e) => e.enrollmentStatus === 'Project Ready').length,
+    'Needs Attention': enrollments.filter((e) => e.enrollmentStatus === 'Needs Attention').length,
+    'At Risk': enrollments.filter((e) => e.enrollmentStatus === 'At Risk').length,
+    Completed: enrollments.filter((e) => e.enrollmentStatus === 'Completed').length,
+  };
+
+  const filterSegmentOptions = [
+    { id: 'All', label: 'All', badge: statusCounts.All },
+    { id: 'On Track', label: 'On Track', badge: statusCounts['On Track'] || undefined },
+    { id: 'Project Ready', label: 'Project Ready', badge: statusCounts['Project Ready'] || undefined },
+    { id: 'Needs Attention', label: 'Needs Attention', badge: statusCounts['Needs Attention'] || undefined },
+    { id: 'At Risk', label: 'At Risk', badge: statusCounts['At Risk'] || undefined },
+    { id: 'Completed', label: 'Completed', badge: statusCounts.Completed || undefined },
+  ];
 
   const tabsList = [
     { id: 'overview', label: 'Overview' },
@@ -292,13 +319,23 @@ export const BootcampDetails: React.FC<BootcampDetailsProps> = ({
       {/* 5. TRAINEES TAB */}
       {activeTab === 'trainees' && (
         <div className="tab-content-wrapper mt-4">
-          <div className="tab-toolbar flex items-center justify-between">
-            <SearchInput
-              value={traineeSearch}
-              onChange={setTraineeSearch}
-              placeholder="Search trainees..."
-              className="max-w-md"
-            />
+          <div className="trainees-tab-toolbar">
+            <div className="trainees-toolbar-left">
+              <SearchInput
+                value={traineeSearch}
+                onChange={setTraineeSearch}
+                placeholder="Search by name, ID, email, domain..."
+                className="trainee-search-box"
+              />
+              <div className="trainee-segmented-filter">
+                <SegmentedControl
+                  options={filterSegmentOptions}
+                  value={traineeStatusFilter}
+                  onChange={setTraineeStatusFilter}
+                  size="sm"
+                />
+              </div>
+            </div>
 
             <Button
               variant="primary"
@@ -309,18 +346,18 @@ export const BootcampDetails: React.FC<BootcampDetailsProps> = ({
             </Button>
           </div>
 
-          <div className="bootcamp-table-wrapper mt-3">
+          <div className="bootcamp-table-wrapper mt-4">
             <div className="table-responsive-wrapper">
               <table className="enterprise-table">
                 <thead>
                   <tr>
+                    <th>Trainee Details</th>
                     <th>Employee ID</th>
-                    <th>Trainee Name</th>
-                    <th>Email</th>
-                    <th>Role</th>
+                    <th>Department &amp; Domain</th>
                     <th>Progress</th>
                     <th>Attendance</th>
-                    <th>Status</th>
+                    <th>Learning Status</th>
+                    <th>Outcome</th>
                     <th className="text-right">Action</th>
                   </tr>
                 </thead>
@@ -328,31 +365,95 @@ export const BootcampDetails: React.FC<BootcampDetailsProps> = ({
                   {filteredEnrollments.length === 0 ? (
                     <tr>
                       <td colSpan={8} className="empty-table-cell">
-                        No trainees assigned.
+                        No trainees matching selected filters.
                       </td>
                     </tr>
                   ) : (
-                    filteredEnrollments.map((e) => (
-                      <tr key={e.id} className="table-row-hover">
-                        <td><span className="code-chip">{e.trainee.employeeId}</span></td>
-                        <td className="font-bold">{e.trainee.name}</td>
-                        <td className="text-secondary-cell">{e.trainee.email}</td>
-                        <td className="text-muted-cell">{e.trainee.role}</td>
-                        <td>{e.progressPercent}%</td>
-                        <td>{e.attendancePercent}%</td>
-                        <td><StatusBadge status={e.enrollmentStatus} /></td>
-                        <td className="text-right">
-                          <button
-                            type="button"
-                            className="action-icon-danger-btn"
-                            onClick={() => setRemovingTraineeId(e.traineeId)}
-                            title="Remove Trainee from Bootcamp"
-                          >
-                            <Trash2 size={16} />
-                          </button>
-                        </td>
-                      </tr>
-                    ))
+                    filteredEnrollments.map((e) => {
+                      const initials = e.trainee.name
+                        .split(' ')
+                        .map((n) => n[0])
+                        .filter(Boolean)
+                        .slice(0, 2)
+                        .join('')
+                        .toUpperCase();
+
+                      return (
+                        <tr key={e.id} className="table-row-hover">
+                          <td>
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-full bg-gradient-to-br from-indigo-500/20 to-teal-500/20 border border-indigo-500/30 flex items-center justify-center font-bold text-xs text-indigo-400 shrink-0">
+                                {initials}
+                              </div>
+                              <div>
+                                <div className="font-bold text-text-primary flex items-center gap-2">
+                                  {e.trainee.name}
+                                </div>
+                                <div className="text-xs text-text-tertiary">{e.trainee.email}</div>
+                              </div>
+                            </div>
+                          </td>
+                          <td>
+                            <span className="code-chip">{e.trainee.employeeId}</span>
+                          </td>
+                          <td>
+                            <div className="text-xs font-semibold text-text-secondary">
+                              {e.trainee.department || 'Data Engineering'}
+                            </div>
+                            <div className="text-[11px] text-text-tertiary">
+                              {e.trainee.primaryDomain || 'Cloud & Pipelines'}
+                            </div>
+                          </td>
+                          <td className="w-36">
+                            <div className="flex items-center justify-between text-xs font-bold mb-1">
+                              <span>{e.progressPercent}%</span>
+                            </div>
+                            <ProgressBar
+                              value={e.progressPercent}
+                              color={e.progressPercent >= 85 ? 'green' : e.progressPercent >= 70 ? 'cyan' : 'amber'}
+                              height={6}
+                            />
+                          </td>
+                          <td>
+                            <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
+                              e.attendancePercent >= 90
+                                ? 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20'
+                                : 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20'
+                            }`}>
+                              {e.attendancePercent}%
+                            </span>
+                          </td>
+                          <td>
+                            <StatusBadge status={e.enrollmentStatus} />
+                          </td>
+                          <td>
+                            {e.trainee.companyOutcome === 'Selected' ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30">
+                                Selected
+                              </span>
+                            ) : e.trainee.companyOutcome === 'Not Selected' ? (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-slate-500/10 text-slate-500 border border-slate-500/20">
+                                Not Selected
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-xs font-medium bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+                                Pending
+                              </span>
+                            )}
+                          </td>
+                          <td className="text-right">
+                            <button
+                              type="button"
+                              className="action-icon-danger-btn"
+                              onClick={() => setRemovingTraineeId(e.traineeId)}
+                              title="Remove Trainee from Bootcamp"
+                            >
+                              <Trash2 size={16} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
                   )}
                 </tbody>
               </table>
