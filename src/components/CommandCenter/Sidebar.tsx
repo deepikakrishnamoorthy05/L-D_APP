@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import {
   LayoutDashboard,
   Layers,
-  Users,
+  GraduationCap,
   Calendar,
   ClipboardCheck,
   MessageSquare,
@@ -71,15 +71,21 @@ export const Sidebar: React.FC<SidebarProps> = ({
           isFunctional: true,
         },
         {
-          id: 'trainees',
-          label: 'Trainees',
-          icon: <Users size={18} />,
+          id: 'training',
+          label: 'Training',
+          icon: <GraduationCap size={18} />,
           isFunctional: true,
         },
         {
-          id: 'sessions',
-          label: 'Sessions',
+          id: 'calendar',
+          label: 'L&D Calendar',
           icon: <Calendar size={18} />,
+          isFunctional: true,
+        },
+        {
+          id: 'certifications',
+          label: 'Certifications',
+          icon: <Award size={18} />,
           isFunctional: true,
         },
         {
@@ -103,12 +109,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           id: 'skill-intelligence',
           label: 'Skill Intelligence',
           icon: <Brain size={18} />,
-          isFunctional: true,
-        },
-        {
-          id: 'certifications',
-          label: 'Certifications',
-          icon: <Award size={18} />,
           isFunctional: true,
         },
         {

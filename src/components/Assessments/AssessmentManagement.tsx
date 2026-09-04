@@ -23,6 +23,7 @@ import {
   TrendingUp,
   ShieldCheck,
   ChevronDown,
+  ChevronRight,
   ArrowRight,
   Medal,
 } from 'lucide-react';
@@ -33,6 +34,7 @@ import { LearningTrack } from '../../types/session';
 import { CreateAssessmentModal } from './CreateAssessmentModal';
 import { EnterScoresModal } from './EnterScoresModal';
 import { AssessmentDetailsModal } from './AssessmentDetailsModal';
+import { AssessmentOrbit } from './AssessmentOrbit';
 
 export const AssessmentManagement: React.FC = () => {
   const {
@@ -178,20 +180,85 @@ export const AssessmentManagement: React.FC = () => {
       transition={{ duration: 0.25 }}
       className="assessment-ops-container"
     >
-      {/* 1. PAGE HEADER CARD */}
-      <header className="asm-header-glass-card">
-        <div className="header-left-title-group">
-          <div className="breadcrumb-trail">L&amp;D / Assessments</div>
-          <h1 className="header-main-title">Assessment Management</h1>
-          <p className="header-subtitle-text">
-            Create, evaluate and monitor trainee assessments across learning modules and technology tracks.
-          </p>
+      {/* 1. PAGE HEADER CARD WITH INTERACTIVE ORBIT VISUALIZER */}
+      <motion.header
+        initial={{ opacity: 0, y: -12 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.3 }}
+        className="asm-header-glass-card"
+      >
+        {/* LEFT: INTERACTIVE ORBIT VISUALIZER */}
+        <div className="hero-section-left hidden md:flex items-center justify-center flex-shrink-0">
+          <AssessmentOrbit />
         </div>
 
-        <div className="header-right-action">
-          <button
+        {/* CENTER: EYEBROW BADGE, TITLE, SUBTITLE & METRICS */}
+        <div className="header-left-title-group min-w-0 flex-1">
+          <motion.div
+            initial={{ opacity: 0, x: -8 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ duration: 0.3, delay: 0.08 }}
+            className="hero-eyebrow-badge"
+          >
+            <span>L&amp;D LEARNING OPERATIONS</span>
+            <ChevronRight size={12} className="inline" />
+            <span>EVALUATIONS</span>
+            <ChevronRight size={12} className="inline" />
+            <span className="text-teal-600 dark:text-teal-400 font-bold">ASSESSMENTS</span>
+          </motion.div>
+
+          <motion.h1
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.14 }}
+            className="header-main-title"
+          >
+            Assessment Management
+          </motion.h1>
+
+          <motion.p
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.18 }}
+            className="header-subtitle-text max-w-2xl"
+          >
+            Create, evaluate and monitor trainee assessments across learning modules and technology tracks.
+          </motion.p>
+
+          <motion.div
+            initial={{ opacity: 0, y: 6 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.3, delay: 0.22 }}
+            className="header-compact-metrics-row"
+          >
+            <span className="header-metric-pill">
+              <CheckSquare size={13} className="text-teal-600 dark:text-teal-400" />
+              <span>Total: <strong>{totalAssessments}</strong></span>
+            </span>
+
+            <span className="header-metric-pill">
+              <TrendingUp size={13} className="text-emerald-600 dark:text-emerald-400" />
+              <span>Avg Score: <strong>{avgCohortScore}%</strong></span>
+            </span>
+
+            <span className="header-metric-pill">
+              <ShieldCheck size={13} className="text-indigo-600 dark:text-indigo-400" />
+              <span>Pass Rate: <strong>{passRate}%</strong></span>
+            </span>
+          </motion.div>
+        </div>
+
+        {/* RIGHT: ENGINE YEAR BADGE & ACTION BUTTON */}
+        <div className="header-right-action flex flex-col items-end gap-3 flex-shrink-0">
+          <span className="code-chip lg bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 font-bold border border-teal-200 dark:border-teal-800 px-3 py-1 rounded-xl text-xs">
+            2026 Evaluation Engine
+          </span>
+
+          <motion.button
+            whileHover={{ scale: 1.03, y: -1 }}
+            whileTap={{ scale: 0.97 }}
             type="button"
-            className="create-asm-primary-btn"
+            className="create-asm-primary-btn group"
             onClick={() => {
               setEditingAssessment(null);
               setShowCreateModal(true);
@@ -199,9 +266,9 @@ export const AssessmentManagement: React.FC = () => {
           >
             <Plus size={16} />
             <span>Create Assessment</span>
-          </button>
+          </motion.button>
         </div>
-      </header>
+      </motion.header>
 
       {/* 2. 5 EQUAL KPI CARDS ROW */}
       <div className="asm-kpi-cards-5row">

@@ -5,6 +5,8 @@ import { BootcampManagement } from '../Bootcamps/BootcampManagement';
 import { BootcampDetails } from '../Bootcamps/BootcampDetails';
 import { TraineeManagement } from '../Trainees/TraineeManagement';
 import { TraineeProfile } from '../Trainees/TraineeProfile';
+import { TrainingManagement } from '../Training/TrainingManagement';
+import { TrainingProvider } from '../../context/TrainingContext';
 import { SessionManagement } from '../Sessions/SessionManagement';
 import { SessionDetails } from '../Sessions/SessionDetails';
 import { AttendanceManagement } from '../Sessions/AttendanceManagement';
@@ -27,10 +29,16 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
 
   const getNavFromPath = () => {
     const rawPath = window.location.pathname.replace(/^\//, '');
+    if (rawPath === 'sessions') {
+      window.history.replaceState(null, '', '/calendar');
+      return 'calendar';
+    }
     const validNavs = [
       'command-center',
       'bootcamps',
+      'training',
       'trainees',
+      'calendar',
       'sessions',
       'assessments',
       'feedback',
@@ -38,7 +46,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
       'certifications',
       'analytics'
     ];
-    return validNavs.includes(rawPath) ? rawPath : 'command-center';
+    return validNavs.includes(rawPath) ? (rawPath === 'sessions' ? 'calendar' : rawPath) : 'command-center';
   };
 
   const [currentNav, setCurrentNav] = useState<string>(getNavFromPath);
@@ -62,10 +70,11 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
   }, []);
 
   const handleNavChange = (navId: string) => {
-    setCurrentNav(navId);
+    const targetNav = navId === 'sessions' ? 'calendar' : navId;
+    setCurrentNav(targetNav);
     setMobileMenuOpen(false);
-    if (window.location.pathname !== `/${navId}`) {
-      window.history.pushState(null, '', `/${navId}`);
+    if (window.location.pathname !== `/${targetNav}`) {
+      window.history.pushState(null, '', `/${targetNav}`);
     }
   };
 
@@ -125,17 +134,19 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
       ? 'bootcamps'
       : currentNav === 'trainee-profile'
       ? 'trainees'
-      : currentNav === 'session-details' || currentNav === 'attendance-record'
-      ? 'sessions'
+      : currentNav === 'session-details' || currentNav === 'attendance-record' || currentNav === 'sessions'
+      ? 'calendar'
       : currentNav;
 
   const pageTitleMap: Record<string, string> = {
     'command-center': 'Command Center',
     'bootcamps': 'Bootcamps',
     'bootcamp-details': 'Cohort Details',
+    'training': 'Training Management',
     'trainees': 'Trainees',
     'trainee-profile': 'Trainee Profile',
-    'sessions': 'Sessions',
+    'calendar': 'L&D Calendar',
+    'sessions': 'L&D Calendar',
     'session-details': 'Session Details',
     'attendance-record': 'Attendance',
     'assessments': 'Assessments',
@@ -146,117 +157,125 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
   };
 
   return (
-    <div className="app-shell-layout">
-      {/* Toast Notification Banner */}
-      {toastMessage && (
-        <div className="global-toast-banner" role="status">
-          <CheckCircle2 size={16} className="toast-icon" />
-          <span>{toastMessage}</span>
-        </div>
-      )}
-
-      {/* Compact Mobile Top Bar Header */}
-      <header className="mobile-app-header">
-        <button
-          type="button"
-          className="mobile-hamburger-btn"
-          onClick={() => setMobileMenuOpen(true)}
-          aria-label="Open navigation menu"
-        >
-          <Menu size={22} />
-        </button>
-
-        <div className="mobile-brand-title">
-          <img src={systechLogo} alt="Systech" className="mobile-brand-logo" />
-          <span className="mobile-page-name">{pageTitleMap[currentNav] || 'L&D Platform'}</span>
-        </div>
-      </header>
-
-      {/* Left Navigation Sidebar / Mobile Drawer */}
-      <Sidebar
-        currentNav={activeSidebarItem}
-        onSelectNav={(navId) => {
-          setTraineeKpiFilter(null);
-          handleNavChange(navId);
-        }}
-        onLogout={onLogout}
-        mobileOpen={mobileMenuOpen}
-        onCloseMobile={() => setMobileMenuOpen(false)}
-      />
-
-      {/* Main Viewport Content Area */}
-      <main ref={mainViewportRef} className="shell-main-viewport">
-        {currentNav === 'command-center' && (
-          <CommandCenterView
-            onNavigate={handleNavigateFromCommandCenter}
-            onSelectTrainee={handleSelectTrainee}
-            onSelectBootcamp={handleSelectBootcamp}
-          />
+    <TrainingProvider>
+      <div className="app-shell-layout">
+        {/* Toast Notification Banner */}
+        {toastMessage && (
+          <div className="global-toast-banner" role="status">
+            <CheckCircle2 size={16} className="toast-icon" />
+            <span>{toastMessage}</span>
+          </div>
         )}
 
-        {currentNav === 'bootcamps' && (
-          <BootcampManagement onSelectBootcamp={handleSelectBootcamp} />
-        )}
+        {/* Compact Mobile Top Bar Header */}
+        <header className="mobile-app-header">
+          <button
+            type="button"
+            className="mobile-hamburger-btn"
+            onClick={() => setMobileMenuOpen(true)}
+            aria-label="Open navigation menu"
+          >
+            <Menu size={22} />
+          </button>
 
-        {currentNav === 'bootcamp-details' && selectedBootcampId && (
-          <BootcampDetails
-            bootcampId={selectedBootcampId}
-            initialTab={bootcampTab}
-            onBack={() => setCurrentNav('bootcamps')}
-            onOpenRecordAttendance={handleOpenAttendance}
-          />
-        )}
+          <div className="mobile-brand-title">
+            <img src={systechLogo} alt="Systech" className="mobile-brand-logo" />
+            <span className="mobile-page-name">{pageTitleMap[currentNav] || 'L&D Platform'}</span>
+          </div>
+        </header>
 
-        {currentNav === 'trainees' && (
-          <TraineeManagement
-            onSelectTrainee={handleSelectTrainee}
-            initialKpiFilter={traineeKpiFilter}
-          />
-        )}
+        {/* Left Navigation Sidebar / Mobile Drawer */}
+        <Sidebar
+          currentNav={activeSidebarItem}
+          onSelectNav={(navId) => {
+            setTraineeKpiFilter(null);
+            handleNavChange(navId);
+          }}
+          onLogout={onLogout}
+          mobileOpen={mobileMenuOpen}
+          onCloseMobile={() => setMobileMenuOpen(false)}
+        />
 
-        {currentNav === 'trainee-profile' && selectedTraineeId && (
-          <TraineeProfile
-            traineeId={selectedTraineeId}
-            initialTab={traineeTab}
-            onBack={() => setCurrentNav('trainees')}
-          />
-        )}
+        {/* Main Viewport Content Area */}
+        <main ref={mainViewportRef} className="shell-main-viewport">
+          {currentNav === 'command-center' && (
+            <CommandCenterView
+              onNavigate={handleNavigateFromCommandCenter}
+              onSelectTrainee={handleSelectTrainee}
+              onSelectBootcamp={handleSelectBootcamp}
+            />
+          )}
 
-        {currentNav === 'sessions' && (
-          <SessionManagement
-            onSelectSession={handleSelectSession}
-            onOpenAttendance={handleOpenAttendance}
-          />
-        )}
+          {currentNav === 'bootcamps' && (
+            <BootcampManagement onSelectBootcamp={handleSelectBootcamp} />
+          )}
 
-        {currentNav === 'session-details' && selectedSessionId && (
-          <SessionDetails
-            sessionId={selectedSessionId}
-            initialTab={sessionTab}
-            onBack={() => setCurrentNav('sessions')}
-            onOpenAttendance={handleOpenAttendance}
-          />
-        )}
+          {currentNav === 'bootcamp-details' && selectedBootcampId && (
+            <BootcampDetails
+              bootcampId={selectedBootcampId}
+              initialTab={bootcampTab}
+              onBack={() => setCurrentNav('bootcamps')}
+              onOpenRecordAttendance={handleOpenAttendance}
+            />
+          )}
 
-        {currentNav === 'attendance-record' && selectedSessionId && (
-          <AttendanceManagement
-            sessionId={selectedSessionId}
-            onBack={() => setCurrentNav('sessions')}
-          />
-        )}
+          {currentNav === 'training' && (
+            <TrainingManagement
+              onNavigateToSessions={() => setCurrentNav('sessions')}
+            />
+          )}
 
-        {currentNav === 'assessments' && <AssessmentManagement />}
+          {currentNav === 'trainees' && (
+            <TraineeManagement
+              onSelectTrainee={handleSelectTrainee}
+              initialKpiFilter={traineeKpiFilter}
+            />
+          )}
 
-        {currentNav === 'feedback' && <FeedbackManagement />}
+          {currentNav === 'trainee-profile' && selectedTraineeId && (
+            <TraineeProfile
+              traineeId={selectedTraineeId}
+              initialTab={traineeTab}
+              onBack={() => setCurrentNav('trainees')}
+            />
+          )}
 
-        {currentNav === 'skill-intelligence' && <SkillIntelligenceView />}
+          {(currentNav === 'calendar' || currentNav === 'sessions') && (
+            <SessionManagement
+              onSelectSession={handleSelectSession}
+              onOpenAttendance={handleOpenAttendance}
+            />
+          )}
 
-        {currentNav === 'certifications' && <CertificationIntelligenceView />}
+          {currentNav === 'session-details' && selectedSessionId && (
+            <SessionDetails
+              sessionId={selectedSessionId}
+              initialTab={sessionTab}
+              onBack={() => setCurrentNav('sessions')}
+              onOpenAttendance={handleOpenAttendance}
+            />
+          )}
 
-        {currentNav === 'analytics' && (
-          <AnalyticsView onNavigateToCommandCenter={() => setCurrentNav('command-center')} />
-        )}
-      </main>
-    </div>
+          {currentNav === 'attendance-record' && selectedSessionId && (
+            <AttendanceManagement
+              sessionId={selectedSessionId}
+              onBack={() => setCurrentNav('sessions')}
+            />
+          )}
+
+          {currentNav === 'assessments' && <AssessmentManagement />}
+
+          {currentNav === 'feedback' && <FeedbackManagement />}
+
+          {currentNav === 'skill-intelligence' && <SkillIntelligenceView />}
+
+          {currentNav === 'certifications' && <CertificationIntelligenceView />}
+
+          {currentNav === 'analytics' && (
+            <AnalyticsView onNavigateToCommandCenter={() => setCurrentNav('command-center')} />
+          )}
+        </main>
+      </div>
+    </TrainingProvider>
   );
 };

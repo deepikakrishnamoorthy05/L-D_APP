@@ -1,13 +1,22 @@
 import React from 'react';
-import { BookOpen, User, Calendar, CheckCircle2, ChevronRight, Sparkles, Layers } from 'lucide-react';
+import { BookOpen, User, Calendar, CheckCircle2, ChevronRight, Sparkles, Layers, ArrowLeft } from 'lucide-react';
 import { Session, LearningTrack } from '../../types/session';
 
 interface ModuleViewProps {
   sessions: Session[];
   onSelectSession: (sessionId: string) => void;
+  onBackToCalendar?: () => void;
+  viewMode?: 'calendar' | 'schedule' | 'modules';
+  setViewMode?: (mode: 'calendar' | 'schedule' | 'modules') => void;
 }
 
-export const ModuleView: React.FC<ModuleViewProps> = ({ sessions, onSelectSession }) => {
+export const ModuleView: React.FC<ModuleViewProps> = ({
+  sessions,
+  onSelectSession,
+  onBackToCalendar,
+  viewMode,
+  setViewMode,
+}) => {
   // Group sessions by Module Name
   const modulesGrouped = sessions.reduce<Record<string, Session[]>>((acc, s) => {
     const modName = s.moduleName || 'Other';
@@ -23,6 +32,9 @@ export const ModuleView: React.FC<ModuleViewProps> = ({ sessions, onSelectSessio
     'Common Foundation': ['Orientation', 'SQL', 'T-SQL', 'Python'],
     'DBT & Snowflake': ['dbt & Snowflake', 'dbt', 'Snowflake'],
     'Databricks': ['Databricks'],
+    'BA': ['BA', 'BA Training', 'Requirements Engineering'],
+    'DE': ['DE', 'DE Training', 'Data Pipelines', 'Knowledge Sharing Series'],
+    'Tools': ['Tools', 'Tools Training', 'Informatica Training'],
     'Shared': [
       'BA',
       'DW/ETL',
@@ -53,7 +65,48 @@ export const ModuleView: React.FC<ModuleViewProps> = ({ sessions, onSelectSessio
   };
 
   return (
-    <div className="module-view-container">
+    <div className="module-view-container space-y-4">
+      {/* 0. TOP SUBVIEW HEADER WITH BACK TO CALENDAR BUTTON */}
+      <div className="subview-header-bar">
+        <div className="subview-title-group">
+          <button
+            type="button"
+            className="back-to-calendar-btn"
+            onClick={onBackToCalendar}
+          >
+            <ArrowLeft size={16} /> Back to Calendar
+          </button>
+          
+          <div className="h-5 w-px bg-slate-200 dark:bg-slate-700" />
+          
+          <div className="flex items-center gap-2">
+            <Layers size={18} className="text-teal-600 dark:text-teal-400" />
+            <h2 className="subview-title-text">
+              MODULES &amp; CURRICULUM BOARD
+            </h2>
+            <span className="rem-count-chip">
+              {moduleNames.length} Modules Active
+            </span>
+          </div>
+        </div>
+
+        {setViewMode && (
+          <div className="board-segmented-switch compact">
+            {(['calendar', 'schedule', 'modules'] as const).map((m) => (
+              <button
+                key={m}
+                type="button"
+                className={`board-segmented-btn ${viewMode === m ? 'active' : ''}`}
+                onClick={() => setViewMode(m)}
+              >
+                <span className="relative z-10 capitalize font-bold text-xs">
+                  {m === 'schedule' ? 'Timeline' : m}
+                </span>
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
       {/* 1. TRACK OVERVIEW SECTION */}
       <section className="track-overview-card">
         <div className="track-overview-header">

@@ -211,7 +211,7 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({
   const trainerEmail = selectedTrainerObj ? `${selectedTrainerObj.name.toLowerCase().replace(/\s+/g, '.')}@systechusa.com` : 'trainer@systechusa.com';
 
   const stepsList = [
-    { num: '01', title: 'Context & Slot', subtitle: 'Bootcamp & Schedule' },
+    { num: '01', title: 'Context & Slot', subtitle: 'Target Audience & Schedule' },
     { num: '02', title: 'Agenda & Details', subtitle: 'Topics & Delivery' },
     { num: '03', title: 'Trainer Assignment', subtitle: 'Trainer & Team' },
     { num: '04', title: 'AI Review', subtitle: 'Trainer Email' },
@@ -235,7 +235,7 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({
                 {isEdit ? 'Edit Training Session' : 'Schedule Training Session'}
               </h2>
               <p className="modal-subtitle-text">
-                Configure learning context, schedule slot, trainer assignment &amp; notification.
+                Configure target audience, schedule slot, trainer assignment &amp; notification.
               </p>
             </div>
           </div>
@@ -299,23 +299,37 @@ export const ScheduleSessionModal: React.FC<ScheduleSessionModalProps> = ({
                     <span className="step-num-pill">01</span>
                     <div>
                       <h3 className="step-title-text">Learning Context &amp; Schedule Slot</h3>
-                      <p className="step-subtitle-text">Select bootcamp cohort, track, module topic and time slot.</p>
+                      <p className="step-subtitle-text">Select target group (Bootcamp, Lateral, Bench, or Custom), track, topic &amp; slot.</p>
                     </div>
                   </div>
 
                   <div className="common-form-grid">
                     <div className="form-field-group">
-                      <label className="field-label">Bootcamp Cohort *</label>
+                      <label className="field-label">Target Audience / Cohort *</label>
                       <select
-                        className="common-form-control"
+                        className="common-form-control font-semibold"
                         value={bootcampId}
                         onChange={(e) => setBootcampId(e.target.value)}
                       >
-                        {bootcamps.map((b) => (
-                          <option key={b.id} value={b.id}>
-                            {b.name} ({b.code})
-                          </option>
-                        ))}
+                        <optgroup label="🎓 BOOTCAMP COHORTS">
+                          {bootcamps.map((b) => (
+                            <option key={b.id} value={b.id}>
+                              Bootcamp: {b.name} ({b.code})
+                            </option>
+                          ))}
+                        </optgroup>
+                        <optgroup label="👔 LATERAL BOOTCAMPS & ONBOARDING">
+                          <option value="lat-1">Lateral Bootcamp: Senior Engineering Onboarding (LAT-2026-B01)</option>
+                          <option value="lat-2">Lateral Bootcamp: Experienced Consultants (LAT-2026-B02)</option>
+                        </optgroup>
+                        <optgroup label="⚡ BENCH EMPLOYEES & UPSKILLING">
+                          <option value="bench-1">Bench Employee: Skill Upskilling Cohort (BENCH-2026-Q3)</option>
+                          <option value="bench-2">Bench Employee: Cloud &amp; Databricks Upskilling (BENCH-2026-Q4)</option>
+                        </optgroup>
+                        <optgroup label="🛠️ CUSTOM & ENTERPRISE WORKSHOPS">
+                          <option value="cust-1">Custom Group: Project-Specific Client Workshop</option>
+                          <option value="cust-2">Custom Group: Specialized Architecture Series</option>
+                        </optgroup>
                       </select>
                     </div>
 

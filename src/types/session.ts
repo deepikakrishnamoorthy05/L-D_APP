@@ -11,10 +11,28 @@ export type AttendanceStatus = 'Present' | 'Absent' | 'Late';
 
 export type EventType =
   | 'Training'
+  | 'Bootcamp'
+  | 'Bootcamp Training'
+  | 'Knowledge Sharing'
+  | 'Knowledge Sharing Series'
+  | 'Informatica Training'
+  | 'Antigravity Training'
+  | 'Databricks Training'
+  | 'BA Training'
+  | 'DE Training'
+  | 'Tools Training'
+  | 'Technical Training'
   | 'Workshop'
-  | 'Practice'
+  | 'Workshops'
+  | 'Internal Training'
+  | 'Certification Preparation'
   | 'Assessment'
   | 'Mock Test'
+  | 'Soft Skills Training'
+  | 'Management Training'
+  | 'External Training'
+  | 'Upskilling Session'
+  | 'Practice'
   | 'HR Event'
   | 'Holiday'
   | 'Feedback'
@@ -24,7 +42,7 @@ export type EventType =
   | 'Sign Off'
   | 'Other';
 
-export type LearningTrack = 'Common Foundation' | 'DBT & Snowflake' | 'Databricks' | 'Shared';
+export type LearningTrack = 'Common Foundation' | 'DBT & Snowflake' | 'Databricks' | 'BA' | 'DE' | 'Tools' | 'Shared';
 
 export interface Session {
   id: string;
@@ -51,11 +69,15 @@ export interface Session {
   coordinatorName?: string; // Source field: Coordinator
   evaluatorName?: string; // Source field: Evaluator
   mode: SessionMode;
+  deliveryMode?: string;
   meetingPlatform?: MeetingPlatform;
   meetingLink?: string;
   location?: string;
   notes?: string;
   reminder?: ReminderOption;
+  remindersEnabled?: boolean;
+  reminderStatus?: string;
+  reminderRules?: string[];
   status: SessionStatus;
   eventType: EventType;
   attendanceApplicable: boolean; // false for Holidays & Sign Off
