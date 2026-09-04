@@ -38571,6 +38571,106 @@ input, select, textarea, button {
   font-size: 0.8rem;
 }
 
+/* HEADER ACTION BUTTONS (ADD TRAINEE & IMPORT EXCEL) */
+.trainee-header-right-actions {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.trainee-action-btn-accent {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(32, 199, 190, 0.3);
+  background: rgba(32, 199, 190, 0.12);
+  color: var(--color-primary, #0d9488);
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] .trainee-action-btn-accent {
+  color: #38e8d4;
+  background: rgba(32, 199, 190, 0.15);
+  border-color: rgba(56, 232, 212, 0.3);
+}
+
+.trainee-action-btn-accent:hover {
+  background: var(--color-primary, #20c7be);
+  color: #050b12;
+  border-color: var(--color-primary, #20c7be);
+  box-shadow: 0 4px 14px rgba(32, 199, 190, 0.3);
+  transform: translateY(-1px);
+}
+
+.trainee-action-btn-excel {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 7px 14px;
+  border-radius: 10px;
+  border: 1px solid rgba(34, 197, 94, 0.3);
+  background: rgba(34, 197, 94, 0.12);
+  color: #15803d;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+[data-theme="dark"] .trainee-action-btn-excel {
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.15);
+  border-color: rgba(74, 222, 128, 0.3);
+}
+
+.trainee-action-btn-excel:hover {
+  background: #16a34a;
+  color: #ffffff;
+  border-color: #16a34a;
+  box-shadow: 0 4px 14px rgba(34, 197, 94, 0.35);
+  transform: translateY(-1px);
+}
+
+.bulk-action-pill.add-btn {
+  background: rgba(32, 199, 190, 0.1);
+  color: var(--color-primary, #0d9488);
+  border-color: rgba(32, 199, 190, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+[data-theme="dark"] .bulk-action-pill.add-btn {
+  color: #38e8d4;
+  background: rgba(32, 199, 190, 0.12);
+  border-color: rgba(56, 232, 212, 0.3);
+}
+
+.bulk-action-pill.excel-btn {
+  background: rgba(34, 197, 94, 0.1);
+  color: #15803d;
+  border-color: rgba(34, 197, 94, 0.25);
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+
+[data-theme="dark"] .bulk-action-pill.excel-btn {
+  color: #4ade80;
+  background: rgba(34, 197, 94, 0.12);
+  border-color: rgba(74, 222, 128, 0.3);
+}
+
+.dot-sep {
+  color: var(--color-text-tertiary, #94a3b8);
+  font-size: 0.8rem;
+}
+
 
 
 
