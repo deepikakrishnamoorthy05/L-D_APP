@@ -23,9 +23,13 @@ export const LoginPage: React.FC<LoginPageProps> = ({ onLoginSuccess }) => {
   const { login } = useAuth();
 
   // Form states
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => {
+    return localStorage.getItem('ld_platform_remember_email') || '';
+  });
   const [password, setPassword] = useState('');
-  const [rememberMe, setRememberMe] = useState(false);
+  const [rememberMe, setRememberMe] = useState(() => {
+    return !!localStorage.getItem('ld_platform_remember_email');
+  });
   const [showPassword, setShowPassword] = useState(false);
 
   // Authentication feedback states

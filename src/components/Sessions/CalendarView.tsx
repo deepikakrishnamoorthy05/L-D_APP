@@ -51,123 +51,111 @@ interface CalendarViewProps {
 const getPinCategoryStyle = (eventType: string, track?: string) => {
   const typeLower = (eventType || '').toLowerCase();
   const trackLower = (track || '').toLowerCase();
+  const isDark = typeof document !== 'undefined' && document.documentElement.getAttribute('data-theme') === 'dark';
 
   // Knowledge Sharing / Knowledge Sharing Series -> Cyan / Aqua
   if (typeLower.includes('knowledge') || typeLower.includes('sharing')) {
     return {
       category: 'Knowledge Sharing',
-      bgColor: '#ECFEFF',
-      borderColor: '#A5F3FC',
-      pinColor: '#0891B2',
-      textColor: '#155E75',
-      badgeBg: '#CFFAFE',
+      bgColor: isDark ? 'rgba(8, 145, 178, 0.18)' : '#ECFEFF',
+      borderColor: isDark ? 'rgba(165, 243, 252, 0.3)' : '#A5F3FC',
+      pinColor: isDark ? '#22D3EE' : '#0891B2',
+      textColor: isDark ? '#67E8F9' : '#155E75',
+      badgeBg: isDark ? 'rgba(8, 145, 178, 0.28)' : '#CFFAFE',
     };
   }
   // Informatica Training -> Deep Indigo
   if (typeLower.includes('informatica')) {
     return {
       category: 'Informatica Training',
-      bgColor: '#EEF2FF',
-      borderColor: '#C7D2FE',
-      pinColor: '#4F46E5',
-      textColor: '#3730A3',
-      badgeBg: '#E0E7FF',
+      bgColor: isDark ? 'rgba(79, 70, 229, 0.18)' : '#EEF2FF',
+      borderColor: isDark ? 'rgba(199, 210, 254, 0.3)' : '#C7D2FE',
+      pinColor: isDark ? '#818CF8' : '#4F46E5',
+      textColor: isDark ? '#A5B4FC' : '#3730A3',
+      badgeBg: isDark ? 'rgba(79, 70, 229, 0.28)' : '#E0E7FF',
     };
   }
   // Antigravity Training -> Purple / Electric Violet
   if (typeLower.includes('antigravity')) {
     return {
       category: 'Antigravity Training',
-      bgColor: '#F5F3FF',
-      borderColor: '#DDD6FE',
-      pinColor: '#7C3AED',
-      textColor: '#5B21B6',
-      badgeBg: '#EDE9FE',
+      bgColor: isDark ? 'rgba(124, 58, 237, 0.18)' : '#F5F3FF',
+      borderColor: isDark ? 'rgba(221, 214, 254, 0.3)' : '#DDD6FE',
+      pinColor: isDark ? '#A78BFA' : '#7C3AED',
+      textColor: isDark ? '#C084FC' : '#5B21B6',
+      badgeBg: isDark ? 'rgba(124, 58, 237, 0.28)' : '#EDE9FE',
     };
   }
   // Databricks Training -> Sky Blue
   if (typeLower.includes('databricks')) {
     return {
       category: 'Databricks Training',
-      bgColor: '#F0F9FF',
-      borderColor: '#BAE6FD',
-      pinColor: '#0284C7',
-      textColor: '#075985',
-      badgeBg: '#E0F2FE',
+      bgColor: isDark ? 'rgba(2, 132, 199, 0.18)' : '#F0F9FF',
+      borderColor: isDark ? 'rgba(186, 230, 253, 0.3)' : '#BAE6FD',
+      pinColor: isDark ? '#38BDF8' : '#0284C7',
+      textColor: isDark ? '#7DD3FC' : '#075985',
+      badgeBg: isDark ? 'rgba(2, 132, 199, 0.28)' : '#E0F2FE',
     };
   }
   // BA Training / BA -> Amber / Gold
   if (typeLower.includes('ba training') || typeLower.includes('business analyst') || trackLower === 'ba') {
     return {
       category: 'BA Training',
-      bgColor: '#FFFBEB',
-      borderColor: '#FDE68A',
-      pinColor: '#D97706',
-      textColor: '#92400E',
-      badgeBg: '#FEF3C7',
+      bgColor: isDark ? 'rgba(217, 119, 6, 0.18)' : '#FFFBEB',
+      borderColor: isDark ? 'rgba(253, 230, 138, 0.3)' : '#FDE68A',
+      pinColor: isDark ? '#FBBF24' : '#D97706',
+      textColor: isDark ? '#FCD34D' : '#92400E',
+      badgeBg: isDark ? 'rgba(217, 119, 6, 0.28)' : '#FEF3C7',
     };
   }
   // DE Training / DE -> Emerald / Teal
   if (typeLower.includes('de training') || typeLower.includes('data engineering') || trackLower === 'de') {
     return {
       category: 'DE Training',
-      bgColor: '#F0FDF4',
-      borderColor: '#A7F3D0',
-      pinColor: '#059669',
-      textColor: '#065F46',
-      badgeBg: '#D1FAE5',
+      bgColor: isDark ? 'rgba(5, 150, 105, 0.18)' : '#F0FDF4',
+      borderColor: isDark ? 'rgba(167, 243, 208, 0.3)' : '#A7F3D0',
+      pinColor: isDark ? '#34D399' : '#059669',
+      textColor: isDark ? '#6EE7B7' : '#065F46',
+      badgeBg: isDark ? 'rgba(5, 150, 105, 0.28)' : '#D1FAE5',
     };
   }
   // Tools Training / Tools -> Rose / Pink
   if (typeLower.includes('tool') || trackLower.includes('tools') || trackLower.includes('dbt')) {
     return {
       category: 'Tool Training',
-      bgColor: '#FFF1F2',
-      borderColor: '#FECDD3',
-      pinColor: '#E11D48',
-      textColor: '#9F1239',
-      badgeBg: '#FFE4E6',
+      bgColor: isDark ? 'rgba(225, 29, 72, 0.18)' : '#FFF1F2',
+      borderColor: isDark ? 'rgba(254, 205, 211, 0.3)' : '#FECDD3',
+      pinColor: isDark ? '#FB7185' : '#E11D48',
+      textColor: isDark ? '#FDA4AF' : '#9F1239',
+      badgeBg: isDark ? 'rgba(225, 29, 72, 0.28)' : '#FFE4E6',
     };
   }
   // Technical Training -> Blue
   if (typeLower.includes('technical') || typeLower.includes('engineering') || typeLower.includes('tech deep dive')) {
     return {
       category: 'Technical Training',
-      bgColor: '#EFF6FF',
-      borderColor: '#BFDBFE',
-      pinColor: '#2563EB',
-      textColor: '#1E40AF',
-      badgeBg: '#DBEAFE',
+      bgColor: isDark ? 'rgba(37, 99, 235, 0.18)' : '#EFF6FF',
+      borderColor: isDark ? 'rgba(191, 219, 254, 0.3)' : '#BFDBFE',
+      pinColor: isDark ? '#60A5FA' : '#2563EB',
+      textColor: isDark ? '#93C5FD' : '#1E40AF',
+      badgeBg: isDark ? 'rgba(37, 99, 235, 0.28)' : '#DBEAFE',
     };
   }
   // Soft Skills Training -> Fuchsia / Pink
   if (typeLower.includes('soft skills') || typeLower.includes('communication')) {
     return {
       category: 'Soft Skills',
-      bgColor: '#FDF4FF',
-      borderColor: '#F5D0FE',
-      pinColor: '#C026D3',
-      textColor: '#86198F',
-      badgeBg: '#FAE8FF',
+      bgColor: isDark ? 'rgba(192, 38, 211, 0.18)' : '#FDF4FF',
+      borderColor: isDark ? 'rgba(245, 208, 254, 0.3)' : '#F5D0FE',
+      pinColor: isDark ? '#E879F9' : '#C026D3',
+      textColor: isDark ? '#F0ABFC' : '#86198F',
+      badgeBg: isDark ? 'rgba(192, 38, 211, 0.28)' : '#FAE8FF',
     };
   }
   // Management Training -> Slate / Steel
   if (typeLower.includes('management') || typeLower.includes('agile')) {
     return {
       category: 'Management Training',
-      bgColor: '#F1F5F9',
-      borderColor: '#CBD5E1',
-      pinColor: '#475569',
-      textColor: '#1E293B',
-      badgeBg: '#E2E8F0',
-    };
-  }
-  // External Training -> Lime
-  if (typeLower.includes('external')) {
-    return {
-      category: 'External Training',
-      bgColor: '#F7FEE7',
-      borderColor: '#D9F99D',
       pinColor: '#65A30D',
       textColor: '#3F6212',
       badgeBg: '#ECFCCB',
@@ -949,12 +937,12 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 </button>
               </div>
 
-              <div className="drawer-body-content space-y-4">
+              <div className="drawer-body-content">
                 {/* Event Key Spec Tiles */}
                 <div className="drawer-spec-grid">
                   <div className="spec-tile">
                     <span className="spec-label">Date &amp; Day</span>
-                    <span className="spec-value">{activeDrawerSession.sessionDate} ({activeDrawerSession.dayOfWeek || 'Wednesday'})</span>
+                    <span className="spec-value">{activeDrawerSession.sessionDate} ({activeDrawerSession.dayOfWeek || 'Friday'})</span>
                   </div>
                   <div className="spec-tile">
                     <span className="spec-label">Time Slot</span>
@@ -970,7 +958,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                   </div>
                   <div className="spec-tile">
                     <span className="spec-label">Delivery Mode</span>
-                    <span className="spec-value font-semibold text-teal-700 dark:text-teal-300">
+                    <span className="spec-value mode">
                       {activeDrawerSession.deliveryMode || 'Microsoft Teams'}
                     </span>
                   </div>
@@ -981,99 +969,102 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
                 </div>
 
                 {/* Teams Link Box */}
-                <div className="p-3 rounded-xl bg-cyan-50/80 dark:bg-cyan-950/40 border border-cyan-200 dark:border-cyan-800 flex items-center justify-between">
-                  <div className="flex items-center gap-2">
-                    <Video size={16} className="text-cyan-600 dark:text-cyan-400" />
+                <div className="drawer-teams-card">
+                  <div className="teams-info">
+                    <div className="teams-icon-badge">
+                      <Video size={18} />
+                    </div>
                     <div>
-                      <div className="text-xs font-extrabold text-cyan-950 dark:text-cyan-200">Microsoft Teams Meeting</div>
-                      <div className="text-[11px] text-cyan-700 dark:text-cyan-300">Join session via corporate calendar invite</div>
+                      <div className="teams-title">Microsoft Teams Meeting</div>
+                      <div className="teams-sub">Join session via corporate calendar invite</div>
                     </div>
                   </div>
                   <a
                     href="https://teams.microsoft.com"
                     target="_blank"
                     rel="noreferrer"
-                    className="px-3 py-1.5 bg-cyan-600 hover:bg-cyan-700 text-white text-xs font-bold rounded-lg transition-colors flex items-center gap-1"
+                    className="teams-join-btn"
                   >
-                    <ExternalLink size={12} /> Join Teams
+                    <ExternalLink size={13} /> Join Teams
                   </a>
                 </div>
 
+                {/* Agenda & Topics */}
                 <div className="drawer-agenda-box">
                   <span className="agenda-title">Agenda &amp; Topics</span>
                   <p className="agenda-desc">{activeDrawerSession.agenda || 'Databricks Performance Optimization & Cluster Tuning Workshop'}</p>
                 </div>
 
                 {/* Automated Reminder Status Badge Box */}
-                <div className="drawer-reminder-card p-3.5 rounded-2xl bg-teal-50/70 dark:bg-teal-950/30 border border-teal-200/80 dark:border-teal-800/50 space-y-2">
-                  <div className="flex items-center justify-between pb-2 border-b border-teal-200/60 dark:border-teal-800/40">
-                    <div className="flex items-center gap-2">
-                      <Bell size={15} className="text-teal-600 dark:text-teal-400" />
-                      <span className="font-extrabold text-xs text-teal-950 dark:text-teal-200">Automated Reminder Job</span>
+                <div className="drawer-reminder-card">
+                  <div className="reminder-hdr">
+                    <div className="reminder-title-group">
+                      <Bell size={16} className="reminder-bell-icon" />
+                      <span className="reminder-title">Automated Reminder Job</span>
                     </div>
-                    <span className="px-2.5 py-0.5 bg-emerald-500 text-white text-[10px] font-black rounded-full shadow-sm">
-                      ● Active &amp; Queued
+                    <span className="reminder-status-pill">
+                      <span className="status-dot">●</span> Active &amp; Queued
                     </span>
                   </div>
-                  <div className="space-y-1 text-xs text-slate-700 dark:text-slate-300">
-                    <div>
-                      <span className="font-bold text-slate-900 dark:text-white">Next Notification:</span> 1-Day Reminder Scheduled for {activeDrawerSession.sessionDate} • 3:00 PM
+                  <div className="reminder-details">
+                    <div className="reminder-row">
+                      <span className="reminder-label">Next Notification:</span> 1-Day Reminder Scheduled for {activeDrawerSession.sessionDate} • 3:00 PM
                     </div>
-                    <div>
-                      <span className="font-bold text-slate-900 dark:text-white">Recipients:</span> Trainer ({activeDrawerSession.trainerName || 'Sarah David'}) + {activeDrawerSession.totalEnrolled || 18} Participants
+                    <div className="reminder-row">
+                      <span className="reminder-label">Recipients:</span> Trainer ({activeDrawerSession.trainerName || 'Sarah David'}) + {activeDrawerSession.totalEnrolled || 18} Participants
                     </div>
-                    <div className="flex items-center gap-3 pt-1 text-[11px] text-teal-700 dark:text-teal-300 font-semibold">
-                      <span>☑ 1-Day Before</span>
-                      <span>☑ 1-Hour Before</span>
-                      <span>☐ 30-Min Before</span>
+                    <div className="reminder-checklist">
+                      <span className="check-item active"><CheckCircle2 size={13} /> 1-Day Before</span>
+                      <span className="check-item active"><CheckCircle2 size={13} /> 1-Hour Before</span>
+                      <span className="check-item inactive"><Clock size={13} /> 30-Min Before</span>
                     </div>
                   </div>
                 </div>
 
                 {/* Action Buttons */}
-                <div className="grid grid-cols-2 gap-2 pt-2">
+                <div className="drawer-action-grid">
                   <button
                     type="button"
-                    className="py-2 px-3 rounded-xl border border-amber-300 bg-amber-50 hover:bg-amber-100 text-amber-900 dark:bg-amber-950/40 dark:border-amber-800 dark:text-amber-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                    className="drawer-action-btn reschedule"
                     onClick={() => {
                       setReschedulingSession(activeDrawerSession);
                     }}
                   >
-                    <Clock size={13} /> Reschedule
+                    <Clock size={14} /> Reschedule
                   </button>
 
                   <button
                     type="button"
-                    className="py-2 px-3 rounded-xl border border-rose-300 bg-rose-50 hover:bg-rose-100 text-rose-900 dark:bg-rose-950/40 dark:border-rose-800 dark:text-rose-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                    className="drawer-action-btn cancel"
                     onClick={() => {
                       setCancellingSession(activeDrawerSession);
                     }}
                   >
-                    <AlertTriangle size={13} /> Cancel Session
+                    <AlertTriangle size={14} /> Cancel Session
                   </button>
 
                   <button
                     type="button"
-                    className="py-2 px-3 rounded-xl border border-teal-300 bg-teal-50 hover:bg-teal-100 text-teal-900 dark:bg-teal-950/40 dark:border-teal-800 dark:text-teal-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                    className="drawer-action-btn attendance"
                     onClick={() => {
                       const id = activeDrawerSession.id;
                       setActiveDrawerSession(null);
                       onSelectSession(id);
                     }}
                   >
-                    <UserCheck size={13} /> Record Attendance
+                    <UserCheck size={14} /> Record Attendance
                   </button>
 
                   <button
                     type="button"
-                    className="py-2 px-3 rounded-xl border border-slate-300 bg-slate-100 hover:bg-slate-200 text-slate-900 dark:bg-slate-800 dark:border-slate-700 dark:text-slate-200 text-xs font-bold flex items-center justify-center gap-1.5 transition-colors"
+                    className="drawer-action-btn edit"
                     onClick={() => {
                       const id = activeDrawerSession.id;
                       setActiveDrawerSession(null);
                       onSelectSession(id);
                     }}
                   >
-                    <Edit size={13} /> Full Details &amp; Edit
+                    <Edit size={14} /> Full Details &amp; Edit
                   </button>
                 </div>
               </div>

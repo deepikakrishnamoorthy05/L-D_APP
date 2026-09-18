@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   ChevronRight,
-  Plus,
   Calendar as CalendarIcon,
   Clock,
   CheckCircle2,
@@ -35,7 +34,6 @@ import { CancelSessionModal } from './CancelSessionModal';
 import { ImportCalendarModal } from './ImportCalendarModal';
 import { AIEmailPreviewModal } from './AIEmailPreviewModal';
 import { CalendarOrbit } from './CalendarOrbit';
-import { AnimatedCounter } from '../Common/AnimatedCounter';
 
 const MOCK_TRAINING_QUEUE_ITEMS = [
   {
@@ -163,11 +161,15 @@ const MOCK_REMINDER_ITEMS = [
 interface SessionManagementProps {
   onSelectSession: (sessionId: string, initialTab?: string) => void;
   onOpenAttendance: (sessionId: string) => void;
+  reminderOpenRequest?: number;
+  onReminderRequestHandled?: () => void;
 }
 
 export const SessionManagement: React.FC<SessionManagementProps> = ({
   onSelectSession,
   onOpenAttendance,
+  reminderOpenRequest = 0,
+  onReminderRequestHandled,
 }) => {
   const { sessions, markCompleted } = useSessions();
   const { bootcamps, showToast } = useBootcamps();
@@ -209,8 +211,14 @@ export const SessionManagement: React.FC<SessionManagementProps> = ({
   // Operational Control Center States
   const [showTrainingQueue, setShowTrainingQueue] = useState(false);
   const [showReminderCenter, setShowReminderCenter] = useState(false);
+
+  React.useEffect(() => {
+    if (reminderOpenRequest > 0) {
+      setShowReminderCenter(true);
+      onReminderRequestHandled?.();
+    }
+  }, [reminderOpenRequest, onReminderRequestHandled]);
   const [queueTab, setQueueTab] = useState<'All' | 'Awaiting Trainer' | 'Ready to Schedule'>('All');
-  const [activeKpiFilter, setActiveKpiFilter] = useState<'scheduled' | 'awaiting-trainer' | 'ready-to-schedule' | 'today' | 'reminders-due' | null>(null);
   const [prefilledSessionData, setPrefilledSessionData] = useState<Session | undefined>(undefined);
 
   // Modal Triggers
@@ -226,12 +234,6 @@ export const SessionManagement: React.FC<SessionManagementProps> = ({
     new Set(sessions.map((s) => s.trainerName).filter((tr): tr is string => Boolean(tr)))
   ).sort();
 
-  // Operational KPI Cards (5 small single-row cards)
-  const totalEvents = sessions.length;
-  const todayStr = new Date().toISOString().split('T')[0];
-  const todayCount = sessions.filter((s) => s.sessionDate === todayStr && s.status !== 'Cancelled').length;
-  const upcomingCount = sessions.filter((s) => s.sessionDate >= todayStr && s.status !== 'Cancelled').length;
-
   // Clear Filters Handler
   const handleClearFilters = () => {
     setSearchQuery('');
@@ -240,34 +242,10 @@ export const SessionManagement: React.FC<SessionManagementProps> = ({
     setSelectedTrack('All');
     setSelectedEventType('All');
     setSelectedDateFilter('January 2026');
-    setActiveKpiFilter(null);
-  };
-
-  // KPI Card Click Handler
-  const handleKpiCardClick = (filterType: 'scheduled' | 'awaiting-trainer' | 'ready-to-schedule' | 'today' | 'reminders-due') => {
-    setActiveKpiFilter(filterType);
-
-    if (filterType === 'awaiting-trainer') {
-      setShowTrainingQueue(true);
-      setQueueTab('Awaiting Trainer');
-    } else if (filterType === 'ready-to-schedule') {
-      setShowTrainingQueue(true);
-      setQueueTab('Ready to Schedule');
-    } else if (filterType === 'reminders-due') {
-      setShowReminderCenter(true);
-    } else if (filterType === 'today') {
-      setSearchQuery(todayStr);
-    } else if (filterType === 'scheduled') {
-      setSelectedEventType('All');
-    }
   };
 
   // Filter Logic
   const filteredSessions = sessions.filter((s) => {
-    if (activeKpiFilter === 'scheduled') {
-      if (s.status === 'Cancelled') return false;
-    }
-
     const matchesSearch =
       s.agenda.toLowerCase().includes(searchQuery.toLowerCase()) ||
       s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
@@ -290,7 +268,7 @@ export const SessionManagement: React.FC<SessionManagementProps> = ({
   });
 
   return (
-    <div className="training-calendar-page">
+    <div className="training-calendar-page page-container space-y-6">
       {/* AMBIENT BACKGROUND GLOW ORBS */}
       <div className="ambient-orb orb-1" />
       <div className="ambient-orb orb-2" />
@@ -335,7 +313,7 @@ export const SessionManagement: React.FC<SessionManagementProps> = ({
             transition={{ duration: 0.3, delay: 0.2 }}
             className="hero-subtitle"
           >
-            Manage all organization-wide training schedules, pending sessions, trainer confirmations, reminders and upcoming learning activities.
+            Manage schedules, trainer confirmations, reminders, and upcoming sessions.
           </motion.p>
         </div>
 
@@ -357,93 +335,8 @@ export const SessionManagement: React.FC<SessionManagementProps> = ({
             <Bell size={15} className="text-teal-600 dark:text-teal-400" /> Reminder Center ({MOCK_REMINDER_ITEMS.filter(r => r.status.includes('Queued')).length})
           </button>
 
-          <button
-            type="button"
-            className="ui-button-primary micro-btn"
-            onClick={() => {
-              setPrefilledSessionData(undefined);
-              setShowScheduleModal(true);
-            }}
-          >
-            <Plus size={16} className="btn-plus-icon" /> Schedule Session
-          </button>
         </div>
       </motion.div>
-
-      {/* 2. TOP 5 OPERATIONAL SUMMARY KPI CARDS */}
-      <section className="compact-glass-metrics-strip my-2">
-        <div
-          className={`glass-metric-tile interactive ${activeKpiFilter === 'scheduled' ? 'active' : ''}`}
-          onClick={() => handleKpiCardClick('scheduled')}
-          title="Click to filter scheduled sessions"
-        >
-          <span className="metric-tile-val"><AnimatedCounter value={28} /></span>
-          <span className="metric-tile-lbl">Scheduled</span>
-        </div>
-
-        <div className="metric-tile-divider" />
-
-        <div
-          className={`glass-metric-tile interactive ${activeKpiFilter === 'awaiting-trainer' ? 'active' : ''}`}
-          onClick={() => handleKpiCardClick('awaiting-trainer')}
-          title="Click to view requests awaiting trainer response"
-        >
-          <span className="metric-tile-val text-amber-600 dark:text-amber-400"><AnimatedCounter value={4} /></span>
-          <span className="metric-tile-lbl">Awaiting Trainer</span>
-        </div>
-
-        <div className="metric-tile-divider" />
-
-        <div
-          className={`glass-metric-tile interactive ${activeKpiFilter === 'ready-to-schedule' ? 'active' : ''}`}
-          onClick={() => handleKpiCardClick('ready-to-schedule')}
-          title="Click to view sessions ready to schedule"
-        >
-          <span className="metric-tile-val text-emerald-600 dark:text-emerald-400"><AnimatedCounter value={3} /></span>
-          <span className="metric-tile-lbl">Ready to Schedule</span>
-        </div>
-
-        <div className="metric-tile-divider" />
-
-        <div
-          className={`glass-metric-tile interactive ${activeKpiFilter === 'today' ? 'active' : ''}`}
-          onClick={() => handleKpiCardClick('today')}
-          title="Click to view sessions scheduled today"
-        >
-          <span className="metric-tile-val text-teal-600 dark:text-teal-400"><AnimatedCounter value={todayCount || 2} /></span>
-          <span className="metric-tile-lbl">Today</span>
-        </div>
-
-        <div className="metric-tile-divider" />
-
-        <div
-          className={`glass-metric-tile interactive ${activeKpiFilter === 'reminders-due' ? 'active' : ''}`}
-          onClick={() => handleKpiCardClick('reminders-due')}
-          title="Click to open Automated Reminder Center"
-        >
-          <span className="metric-tile-val text-cyan-600 dark:text-cyan-400"><AnimatedCounter value={5} /></span>
-          <span className="metric-tile-lbl">Reminders Due</span>
-        </div>
-      </section>
-
-      {/* ACTIVE KPI FILTER BAR */}
-      {activeKpiFilter && (
-        <div className="kpi-filter-active-bar">
-          <div className="flex items-center gap-2">
-            <CheckCircle2 size={16} className="text-teal-600 dark:text-teal-400" />
-            <span className="text-xs font-bold text-slate-800 dark:text-slate-200">
-              Active KPI Filter: <span className="capitalize font-extrabold text-teal-700 dark:text-teal-300">{activeKpiFilter.replace('-', ' ')}</span>
-            </span>
-          </div>
-          <button
-            type="button"
-            className="px-2.5 py-1 text-xs font-bold bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-lg border border-slate-300 dark:border-slate-700 hover:bg-slate-50 flex items-center gap-1"
-            onClick={handleClearFilters}
-          >
-            <RotateCcw size={12} /> Clear Filter
-          </button>
-        </div>
-      )}
 
       {/* 3. COLLAPSIBLE TRAINING QUEUE PANEL */}
       {showTrainingQueue && (

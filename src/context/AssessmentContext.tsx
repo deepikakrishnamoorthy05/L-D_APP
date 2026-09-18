@@ -47,6 +47,12 @@ interface AssessmentContextType {
     data: Partial<Assessment>,
     participantIds: string[]
   ) => boolean;
+  createAIGeneratedAssessment: (
+    quizData: any,
+    status: AssessmentStatus,
+    deliveryMode?: 'LIVE_QUIZ' | 'LD_ASSESSMENT',
+    liveQuizSession?: any
+  ) => Assessment;
   updateAssessment: (id: string, data: Partial<Assessment>) => boolean;
   enterScores: (
     assessmentId: string,
@@ -191,6 +197,55 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
     showToast(`Assessment "${newAssessment.name}" created & evaluator notified.`);
     return true;
+  };
+
+  // 1b. Create AI Generated Assessment
+  const createAIGeneratedAssessment = (
+    quizData: any,
+    status: AssessmentStatus = 'Scheduled',
+    deliveryMode: 'LIVE_QUIZ' | 'LD_ASSESSMENT' = 'LD_ASSESSMENT',
+    liveQuizSession?: any
+  ): Assessment => {
+    const sourceSession = sessions.find((session) => session.id === quizData.sessionId);
+    const selectedBootcamp = bootcamps.find((bootcamp) => bootcamp.id === sourceSession?.bootcampId) || bootcamps[0];
+    const nowStr = new Date().toISOString().split('T')[0];
+    const newId = 'ai-asm-' + Date.now();
+
+    const newAssessment: Assessment = {
+      id: newId,
+      name: quizData.title || `${quizData.topic} AI Quiz`,
+      type: 'Technical Evaluation',
+      bootcampId: selectedBootcamp.id,
+      bootcampName: selectedBootcamp.name,
+      bootcampYear: selectedBootcamp.bootcampYear || 2026,
+      track: sourceSession?.learningTrack || 'Shared',
+      moduleId: sourceSession?.moduleId || 'm-ai',
+      moduleName: sourceSession?.title || quizData.sessionName || quizData.topic || 'AI Generated Assessment',
+      linkedSessionId: sourceSession?.id || quizData.sessionId,
+      date: sourceSession?.sessionDate || nowStr,
+      startTime: '10:00',
+      endTime: '11:00',
+      evaluatorId: 'tr-ai',
+      evaluatorName: sourceSession?.trainerName || 'AI Quiz Engine',
+      totalMarks: (quizData.questions?.length || 10) * 10,
+      passingMarks: Math.round((quizData.questions?.length || 10) * 6),
+      evaluationStyle: 'SCORE_BASED',
+      status,
+      participantIds: trainees.map((t) => t.id),
+      totalParticipants: sourceSession?.attendedCount || sourceSession?.totalEnrolled || trainees.length || 24,
+      createdAt: nowStr,
+      updatedAt: nowStr,
+      isAiGenerated: true,
+      topic: quizData.topic,
+      difficulty: quizData.difficulty,
+      deliveryMode,
+      liveQuizSession,
+      questions: quizData.questions,
+    };
+
+    setAssessments((prev) => [newAssessment, ...prev]);
+    showToast(`AI Quiz "${newAssessment.name}" saved as ${status}.`);
+    return newAssessment;
   };
 
   // 2. Update Assessment
@@ -468,6 +523,7 @@ export const AssessmentProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         assessments,
         resultsMap,
         createAssessment,
+        createAIGeneratedAssessment,
         updateAssessment,
         enterScores,
         completeAssessment,

@@ -5,18 +5,23 @@ import {
   TrainerFeedbackRecord,
   PendingFeedbackRequest,
   FeedbackRecord,
+  LdFeedbackRecord,
 } from '../types/feedback';
 
 interface FeedbackContextType {
   sessionSummaries: SessionFeedbackSummary[];
   participantResponses: ParticipantFeedbackResponse[];
   trainerFeedbacks: TrainerFeedbackRecord[];
+  ldFeedbacks: LdFeedbackRecord[];
   pendingRequests: PendingFeedbackRequest[];
   feedbackRecords: FeedbackRecord[];
   addSessionFeedback: (summary: Partial<SessionFeedbackSummary>) => void;
   importSessionFeedback: (records: Partial<SessionFeedbackSummary>[]) => void;
   sendFeedbackReminder: (sessionId: string) => void;
   simulateAllPendingReminders: () => void;
+  addTrainerFeedback: (record: Omit<TrainerFeedbackRecord, 'id' | 'submittedAt'>) => void;
+  addParticipantFeedback: (record: Omit<ParticipantFeedbackResponse, 'id' | 'submittedAt'>) => void;
+  addLdFeedback: (record: Omit<LdFeedbackRecord, 'id' | 'submittedAt'>) => void;
 
   // Legacy compatibility helpers
   addFeedback: (record: Partial<FeedbackRecord>) => void;
@@ -483,6 +488,7 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
   const [sessionSummaries, setSessionSummaries] = useState<SessionFeedbackSummary[]>(INITIAL_SESSION_SUMMARIES);
   const [participantResponses, setParticipantResponses] = useState<ParticipantFeedbackResponse[]>(INITIAL_PARTICIPANT_RESPONSES);
   const [trainerFeedbacks, setTrainerFeedbacks] = useState<TrainerFeedbackRecord[]>(INITIAL_TRAINER_FEEDBACKS);
+  const [ldFeedbacks, setLdFeedbacks] = useState<LdFeedbackRecord[]>([]);
   const [pendingRequests, setPendingRequests] = useState<PendingFeedbackRequest[]>(INITIAL_PENDING_REQUESTS);
   const [feedbackRecords, setFeedbackRecords] = useState<FeedbackRecord[]>([]);
 
@@ -582,6 +588,18 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     );
   };
 
+  const addTrainerFeedback = (record: Omit<TrainerFeedbackRecord, 'id' | 'submittedAt'>) => {
+    setTrainerFeedbacks((prev) => [{ ...record, id: `tf-${Date.now()}`, submittedAt: new Date().toISOString() }, ...prev]);
+  };
+
+  const addParticipantFeedback = (record: Omit<ParticipantFeedbackResponse, 'id' | 'submittedAt'>) => {
+    setParticipantResponses((prev) => [{ ...record, id: `pr-${Date.now()}`, submittedAt: new Date().toISOString() }, ...prev]);
+  };
+
+  const addLdFeedback = (record: Omit<LdFeedbackRecord, 'id' | 'submittedAt'>) => {
+    setLdFeedbacks((prev) => [{ ...record, id: `ld-fb-${Date.now()}`, submittedAt: new Date().toISOString() }, ...prev]);
+  };
+
   // Legacy Compatibility Functions
   const addFeedback = (record: Partial<FeedbackRecord>) => {};
   const updateFeedback = (id: string, updates: Partial<FeedbackRecord>) => {};
@@ -597,12 +615,16 @@ export const FeedbackProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         sessionSummaries,
         participantResponses,
         trainerFeedbacks,
+        ldFeedbacks,
         pendingRequests,
         feedbackRecords,
         addSessionFeedback,
         importSessionFeedback,
         sendFeedbackReminder,
         simulateAllPendingReminders,
+        addTrainerFeedback,
+        addParticipantFeedback,
+        addLdFeedback,
         addFeedback,
         updateFeedback,
         approveFeedback,

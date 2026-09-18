@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { CheckSquare, CheckCircle2, TrendingUp, Target, Clock } from 'lucide-react';
+import { Sparkles, Zap, CheckSquare, BarChart3, HelpCircle, Trophy } from 'lucide-react';
 
 export const AssessmentOrbit: React.FC = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -21,9 +21,9 @@ export const AssessmentOrbit: React.FC = () => {
         <circle cx="110" cy="80" r="72" className="orbit-ring ring-outer" />
       </svg>
 
-      {/* Central Core Sphere - ASSESSMENT CHECK SQUARE ICON */}
+      {/* Central Core Sphere */}
       <motion.div
-        className="orbit-center-core text-teal-600 dark:text-teal-400 flex items-center justify-center bg-teal-500/10 dark:bg-teal-400/10 border border-teal-500/30 rounded-full"
+        className="orbit-center-core text-indigo-600 dark:text-indigo-400 flex items-center justify-center bg-indigo-500/10 dark:bg-indigo-400/10 border border-indigo-500/30 rounded-full"
         animate={{
           scale: isHovered ? 1.08 : [1, 1.06, 1],
           y: isHovered ? -3 : 0,
@@ -35,7 +35,7 @@ export const AssessmentOrbit: React.FC = () => {
           y: { duration: 0.25 },
         }}
       >
-        <CheckSquare size={24} className="text-teal-600 dark:text-teal-400" />
+        <Sparkles size={24} className="text-indigo-600 dark:text-indigo-400" />
       </motion.div>
 
       {/* Rotating Layer 1 (Outer Clockwise: 24s / 12s on hover) */}
@@ -48,22 +48,22 @@ export const AssessmentOrbit: React.FC = () => {
           ease: 'linear',
         }}
       >
-        {/* Node 1: Top Right - Evaluation Completion */}
+        {/* Node 1: Top Right - Live Quiz */}
         <motion.div
           className="orbit-floating-node node-1"
           animate={{ scale: isHovered ? 1.1 : 1, x: isHovered ? 4 : 0, y: isHovered ? -4 : 0 }}
-          title="Completed Evaluations"
+          title="Live Quiz"
         >
-          <CheckCircle2 size={14} />
+          <Zap size={14} />
         </motion.div>
 
-        {/* Node 2: Bottom Left - Score Trends */}
+        {/* Node 2: Bottom Left - AI Quiz Generation */}
         <motion.div
           className="orbit-floating-node node-2"
           animate={{ scale: isHovered ? 1.1 : 1, x: isHovered ? -4 : 0, y: isHovered ? 4 : 0 }}
-          title="Cohort Score Trends"
+          title="AI Quiz Generator"
         >
-          <TrendingUp size={14} />
+          <HelpCircle size={14} />
         </motion.div>
       </motion.div>
 
@@ -77,22 +77,22 @@ export const AssessmentOrbit: React.FC = () => {
           ease: 'linear',
         }}
       >
-        {/* Node 3: Top Left - Scoring Targets */}
+        {/* Node 3: Top Left - Score Analytics */}
         <motion.div
           className="orbit-floating-node node-3"
           animate={{ scale: isHovered ? 1.1 : 1, x: isHovered ? -4 : 0, y: isHovered ? -4 : 0 }}
-          title="Scoring & Pass Targets"
+          title="Quiz Analytics"
         >
-          <Target size={14} />
+          <BarChart3 size={14} />
         </motion.div>
 
-        {/* Node 4: Bottom Right - Scheduled Assessments */}
+        {/* Node 4: Bottom Right - Score Leaderboard */}
         <motion.div
           className="orbit-floating-node node-4"
           animate={{ scale: isHovered ? 1.1 : 1, x: isHovered ? 4 : 0, y: isHovered ? 4 : 0 }}
-          title="Scheduled Assessments"
+          title="Performance Scores"
         >
-          <Clock size={14} />
+          <Trophy size={14} />
         </motion.div>
       </motion.div>
     </div>

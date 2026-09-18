@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState } from 'react';
 import {
   Bootcamp,
   BootcampModule,
@@ -29,7 +29,7 @@ interface BootcampContextType {
     data: Partial<Bootcamp>,
     selectedModules?: string[],
     selectedTraineeIds?: string[]
-  ) => void;
+  ) => Bootcamp;
   updateBootcamp: (
     id: string,
     data: Partial<Bootcamp>,
@@ -47,6 +47,7 @@ interface BootcampContextType {
   deleteModule: (bootcampId: string, moduleId: string) => void;
   reorderModules: (bootcampId: string, fromIndexOrModules: number | BootcampModule[], toIndex?: number) => void;
   addTraineesToBootcamp: (bootcampId: string, traineeIds: string[]) => void;
+  addNewTraineeToBootcamp: (bootcampId: string, trainee: User) => void;
   removeTraineeFromBootcamp: (bootcampId: string, traineeId: string) => void;
   createFromPreviousYear: (sourceBootcampId: string, targetYear: number) => void;
   toastMessage: string | null;
@@ -54,9 +55,23 @@ interface BootcampContextType {
 }
 
 const BootcampContext = createContext<BootcampContextType | undefined>(undefined);
+const BOOTCAMP_STORAGE_KEY = 'ld-platform-bootcamps';
+
+const loadBootcamps = (): Bootcamp[] => {
+  try {
+    const saved = localStorage.getItem(BOOTCAMP_STORAGE_KEY);
+    if (saved) {
+      const parsed = JSON.parse(saved);
+      if (Array.isArray(parsed)) return parsed;
+    }
+  } catch (error) {
+    console.error('Failed to load saved bootcamps:', error);
+  }
+  return MOCK_BOOTCAMPS;
+};
 
 export const BootcampProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [bootcamps, setBootcamps] = useState<Bootcamp[]>(MOCK_BOOTCAMPS);
+  const [bootcamps, setBootcamps] = useState<Bootcamp[]>(loadBootcamps);
   const [modulesMap, setModulesMap] = useState<Record<string, BootcampModule[]>>(
     INITIAL_BOOTCAMP_MODULES
   );
@@ -64,6 +79,14 @@ export const BootcampProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     INITIAL_BOOTCAMP_ENROLLMENTS
   );
   const [toastMessage, setToastMessage] = useState<string | null>(null);
+
+  useEffect(() => {
+    try {
+      localStorage.setItem(BOOTCAMP_STORAGE_KEY, JSON.stringify(bootcamps));
+    } catch (error) {
+      console.error('Failed to save bootcamps:', error);
+    }
+  }, [bootcamps]);
 
   const centralDirectory = getCentralTrainerDirectory();
   const trainers: User[] = centralDirectory
@@ -139,6 +162,8 @@ export const BootcampProvider: React.FC<{ children: React.ReactNode }> = ({ chil
       primaryTrainerName: getTrainerName(data.primaryTrainerId || trainers[0]?.id || 'tr-1'),
       additionalTrainerId: data.additionalTrainerId,
       additionalTrainerName: data.additionalTrainerId ? getTrainerName(data.additionalTrainerId) : undefined,
+      additionalTrainerIds: data.additionalTrainerIds || (data.additionalTrainerId ? [data.additionalTrainerId] : []),
+      additionalTrainerNames: (data.additionalTrainerIds || (data.additionalTrainerId ? [data.additionalTrainerId] : [])).map(getTrainerName),
       coordinatorId: data.coordinatorId || coordinators[0]?.id || 'co-1',
       coordinatorName: getCoordinatorName(data.coordinatorId || coordinators[0]?.id || 'co-1'),
       traineesCount: selectedTraineeIds.length,
@@ -165,6 +190,7 @@ export const BootcampProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     setModulesMap((prev) => ({ ...prev, [newId]: newModules }));
 
     showToast('Bootcamp cohort launched successfully!');
+    return newBootcamp;
   };
 
   // 2. Update Bootcamp
@@ -377,6 +403,27 @@ export const BootcampProvider: React.FC<{ children: React.ReactNode }> = ({ chil
     showToast(`Updated bootcamp roster with ${traineeIds.length} trainees`);
   };
 
+  const addNewTraineeToBootcamp = (bootcampId: string, trainee: User) => {
+    const enrollment: BootcampEnrollment = {
+      id: `en-${bootcampId}-${trainee.id}`,
+      bootcampId,
+      traineeId: trainee.id,
+      trainee,
+      enrollmentDate: new Date().toISOString().split('T')[0],
+      enrollmentStatus: 'Active',
+      progressPercent: 0,
+      attendancePercent: 100,
+    };
+
+    setEnrollmentsMap((prev) => ({
+      ...prev,
+      [bootcampId]: [...(prev[bootcampId] || []), enrollment],
+    }));
+    setBootcamps((prev) =>
+      prev.map((b) => b.id === bootcampId ? { ...b, traineesCount: b.traineesCount + 1 } : b)
+    );
+  };
+
   const removeTraineeFromBootcamp = (bootcampId: string, traineeId: string) => {
     setEnrollmentsMap((prev) => ({
       ...prev,
@@ -413,6 +460,7 @@ export const BootcampProvider: React.FC<{ children: React.ReactNode }> = ({ chil
         deleteModule,
         reorderModules,
         addTraineesToBootcamp,
+        addNewTraineeToBootcamp,
         removeTraineeFromBootcamp,
         createFromPreviousYear,
         toastMessage,

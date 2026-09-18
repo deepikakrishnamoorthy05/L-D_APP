@@ -21,7 +21,7 @@ import { useSessions } from '../../context/SessionContext';
 import { useAssessments } from '../../context/AssessmentContext';
 import { BootcampModule } from '../../types/bootcamp';
 import { CreateBootcampModal } from './CreateBootcampModal';
-import { TraineeSelectionModal } from './TraineeSelectionModal';
+import { AddTraineeModal } from '../Trainees/AddTraineeModal';
 import { AddModuleModal } from './AddModuleModal';
 import { ArchiveConfirmModal } from './ArchiveConfirmModal';
 import {
@@ -51,7 +51,6 @@ export const BootcampDetails: React.FC<BootcampDetailsProps> = ({
 }) => {
   const {
     bootcamps,
-    allTrainees,
     modulesMap,
     enrollmentsMap,
     updateModule,
@@ -59,7 +58,7 @@ export const BootcampDetails: React.FC<BootcampDetailsProps> = ({
     deleteBootcamp,
     reorderModules,
     addModuleToBootcamp,
-    addTraineesToBootcamp,
+    addNewTraineeToBootcamp,
     removeTraineeFromBootcamp,
   } = useBootcamps();
 
@@ -342,7 +341,7 @@ export const BootcampDetails: React.FC<BootcampDetailsProps> = ({
               icon={<UserPlus size={16} />}
               onClick={() => setShowAddTraineesModal(true)}
             >
-              Add Trainees
+              Add New Trainee
             </Button>
           </div>
 
@@ -469,6 +468,7 @@ export const BootcampDetails: React.FC<BootcampDetailsProps> = ({
             <Button
               variant="primary"
               icon={<Plus size={16} />}
+              className="bootcamp-add-module-btn"
               onClick={() => setShowAddModuleModal(true)}
             >
               Add Module
@@ -614,10 +614,21 @@ export const BootcampDetails: React.FC<BootcampDetailsProps> = ({
       )}
 
       {showAddTraineesModal && (
-        <TraineeSelectionModal
-          allTrainees={allTrainees}
-          selectedTraineeIds={enrollments.map((e) => e.traineeId)}
-          onConfirm={(updatedIds) => addTraineesToBootcamp(bootcamp.id, updatedIds)}
+        <AddTraineeModal
+          defaultBootcampId={bootcamp.id}
+          lockBootcamp
+          onCreated={(trainee) => addNewTraineeToBootcamp(bootcamp.id, {
+            id: trainee.id,
+            employeeId: trainee.employeeId,
+            name: trainee.name,
+            email: trainee.email,
+            role: 'Trainee',
+            department: trainee.department,
+            primaryDomain: trainee.primaryDomain || trainee.primaryTech,
+            joiningDate: trainee.joiningDate,
+            companyOutcome: trainee.companyOutcome,
+            avgScorePercent: trainee.avgScorePercent,
+          })}
           onClose={() => setShowAddTraineesModal(false)}
         />
       )}

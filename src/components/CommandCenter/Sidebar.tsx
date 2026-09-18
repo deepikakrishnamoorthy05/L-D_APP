@@ -12,11 +12,13 @@ import {
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
-  Settings,
+  Sun,
+  Moon,
   X,
 } from 'lucide-react';
 
 import systechLogo from '../../assets/systech-logo.png';
+import { useTheme } from '../../context/ThemeContext';
 
 interface SidebarProps {
   currentNav: string;
@@ -48,6 +50,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
   const [collapsed, setCollapsed] = useState(false);
   const [activeToast, setActiveToast] = useState<string | null>(null);
   const [logoFailed, setLogoFailed] = useState(false);
+  const { theme, setTheme, toggleTheme } = useTheme();
 
   const NAV_GROUPS: NavGroup[] = [
     {
@@ -274,19 +277,41 @@ export const Sidebar: React.FC<SidebarProps> = ({
           </div>
 
           <div className="footer-actions-row">
-            <button
-              type="button"
-              className="profile-action-btn"
-              onClick={() => {
-                setActiveToast('Settings & preferences panel coming soon.');
-                setTimeout(() => setActiveToast(null), 3000);
-              }}
-              title={isCollapsedMode ? 'Settings' : undefined}
-            >
-              <Settings size={16} />
-              {!isCollapsedMode && <span>Settings</span>}
-              {isCollapsedMode && <span className="sidebar-tooltip">Settings</span>}
-            </button>
+            {!isCollapsedMode ? (
+              <div className="theme-toggle-segmented" role="radiogroup" aria-label="Theme selection">
+                <button
+                  type="button"
+                  className={`theme-segment-btn ${theme === 'light' ? 'active' : ''}`}
+                  onClick={() => setTheme('light')}
+                  title="Light Mode"
+                  aria-label="Light Mode"
+                  aria-checked={theme === 'light'}
+                >
+                  <Sun size={15} />
+                </button>
+                <button
+                  type="button"
+                  className={`theme-segment-btn ${theme === 'dark' ? 'active' : ''}`}
+                  onClick={() => setTheme('dark')}
+                  title="Dark Mode"
+                  aria-label="Dark Mode"
+                  aria-checked={theme === 'dark'}
+                >
+                  <Moon size={15} />
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                className="profile-action-btn theme-single-btn"
+                onClick={toggleTheme}
+                title={`Theme: ${theme === 'light' ? 'Light' : 'Dark'} (Click to switch)`}
+                aria-label="Toggle theme"
+              >
+                {theme === 'light' ? <Sun size={15} /> : <Moon size={15} />}
+                <span className="sidebar-tooltip">Theme: {theme === 'light' ? 'Light' : 'Dark'}</span>
+              </button>
+            )}
 
             {onLogout && (
               <button
@@ -294,6 +319,7 @@ export const Sidebar: React.FC<SidebarProps> = ({
                 className="profile-action-btn logout-btn"
                 onClick={handleLogoutClick}
                 title={isCollapsedMode ? 'Sign Out' : undefined}
+                aria-label="Sign Out"
               >
                 <LogOut size={16} />
                 {!isCollapsedMode && <span>Sign Out</span>}
@@ -306,3 +332,5 @@ export const Sidebar: React.FC<SidebarProps> = ({
     </>
   );
 };
+
+export default Sidebar;

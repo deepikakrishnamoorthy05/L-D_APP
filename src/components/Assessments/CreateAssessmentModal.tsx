@@ -15,7 +15,6 @@ import {
 } from 'lucide-react';
 import { useBootcamps } from '../../context/BootcampContext';
 import { useTrainees } from '../../context/TraineeContext';
-import { useSessions } from '../../context/SessionContext';
 import { useAssessments } from '../../context/AssessmentContext';
 import { AssessmentType, AssessmentCriterion, AssessmentStatus } from '../../types/assessment';
 import { LearningTrack } from '../../types/session';
@@ -31,7 +30,6 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
 }) => {
   const { bootcamps, modulesMap } = useBootcamps();
   const { trainees } = useTrainees();
-  const { sessions } = useSessions();
   const { createAssessment, updateAssessment } = useAssessments();
 
   const [step, setStep] = useState<number>(1);
@@ -42,12 +40,12 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
   const [bootcampId, setBootcampId] = useState(initialData?.bootcampId || bootcamps[0]?.id || 'bc-1');
   const [track, setTrack] = useState<LearningTrack>(initialData?.track || 'Common Foundation');
   const [moduleId, setModuleId] = useState(initialData?.moduleId || '');
-  const [linkedSessionId, setLinkedSessionId] = useState(initialData?.linkedSessionId || '');
+  const linkedSessionId = initialData?.linkedSessionId || '';
   const [date, setDate] = useState(initialData?.date || new Date().toISOString().split('T')[0]);
-  const [startTime, setStartTime] = useState(initialData?.startTime || '09:30');
-  const [endTime, setEndTime] = useState(initialData?.endTime || '12:30');
-  const [evaluatorName, setEvaluatorName] = useState(initialData?.evaluatorName || 'John Mathew');
-  const [additionalEvaluatorName, setAdditionalEvaluatorName] = useState(initialData?.additionalEvaluatorName || '');
+  const startTime = initialData?.startTime || '09:30';
+  const endTime = initialData?.endTime || '12:30';
+  const evaluatorName = initialData?.evaluatorName || 'L&D Admin';
+  const additionalEvaluatorName = initialData?.additionalEvaluatorName || '';
   const [totalMarks, setTotalMarks] = useState<number>(initialData?.totalMarks || 100);
   const [passingMarks, setPassingMarks] = useState<number>(initialData?.passingMarks || 60);
   const [status, setStatus] = useState<AssessmentStatus>(initialData?.status || 'Scheduled');
@@ -91,13 +89,6 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
       setModuleId(applicableModules[0].id);
     }
   }, [bootcampId, track, applicableModules]);
-
-  // Calendar sessions available for linking
-  const candidateSessions = sessions.filter(
-    (s) =>
-      s.bootcampId === bootcampId &&
-      (s.eventType === 'Assessment' || s.eventType === 'Mock Test' || s.eventType === 'Evaluation')
-  );
 
   // Automatic Track-Aware Trainee Suggestion for Step 02
   useEffect(() => {
@@ -174,6 +165,14 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
         setErrorMsg('Please select an assessment date.');
         return;
       }
+      if (!bootcampId || !moduleId) {
+        setErrorMsg('Please select a bootcamp and module.');
+        return;
+      }
+      if (totalMarks <= 0 || passingMarks < 0 || passingMarks > totalMarks) {
+        setErrorMsg('Passing marks must be between 0 and the total marks.');
+        return;
+      }
       setStep(2);
     } else if (step === 2) {
       if (selectedTraineeIds.length === 0) {
@@ -226,14 +225,14 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
 
   return (
     <div className="modal-backdrop-overlay" role="dialog" aria-modal="true">
-      <div className="modal-container-card premium-wizard-modal max-w-4xl">
+      <div className="modal-container-card premium-wizard-modal assessment-wizard-modal">
         {/* Modal Header */}
         <header className="modal-header-bar">
           <div className="modal-header-title">
             <Award size={20} className="header-icon-gradient" />
             <div>
-              <h2>{initialData ? 'Edit Assessment' : 'Create New Assessment'}</h2>
-              <p className="subtitle">Configure track-aware evaluation and scheduling</p>
+              <h2>{initialData ? 'Edit Manual Assessment' : 'Create Manual Assessment'}</h2>
+              <p className="subtitle">Set up the assessment, participants and scoring.</p>
             </div>
           </div>
           <button type="button" className="modal-close-btn" onClick={onClose}>
@@ -273,164 +272,60 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
             <div className="form-grid-2">
               <div className="form-group full-width">
                 <label className="form-label">Assessment Name *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="e.g. Module Test 1 — SQL & T-SQL"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                />
+                <input type="text" className="form-input" placeholder="e.g. Databricks Module Test" value={name} onChange={(e) => setName(e.target.value)} />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Assessment Type *</label>
-                <select
-                  className="form-select"
-                  value={type}
-                  onChange={(e) => setType(e.target.value as AssessmentType)}
-                >
+                <select className="form-select" value={type} onChange={(e) => setType(e.target.value as AssessmentType)}>
                   <option value="Module Test">Module Test</option>
-                  <option value="Mock Test">Mock Test</option>
+                  <option value="Live Quiz">Live Quiz</option>
                   <option value="Practical">Practical</option>
                   <option value="Technical Evaluation">Technical Evaluation</option>
-                  <option value="Project Evaluation">Project Evaluation</option>
                   <option value="Certification Evaluation">Certification Evaluation</option>
                 </select>
               </div>
 
               <div className="form-group">
+                <label className="form-label">Assessment Date *</label>
+                <input type="date" className="form-input" value={date} onChange={(e) => setDate(e.target.value)} />
+              </div>
+
+              <div className="form-group">
                 <label className="form-label">Bootcamp *</label>
-                <select
-                  className="form-select"
-                  value={bootcampId}
-                  onChange={(e) => setBootcampId(e.target.value)}
-                >
-                  {bootcamps.map((b) => (
-                    <option key={b.id} value={b.id}>
-                      {b.name} ({b.bootcampYear})
-                    </option>
-                  ))}
+                <select className="form-select" value={bootcampId} onChange={(e) => setBootcampId(e.target.value)}>
+                  {bootcamps.map((bootcamp) => <option key={bootcamp.id} value={bootcamp.id}>{bootcamp.name} ({bootcamp.bootcampYear})</option>)}
                 </select>
               </div>
 
               <div className="form-group">
                 <label className="form-label">Learning Track *</label>
-                <select
-                  className="form-select"
-                  value={track}
-                  onChange={(e) => setTrack(e.target.value as LearningTrack)}
-                >
+                <select className="form-select" value={track} onChange={(e) => setTrack(e.target.value as LearningTrack)}>
                   <option value="Common Foundation">Common Foundation</option>
+                  <option value="DE">DE</option>
+                  <option value="BA">BA</option>
+                  <option value="Tools">Tools</option>
                   <option value="DBT & Snowflake">DBT &amp; Snowflake</option>
                   <option value="Databricks">Databricks</option>
                   <option value="Shared">Shared</option>
                 </select>
               </div>
 
-              <div className="form-group">
-                <label className="form-label">Module *</label>
-                <select
-                  className="form-select"
-                  value={moduleId}
-                  onChange={(e) => setModuleId(e.target.value)}
-                >
-                  {applicableModules.length === 0 ? (
-                    <option value="">No specific modules found</option>
-                  ) : (
-                    applicableModules.map((m) => (
-                      <option key={m.id} value={m.id}>
-                        {m.name}
-                      </option>
-                    ))
-                  )}
-                </select>
-              </div>
-
               <div className="form-group full-width">
-                <label className="form-label">Linked Training Calendar Session (Optional)</label>
-                <select
-                  className="form-select"
-                  value={linkedSessionId}
-                  onChange={(e) => setLinkedSessionId(e.target.value)}
-                >
-                  <option value="">-- Create/Link Automatically on Calendar --</option>
-                  {candidateSessions.map((s) => (
-                    <option key={s.id} value={s.id}>
-                      {s.sessionDate} • {s.title} ({s.eventType})
-                    </option>
-                  ))}
+                <label className="form-label">Module *</label>
+                <select className="form-select" value={moduleId} onChange={(e) => setModuleId(e.target.value)}>
+                  {applicableModules.map((module) => <option key={module.id} value={module.id}>{module.name}</option>)}
                 </select>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Assessment Date *</label>
-                <input
-                  type="date"
-                  className="form-input"
-                  value={date}
-                  onChange={(e) => setDate(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Time Slot</label>
-                <div className="time-flex">
-                  <input
-                    type="time"
-                    className="form-input"
-                    value={startTime}
-                    onChange={(e) => setStartTime(e.target.value)}
-                  />
-                  <span>to</span>
-                  <input
-                    type="time"
-                    className="form-input"
-                    value={endTime}
-                    onChange={(e) => setEndTime(e.target.value)}
-                  />
-                </div>
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Primary Evaluator *</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="e.g. John Mathew"
-                  value={evaluatorName}
-                  onChange={(e) => setEvaluatorName(e.target.value)}
-                />
-              </div>
-
-              <div className="form-group">
-                <label className="form-label">Additional Evaluator (Optional)</label>
-                <input
-                  type="text"
-                  className="form-input"
-                  placeholder="e.g. Sarah David"
-                  value={additionalEvaluatorName}
-                  onChange={(e) => setAdditionalEvaluatorName(e.target.value)}
-                />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Total Marks *</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={totalMarks}
-                  onChange={(e) => setTotalMarks(Number(e.target.value))}
-                />
+                <input type="number" min="1" className="form-input" value={totalMarks} onChange={(e) => setTotalMarks(Number(e.target.value))} />
               </div>
 
               <div className="form-group">
                 <label className="form-label">Passing Marks *</label>
-                <input
-                  type="number"
-                  className="form-input"
-                  value={passingMarks}
-                  onChange={(e) => setPassingMarks(Number(e.target.value))}
-                />
+                <input type="number" min="0" max={totalMarks} className="form-input" value={passingMarks} onChange={(e) => setPassingMarks(Number(e.target.value))} />
               </div>
             </div>
           </div>
@@ -442,7 +337,7 @@ export const CreateAssessmentModal: React.FC<CreateAssessmentModalProps> = ({
             <div className="participant-selection-header">
               <div className="participant-count-badge">
                 <Users size={16} />
-                <span>Selected Trainees: <strong>{selectedTraineeIds.length}</strong></span>
+                <span>Selected Participants: <strong>{selectedTraineeIds.length}</strong></span>
               </div>
 
               <div className="participant-actions-row">

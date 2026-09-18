@@ -59,6 +59,8 @@ export interface Bootcamp {
   primaryTrainerName: string;
   additionalTrainerId?: string;
   additionalTrainerName?: string;
+  additionalTrainerIds?: string[];
+  additionalTrainerNames?: string[];
   coordinatorId: string;
   coordinatorName: string;
   traineesCount: number;

@@ -256,10 +256,6 @@ export const CertificationIntelligenceView: React.FC = () => {
 
         {/* RIGHT SECTION: ACTION COMMAND BUTTONS */}
         <div className="hero-section-right flex items-center gap-2">
-          <span className="code-chip lg bg-teal-50 dark:bg-teal-900/30 text-teal-700 dark:text-teal-300 font-bold border border-teal-200 dark:border-teal-800 px-3 py-1.5 rounded-xl">
-            2026 Certification Year
-          </span>
-
           <button
             type="button"
             className="ui-button-primary micro-btn"

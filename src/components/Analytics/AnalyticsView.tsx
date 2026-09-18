@@ -213,7 +213,7 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = () => {
   };
 
   return (
-    <div className="analytics-workspace-root">
+    <div className="analytics-workspace-root page-container space-y-6">
       {/* HEADER & TOP SEGMENTED SWITCH */}
       <div className="analytics-header-card">
         <div>
@@ -412,40 +412,6 @@ export const AnalyticsView: React.FC<AnalyticsViewProps> = () => {
               </section>
             </div>
 
-            <div className="executive-secondary-grid">
-              <section className="analytics-panel executive-card executive-snapshot-card">
-                <div className="panel-hdr-group">
-                  <h3 className="panel-title">Skill Snapshot</h3>
-                  <p className="panel-sub">Organization-wide strengths and priority</p>
-                </div>
-                <div className="executive-snapshot-list">
-                  <div><span>Strongest Skill</span><strong>SQL <em>86%</em></strong></div>
-                  <div><span>Strong Skills</span><strong>Power BI <em>84%</em> &nbsp; Python <em>82%</em></strong></div>
-                  <div><span>Development Priority</span><strong>Problem Solving <em>69%</em></strong></div>
-                </div>
-                <button type="button" className="executive-link-button" onClick={() => setExecutiveDetail('skills')}>
-                  View Full Skill Analysis <ArrowRight size={14} />
-                </button>
-              </section>
-
-              <section className="analytics-panel executive-card executive-cohort-card">
-                <div className="panel-hdr-group">
-                  <h3 className="panel-title">Cohort Performance</h3>
-                  <p className="panel-sub">Top active cohorts at a glance</p>
-                </div>
-                <div className="executive-cohort-list">
-                  {cohortPerformance.slice(0, 3).map((cohort) => (
-                    <div key={cohort.id} className="executive-cohort-row">
-                      <div><strong>{cohort.name}</strong><span>{cohort.total} trainees · {cohort.ready} project ready</span></div>
-                      <b>{cohort.assessment}%</b>
-                    </div>
-                  ))}
-                </div>
-                <button type="button" className="executive-link-button" onClick={() => setExecutiveDetail('cohorts')}>
-                  View All Cohorts <ArrowRight size={14} />
-                </button>
-              </section>
-            </div>
 
             <section className="analytics-panel executive-talent-section">
               <div className="panel-hdr-group">

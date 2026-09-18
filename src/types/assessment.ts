@@ -42,6 +42,34 @@ export interface AssessmentResult {
   evaluatedAt?: string;
 }
 
+export interface QuizQuestion {
+  id: string;
+  question: string;
+  type: 'multiple_choice' | 'type_answer';
+  options: string[];
+  correctAnswer: string;
+  explanation: string;
+  timeLimit?: number; // seconds per question
+  points?: number;
+}
+
+export interface NativeLiveQuizSession {
+  id: string;
+  joinCode: string;
+  startedAt?: string;
+  endedAt?: string;
+  participantCount?: number;
+  averageScore?: number;
+  passRate?: number;
+}
+
+export interface AIQuizGenerationPayload {
+  sessionId?: string;
+  topic: string;
+  questionCount: number;
+  difficulty: 'Beginner' | 'Intermediate' | 'Advanced';
+}
+
 export interface Assessment {
   id: string;
   name: string;
@@ -79,4 +107,12 @@ export interface Assessment {
   publishedAt?: string;
   createdAt: string;
   updatedAt: string;
+
+  // AI Quiz Generator & Native Live Quiz extensions
+  isAiGenerated?: boolean;
+  topic?: string;
+  difficulty?: string;
+  deliveryMode?: 'LIVE_QUIZ' | 'LD_ASSESSMENT';
+  liveQuizSession?: NativeLiveQuizSession;
+  questions?: QuizQuestion[];
 }

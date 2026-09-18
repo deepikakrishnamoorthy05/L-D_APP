@@ -186,7 +186,7 @@
   display: flex;
   flex-direction: column;
   font-size: 0.72rem;
-  font-weight: 800;
+  font-weight: 600;
   line-height: 1.2;
 }
 
@@ -213,7 +213,7 @@
 
 .capability-section-title {
   font-size: 0.72rem;
-  font-weight: 900;
+  font-weight: 600;
   letter-spacing: 0.5px;
   text-transform: uppercase;
   color: #0F766E;
@@ -258,7 +258,7 @@
   display: flex;
   justify-content: space-between;
   font-size: 0.74rem;
-  font-weight: 800;
+  font-weight: 600;
   color: #334155;
 }
 
@@ -350,7 +350,7 @@
 
 .candidate-score-num {
   font-size: 1.45rem;
-  font-weight: 900;
+  font-weight: 700;
   color: #0F766E;
   line-height: 1;
 }
@@ -375,7 +375,7 @@
   background: #F0FDFA;
   color: #0F766E;
   font-size: 0.74rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   transition: all 0.15s ease;
   display: flex;
@@ -402,7 +402,7 @@
 }
 
 .insight-header-title {
-  font-weight: 900;
+  font-weight: 600;
   color: #0D5E58;
   display: flex;
   align-items: center;
@@ -416,7 +416,7 @@
   border-radius: 6px;
   background: rgba(15, 118, 110, 0.12);
   color: #0F766E;
-  font-weight: 800;
+  font-weight: 600;
 }
 
 /* FOOTER */
@@ -439,7 +439,7 @@
   background: #FFFFFF;
   color: #475569;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
 }
 
@@ -454,7 +454,7 @@
   background: #0F766E;
   color: #FFFFFF;
   font-size: 0.78rem;
-  font-weight: 800;
+  font-weight: 600;
   cursor: pointer;
   display: inline-flex;
   align-items: center;

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { MessageSquare, Star, Send, ThumbsUp, MessageCircle } from 'lucide-react';
+import { MessageSquare, Star, MessageCircle, HeartHandshake, TrendingUp, Award } from 'lucide-react';
 
 export const FeedbackOrbit: React.FC = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -21,9 +21,9 @@ export const FeedbackOrbit: React.FC = () => {
         <circle cx="110" cy="80" r="72" className="orbit-ring ring-outer" />
       </svg>
 
-      {/* Central Core Sphere - MESSAGE SQUARE / FEEDBACK ICON */}
+      {/* Central Core Sphere */}
       <motion.div
-        className="orbit-center-core text-teal-600 dark:text-teal-400 flex items-center justify-center bg-teal-500/10 dark:bg-teal-400/10 border border-teal-500/30 rounded-full"
+        className="orbit-center-core text-amber-600 dark:text-amber-400 flex items-center justify-center bg-amber-500/10 dark:bg-amber-400/10 border border-amber-500/30 rounded-full"
         animate={{
           scale: isHovered ? 1.08 : [1, 1.06, 1],
           y: isHovered ? -3 : 0,
@@ -35,7 +35,7 @@ export const FeedbackOrbit: React.FC = () => {
           y: { duration: 0.25 },
         }}
       >
-        <MessageSquare size={24} className="text-teal-600 dark:text-teal-400" />
+        <MessageSquare size={24} className="text-amber-600 dark:text-amber-400" />
       </motion.div>
 
       {/* Rotating Layer 1 (Outer Clockwise: 24s / 12s on hover) */}
@@ -52,18 +52,18 @@ export const FeedbackOrbit: React.FC = () => {
         <motion.div
           className="orbit-floating-node node-1"
           animate={{ scale: isHovered ? 1.1 : 1, x: isHovered ? 4 : 0, y: isHovered ? -4 : 0 }}
-          title="Trainer Ratings"
+          title="Qualitative Rating"
         >
           <Star size={14} />
         </motion.div>
 
-        {/* Node 2: Bottom Left - Pending Requests */}
+        {/* Node 2: Bottom Left - Trainee & Trainer Feedback */}
         <motion.div
           className="orbit-floating-node node-2"
           animate={{ scale: isHovered ? 1.1 : 1, x: isHovered ? -4 : 0, y: isHovered ? 4 : 0 }}
-          title="Feedback Requests & Reminders"
+          title="Feedback Entries"
         >
-          <Send size={14} />
+          <MessageCircle size={14} />
         </motion.div>
       </motion.div>
 
@@ -77,22 +77,22 @@ export const FeedbackOrbit: React.FC = () => {
           ease: 'linear',
         }}
       >
-        {/* Node 3: Top Left - Response Rate */}
+        {/* Node 3: Top Left - Learning Satisfaction */}
         <motion.div
           className="orbit-floating-node node-3"
           animate={{ scale: isHovered ? 1.1 : 1, x: isHovered ? -4 : 0, y: isHovered ? -4 : 0 }}
-          title="Response Rate %"
+          title="Trainer Review"
         >
-          <ThumbsUp size={14} />
+          <HeartHandshake size={14} />
         </motion.div>
 
-        {/* Node 4: Bottom Right - Qualitative Comments */}
+        {/* Node 4: Bottom Right - Improvement Trend */}
         <motion.div
           className="orbit-floating-node node-4"
           animate={{ scale: isHovered ? 1.1 : 1, x: isHovered ? 4 : 0, y: isHovered ? 4 : 0 }}
-          title="Qualitative Sentiment"
+          title="Qualitative Insights"
         >
-          <MessageCircle size={14} />
+          <TrendingUp size={14} />
         </motion.div>
       </motion.div>
     </div>

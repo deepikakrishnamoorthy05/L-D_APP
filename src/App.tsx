@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { ThemeProvider } from './context/ThemeContext';
 import { AuthProvider, useAuth } from './context/AuthContext';
 import { LoginPage } from './components/LoginPage';
 import { AppShell } from './components/CommandCenter/AppShell';
@@ -7,6 +8,8 @@ import { TraineeProvider } from './context/TraineeContext';
 import { SessionProvider } from './context/SessionContext';
 import { AssessmentProvider } from './context/AssessmentContext';
 import { FeedbackProvider } from './context/FeedbackContext';
+import { LiveQuizParticipantView } from './components/Assessments/LiveQuizParticipantView';
+import { getHealthStatus, apiClient } from './services/api';
 import './App.css';
 
 const MainAppContent: React.FC = () => {
@@ -14,8 +17,18 @@ const MainAppContent: React.FC = () => {
   const [, setLocationPath] = useState(window.location.pathname);
 
   useEffect(() => {
-    document.documentElement.removeAttribute('data-theme');
-    localStorage.removeItem('systech_theme');
+    // Non-blocking application startup health check
+    getHealthStatus()
+      .then((data) => {
+        if (import.meta.env.DEV) {
+          console.log(`[Backend API] Successfully connected to NestJS backend at ${apiClient.getBaseUrl()}:`, data);
+        }
+      })
+      .catch((err) => {
+        if (import.meta.env.DEV) {
+          console.warn(`[Backend API] Backend unreachable at ${apiClient.getBaseUrl()}:`, err);
+        }
+      });
   }, []);
 
   useEffect(() => {
@@ -40,6 +53,26 @@ const MainAppContent: React.FC = () => {
     }
   }, [isAuthenticated]);
 
+  // Support /quiz/join URL route for participants
+  const isQuizJoinPath = window.location.pathname.startsWith('/quiz/join');
+  const urlParams = new URLSearchParams(window.location.search);
+  const joinCodeParam = urlParams.get('code') || window.location.pathname.split('/quiz/join/')[1] || '482913';
+
+  if (isQuizJoinPath) {
+    return (
+      <div style={{ minHeight: '100vh', background: 'var(--surface-0)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+        <LiveQuizParticipantView
+          isOpen={true}
+          onClose={() => {
+            window.history.pushState(null, '', '/command-center');
+            setLocationPath('/command-center');
+          }}
+          initialJoinCode={joinCodeParam}
+        />
+      </div>
+    );
+  }
+
   if (!isAuthenticated) {
     return (
       <LoginPage onLoginSuccess={() => {
@@ -56,19 +89,21 @@ const MainAppContent: React.FC = () => {
 
 export const App: React.FC = () => {
   return (
-    <AuthProvider>
-      <BootcampProvider>
-        <TraineeProvider>
-          <SessionProvider>
-            <AssessmentProvider>
-              <FeedbackProvider>
-                <MainAppContent />
-              </FeedbackProvider>
-            </AssessmentProvider>
-          </SessionProvider>
-        </TraineeProvider>
-      </BootcampProvider>
-    </AuthProvider>
+    <ThemeProvider>
+      <AuthProvider>
+        <BootcampProvider>
+          <TraineeProvider>
+            <SessionProvider>
+              <AssessmentProvider>
+                <FeedbackProvider>
+                  <MainAppContent />
+                </FeedbackProvider>
+              </AssessmentProvider>
+            </SessionProvider>
+          </TraineeProvider>
+        </BootcampProvider>
+      </AuthProvider>
+    </ThemeProvider>
   );
 };
 

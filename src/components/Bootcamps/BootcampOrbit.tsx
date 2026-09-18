@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { BookOpen, Users, GitFork, Award } from 'lucide-react';
+import { BookOpen, Users, GitFork, Award, GraduationCap } from 'lucide-react';
 
 export const BootcampOrbit: React.FC = () => {
   const [isHovered, setIsHovered] = useState(false);
@@ -23,7 +23,7 @@ export const BootcampOrbit: React.FC = () => {
 
       {/* Central Core Sphere */}
       <motion.div
-        className="orbit-center-core"
+        className="orbit-center-core text-teal-600 dark:text-teal-400 flex items-center justify-center bg-teal-500/10 dark:bg-teal-400/10 border border-teal-500/30 rounded-full"
         animate={{
           scale: isHovered ? 1.08 : [1, 1.06, 1],
           y: isHovered ? -3 : 0,
@@ -35,7 +35,7 @@ export const BootcampOrbit: React.FC = () => {
           y: { duration: 0.25 },
         }}
       >
-        <span className="core-inner-dot" />
+        <GraduationCap size={24} className="text-teal-600 dark:text-teal-400" />
       </motion.div>
 
       {/* Rotating Layer 1 (Outer Clockwise: 24s / 12s on hover) */}
@@ -98,4 +98,5 @@ export const BootcampOrbit: React.FC = () => {
     </div>
   );
 };
+
 

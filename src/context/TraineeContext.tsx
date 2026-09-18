@@ -34,7 +34,7 @@ export interface BulkImportPayloadRow {
 interface TraineeContextType {
   trainees: Trainee[];
   auditHistory: TraineeAuditRecord[];
-  addTrainee: (data: Partial<Trainee>) => void;
+  addTrainee: (data: Partial<Trainee>) => Trainee;
   updateTrainee: (id: string, data: Partial<Trainee>) => void;
   changeBootcamp: (id: string, newBootcampId: string, newBootcampName: string, trainerName: string, effectiveDate: string) => void;
   archiveTrainee: (id: string) => void;
@@ -109,7 +109,12 @@ export const TraineeProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
   // 1. Add Trainee
   const addTrainee = (data: Partial<Trainee>) => {
-    const selectedBootcamp = bootcamps.find((b) => b.id === data.bootcampId) || bootcamps[0];
+    const selectedBootcamp = bootcamps.find((b) => b.id === data.bootcampId) || {
+      id: data.bootcampId || bootcamps[0]?.id || '',
+      name: data.bootcampName || bootcamps[0]?.name || 'Not Assigned',
+      primaryTrainerName: data.primaryTrainerName || bootcamps[0]?.primaryTrainerName || 'To be assigned',
+      modulesCount: data.totalModules || 0,
+    };
 
     const newTrainee: Trainee = {
       id: 'te-' + Date.now(),
@@ -140,6 +145,7 @@ export const TraineeProvider: React.FC<{ children: React.ReactNode }> = ({ child
 
     setTrainees((prev) => [newTrainee, ...prev]);
     showToast('Trainee added successfully');
+    return newTrainee;
   };
 
   // 2. Update Trainee
@@ -340,4 +346,3 @@ export const useTrainees = () => {
   }
   return context;
 };
-

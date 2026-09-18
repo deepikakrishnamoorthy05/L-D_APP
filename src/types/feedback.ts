@@ -101,6 +101,31 @@ export interface TrainerFeedbackRecord {
   submittedAt: string;
 }
 
+export interface LdFeedbackRecord {
+  id: string;
+  sessionId: string;
+  sessionTitle: string;
+  trainingType: string;
+  track: string;
+  trainerName: string;
+  sessionDate: string;
+  reviewerName: string;
+  trainingEffectivenessRating: number;
+  trainerPerformanceRating: number;
+  participantEngagementRating: number;
+  contentQualityRating: number;
+  sessionManagementRating: number;
+  businessRelevanceRating: number;
+  overallRating: number;
+  whatWentWell?: string;
+  improvementAreas?: string;
+  observations?: string;
+  recommendedFollowUp?: string;
+  followUpRequired: 'Yes' | 'No';
+  followUpNotes?: string;
+  submittedAt: string;
+}
+
 /**
  * Pending Feedback Request Tracking
  */

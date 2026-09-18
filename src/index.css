@@ -80,29 +80,30 @@
 }
 
 [data-theme="dark"] {
-  /* Dark Theme — Exact Dark Navy Palette Specified by User */
-  --app-bg: #050B12;
-  --surface-1: #0B1823;
-  --surface-2: #0F202C;
-  --surface-3: #132936;
-  --surface-hover: #172E3A;
-  --surface-soft: #102430;
+  /* Dark Theme — Deep Slate Enterprise Direction */
+  --app-bg: #07111F;
+  --surface-1: #0D1B2A;
+  --surface-2: #122235;
+  --surface-3: #16283D;
+  --surface-hover: #1A304B;
+  --surface-soft: #14283E;
+  --surface-elevated: #16283D;
 
-  --text-1: #F2F7F8;
-  --text-2: #A7BAC3;
-  --text-3: #738A95;
+  --text-1: #F4F8FB;
+  --text-2: #B7C4D1;
+  --text-3: #7F92A3;
 
-  --border-1: #203B49;
-  --border-2: #172F3B;
+  --border-1: rgba(255, 255, 255, 0.08);
+  --border-2: rgba(255, 255, 255, 0.05);
 
-  --input-bg: #102430;
-  --table-header: #102531;
+  --input-bg: #14283E;
+  --table-header: #0F2033;
 
   --accent: #20C7BE;
   --accent-hover: #34D5CC;
 
-  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.35);
-  --overlay: rgba(1, 8, 13, 0.72);
+  --shadow-card: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --overlay: rgba(5, 12, 22, 0.78);
 
   /* Unified Aliases */
   --bg-page: var(--app-bg);
@@ -118,7 +119,7 @@
   /* Legacy design tokens mapped to unified dark system */
   --bg-main: var(--app-bg);
   --bg-elevated: var(--surface-2);
-  --bg-glass: rgba(11, 24, 35, 0.92);
+  --bg-glass: rgba(13, 27, 42, 0.94);
 
   --color-primary: #20C7BE;
   --color-primary-strong: #34D5CC;
@@ -131,7 +132,7 @@
   --color-text-primary: var(--text-1);
   --color-text-secondary: var(--text-2);
   --color-text-muted: var(--text-3);
-  --color-text-dim: #445966;
+  --color-text-dim: #576B78;
 
   --color-border: var(--border-1);
   --color-border-hover: rgba(32, 199, 190, 0.45);
@@ -139,8 +140,8 @@
   --color-ai-glow: rgba(32, 199, 190, 0.22);
   --color-ai-glow-strong: rgba(32, 199, 190, 0.45);
 
-  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
-  --card-shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.6);
+  --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.45);
+  --card-shadow-hover: 0 16px 40px rgba(0, 0, 0, 0.65);
 
   /* State Colors */
   --state-error: #ff5a5a;
@@ -156,20 +157,84 @@
   --state-success-border: rgba(32, 201, 151, 0.35);
 }
 
-/* Base Tokens & Fonts */
+/* Base Tokens & Single Global Typography System */
 :root {
-  --font-family-sans: 'Inter', system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
-  --font-family-display: 'Inter', sans-serif;
+  --font-family-ui: Inter, "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, "Helvetica Neue", Arial, sans-serif;
+  --font-family-sans: var(--font-family-ui);
+  --font-family-display: var(--font-family-ui);
+  --font-family: var(--font-family-ui);
 
-  --radius-sm: 6px;
-  --radius-md: 10px;
-  --radius-lg: 14px;
+  /* Typography Scale Standard */
+  --font-page-title: 26px;
+  --font-page-title-lh: 34px;
+  --font-page-title-weight: 700;
+
+  --font-page-subtitle: 13px;
+  --font-page-subtitle-lh: 20px;
+  --font-page-subtitle-weight: 400;
+
+  --font-eyebrow: 11px;
+  --font-eyebrow-lh: 16px;
+  --font-eyebrow-weight: 600;
+  --font-eyebrow-ls: 0.06em;
+
+  --font-section-title: 16px;
+  --font-section-title-lh: 22px;
+  --font-section-title-weight: 600;
+
+  --font-card-title: 14px;
+  --font-card-title-lh: 20px;
+  --font-card-title-weight: 600;
+
+  --font-body: 13px;
+  --font-body-lh: 20px;
+  --font-body-weight: 400;
+
+  --font-compact: 12.5px;
+  --font-compact-lh: 18px;
+  --font-compact-weight: 400;
+
+  --font-meta: 12px;
+  --font-meta-lh: 16px;
+  --font-meta-weight: 400;
+
+  --font-btn: 13px;
+  --font-btn-lh: 18px;
+  --font-btn-weight: 600;
+
+  --font-tab: 13px;
+  --font-tab-weight: 600;
+
+  --font-badge: 11px;
+  --font-badge-weight: 600;
+
+  --font-kpi-val: 26px;
+  --font-kpi-val-lh: 32px;
+  --font-kpi-val-weight: 700;
+
+  /* Layout & Density Standard */
+  --page-max-width: 1440px;
+  --page-padding: 20px 24px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+
+  /* Component Radii Standard */
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-card: 16px;
+  --radius-btn: 10px;
+  --radius-input: 8px;
   --radius-xl: 20px;
   --radius-full: 9999px;
 
   --transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-normal: 250ms cubic-bezier(0.4, 0, 0.2, 1);
-  --transition-smooth: 350ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-normal: 200ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-smooth: 250ms cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 /* Base Resets */
@@ -183,12 +248,17 @@ html, body, #root {
   width: 100%;
   height: 100%;
   overflow: hidden;
-  font-family: var(--font-family-sans);
+  font-family: var(--font-family-ui) !important;
+  font-variant-numeric: tabular-nums;
   background-color: var(--bg-main);
   color: var(--color-text-primary);
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   transition: background-color var(--transition-normal), color var(--transition-normal);
+}
+
+button, input, textarea, select {
+  font-family: var(--font-family-ui) !important;
 }
 
 /* Ambient Background Glow */

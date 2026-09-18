@@ -11,29 +11,21 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(() => {
-    return localStorage.getItem('ld_platform_authenticated') === 'true';
-  });
+  // Always initialize isAuthenticated to false on app load so the login page opens first when visiting the site
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
   const [user, setUser] = useState<AuthUser | null>(() => {
     const savedUser = localStorage.getItem('ld_platform_user');
     return savedUser ? JSON.parse(savedUser) : null;
   });
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      localStorage.setItem('ld_platform_authenticated', 'true');
-    } else {
-      localStorage.removeItem('ld_platform_authenticated');
-    }
-  }, [isAuthenticated]);
-
   const login = async (credentials: LoginCredentials) => {
     const result = await authService.login(credentials);
     if (result.success && result.user) {
-      localStorage.setItem('ld_platform_authenticated', 'true');
       if (credentials.rememberMe) {
         localStorage.setItem('ld_platform_remember_email', credentials.email);
+      } else {
+        localStorage.removeItem('ld_platform_remember_email');
       }
       localStorage.setItem('ld_platform_user', JSON.stringify(result.user));
       setUser(result.user);

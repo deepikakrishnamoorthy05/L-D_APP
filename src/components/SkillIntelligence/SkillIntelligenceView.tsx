@@ -1,5 +1,6 @@
 import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
+import './SkillIntelligenceView.css';
 import {
   Brain,
   Sparkles,
@@ -187,7 +188,7 @@ export const SkillIntelligenceView: React.FC = () => {
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.28, ease: [0.16, 1, 0.3, 1] }}
-      className="skill-intelligence-page"
+      className="skill-intelligence-page page-container space-y-6"
     >
       {!activeFeature ? (
         <>
@@ -291,30 +292,6 @@ export const SkillIntelligenceView: React.FC = () => {
 
       </section>
 
-      <section className="ski-feature-launcher-section">
-        <div className="ski-feature-launcher-heading">
-          <h2>Explore Skill Intelligence</h2>
-          <p>Choose an intelligence capability to explore.</p>
-        </div>
-        <div className="ski-feature-launcher-grid">
-          {FEATURE_CONFIG.map((feature) => {
-            const FeatureIcon = feature.icon;
-            return (
-              <button
-                key={feature.id}
-                type="button"
-                className="ski-feature-launcher-card"
-                onClick={() => openFeature(feature.id)}
-              >
-                <span className="ski-feature-icon"><FeatureIcon size={22} /></span>
-                <span className="ski-feature-title">{feature.title}</span>
-                <span className="ski-feature-description">{feature.description}</span>
-                <span className="ski-feature-action">{feature.action} <ArrowRight size={15} /></span>
-              </button>
-            );
-          })}
-        </div>
-      </section>
         </>
       ) : (
         <header className="ski-feature-detail-header">
@@ -340,10 +317,10 @@ export const SkillIntelligenceView: React.FC = () => {
       )}
 
       {/* 3. MAIN INTELLIGENCE WORKSPACE (COPILOT + TALENT SNAPSHOT) */}
-      {(activeFeature === 'copilot' || activeFeature === 'talent-snapshot') && (
-      <section id="copilot-workspace" className={`ski-main-workspace-grid ski-single-feature-${activeFeature}`}>
+      {(activeFeature === null || activeFeature === 'copilot' || activeFeature === 'talent-snapshot') && (
+      <section id="copilot-workspace" className={`ski-main-workspace-grid ski-single-feature-${activeFeature || 'copilot'}`}>
         {/* LEFT: AI SKILL COPILOT */}
-        {activeFeature === 'copilot' && (
+        {(activeFeature === null || activeFeature === 'copilot') && (
         <div className="ski-copilot-card">
           <div className="ski-copilot-header">
             <div className="flex items-center gap-2">
@@ -356,13 +333,6 @@ export const SkillIntelligenceView: React.FC = () => {
               </div>
             </div>
             <span className="ski-preview-boundary-tag">AI Integration Preview</span>
-          </div>
-
-          {/* AI NOTICE CHIP */}
-          <div className="ski-ai-notice-banner">
-            <span>
-              Responses currently use structured application data. OpenAI service connection will be added next.
-            </span>
           </div>
 
           {/* CHAT DISPLAY BODY */}

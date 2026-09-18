@@ -1,5 +1,6 @@
 import React from 'react';
-import { AlertTriangle, X } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { AlertTriangle, ShieldAlert, Trash2, X } from 'lucide-react';
 
 interface ArchiveConfirmModalProps {
   title: string;
@@ -17,38 +18,34 @@ export const ArchiveConfirmModal: React.FC<ArchiveConfirmModalProps> = ({
   onClose,
 }) => {
   return (
-    <div className="bootcamp-modal-backdrop" onClick={onClose}>
-      <div className="bootcamp-modal-card bootcamp-modal-sm" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header header-warning">
-          <div className="modal-title-row">
-            <AlertTriangle size={18} className="icon-warning" />
-            <h3>{title}</h3>
-          </div>
-          <button type="button" className="close-btn" onClick={onClose}>
-            <X size={16} />
-          </button>
+    <div className="premium-confirm-backdrop" onClick={onClose}>
+      <motion.div initial={{opacity:0,scale:.94,y:16}} animate={{opacity:1,scale:1,y:0}} transition={{duration:.24,ease:[.16,1,.3,1]}} className="premium-confirm-card" onClick={(e) => e.stopPropagation()}>
+        <div className="premium-confirm-accent" />
+        <header>
+          <div className="premium-warning-icon"><AlertTriangle /></div>
+          <div><span>Destructive action</span><h3>{title}</h3></div>
+          <button type="button" className="premium-confirm-close" onClick={onClose} aria-label="Close"><X /></button>
+        </header>
+        <div className="premium-confirm-body">
+          <p>{message}</p>
+          <div className="premium-warning-note"><ShieldAlert /><span>This action is permanent and cannot be reversed.</span></div>
         </div>
-
-        <div className="modal-body">
-          <p className="confirm-message">{message}</p>
-        </div>
-
-        <div className="modal-footer">
-          <button type="button" className="bootcamp-btn-secondary" onClick={onClose}>
+        <footer>
+          <button type="button" className="premium-confirm-cancel" onClick={onClose}>
             Cancel
           </button>
           <button
             type="button"
-            className="bootcamp-btn-danger"
+            className="premium-confirm-delete"
             onClick={() => {
               onConfirm();
               onClose();
             }}
           >
-            {confirmLabel}
+            <Trash2 /> {confirmLabel}
           </button>
-        </div>
-      </div>
+        </footer>
+      </motion.div>
     </div>
   );
 };

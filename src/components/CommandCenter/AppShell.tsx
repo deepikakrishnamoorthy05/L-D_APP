@@ -90,6 +90,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
   // Session & Attendance routing state
   const [selectedSessionId, setSelectedSessionId] = useState<string | null>(null);
   const [sessionTab, setSessionTab] = useState<string>('overview');
+  const [reminderOpenRequest, setReminderOpenRequest] = useState(0);
 
   const { toastMessage } = useBootcamps();
 
@@ -97,6 +98,11 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
     navId: string,
     filter?: 'active' | 'project-ready' | 'needs-attention' | null
   ) => {
+    if (navId === 'reminders') {
+      setReminderOpenRequest((request) => request + 1);
+      handleNavChange('calendar');
+      return;
+    }
     if (filter !== undefined) {
       setTraineeKpiFilter(filter);
     } else {
@@ -244,6 +250,8 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
             <SessionManagement
               onSelectSession={handleSelectSession}
               onOpenAttendance={handleOpenAttendance}
+              reminderOpenRequest={reminderOpenRequest}
+              onReminderRequestHandled={() => setReminderOpenRequest(0)}
             />
           )}
 

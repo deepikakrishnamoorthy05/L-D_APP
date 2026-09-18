@@ -55,15 +55,11 @@ export const AssessmentDetailsModal: React.FC<AssessmentDetailsModalProps> = ({
           {/* Metadata Summary Bar */}
           <div className="details-meta-bar mb-4">
             <div className="meta-item">
-              <span className="meta-label">Bootcamp:</span>
-              <span className="meta-val">{assessment.bootcampName}</span>
+              <span className="meta-label">Training / Session:</span>
+              <span className="meta-val">{assessment.moduleName || assessment.bootcampName}</span>
             </div>
             <div className="meta-item">
-              <span className="meta-label">Module:</span>
-              <span className="meta-val">{assessment.moduleName}</span>
-            </div>
-            <div className="meta-item">
-              <span className="meta-label">Evaluator:</span>
+              <span className="meta-label">Trainer:</span>
               <span className="meta-val">{assessment.evaluatorName}</span>
             </div>
             <div className="meta-item">
@@ -81,13 +77,13 @@ export const AssessmentDetailsModal: React.FC<AssessmentDetailsModalProps> = ({
             <div className="kpi-card-compact text-center">
               <span className="kpi-label">Average Score</span>
               <div className="kpi-value text-cyan">{assessment.averageScore || 0}%</div>
-              <span className="kpi-subtext">Cohort Average</span>
+              <span className="kpi-subtext">Overall Average</span>
             </div>
 
             <div className="kpi-card-compact text-center">
               <span className="kpi-label">Pass Rate</span>
               <div className="kpi-value text-green">{assessment.passRate || 0}%</div>
-              <span className="kpi-subtext">Passing Cohort</span>
+              <span className="kpi-subtext">Passing Rate</span>
             </div>
 
             <div className="kpi-card-compact text-center">
@@ -105,7 +101,7 @@ export const AssessmentDetailsModal: React.FC<AssessmentDetailsModalProps> = ({
             <div className="kpi-card-compact text-center">
               <span className="kpi-label">Evaluated</span>
               <div className="kpi-value text-purple">{results.length}</div>
-              <span className="kpi-subtext">Trainees Evaluated</span>
+              <span className="kpi-subtext">Participants Evaluated</span>
             </div>
 
             <div className="kpi-card-compact text-center">
@@ -122,7 +118,7 @@ export const AssessmentDetailsModal: React.FC<AssessmentDetailsModalProps> = ({
               <div className="dist-bar-item">
                 <div className="dist-bar-label">
                   <span>90–100% (Excellent)</span>
-                  <span>{excellentCount} Trainees ({excellentPct}%)</span>
+                  <span>{excellentCount} Participants ({excellentPct}%)</span>
                 </div>
                 <div className="dist-track">
                   <div className="dist-fill bg-cyan" style={{ width: `${excellentPct}%` }} />
@@ -132,7 +128,7 @@ export const AssessmentDetailsModal: React.FC<AssessmentDetailsModalProps> = ({
               <div className="dist-bar-item">
                 <div className="dist-bar-label">
                   <span>75–89% (Good)</span>
-                  <span>{goodCount} Trainees ({goodPct}%)</span>
+                  <span>{goodCount} Participants ({goodPct}%)</span>
                 </div>
                 <div className="dist-track">
                   <div className="dist-fill bg-indigo" style={{ width: `${goodPct}%` }} />
@@ -142,7 +138,7 @@ export const AssessmentDetailsModal: React.FC<AssessmentDetailsModalProps> = ({
               <div className="dist-bar-item">
                 <div className="dist-bar-label">
                   <span>60–74% (Pass)</span>
-                  <span>{passCount} Trainees ({passPct}%)</span>
+                  <span>{passCount} Participants ({passPct}%)</span>
                 </div>
                 <div className="dist-track">
                   <div className="dist-fill bg-green" style={{ width: `${passPct}%` }} />
@@ -152,7 +148,7 @@ export const AssessmentDetailsModal: React.FC<AssessmentDetailsModalProps> = ({
               <div className="dist-bar-item">
                 <div className="dist-bar-label">
                   <span>Below 60% (Needs Attention)</span>
-                  <span>{needAttentionCount} Trainees ({needAttentionPct}%)</span>
+                  <span>{needAttentionCount} Participants ({needAttentionPct}%)</span>
                 </div>
                 <div className="dist-track">
                   <div className="dist-fill bg-rose" style={{ width: `${needAttentionPct}%` }} />
@@ -161,20 +157,20 @@ export const AssessmentDetailsModal: React.FC<AssessmentDetailsModalProps> = ({
             </div>
           </div>
 
-          {/* Trainee Results Breakdown Table */}
+          {/* Participant Results Breakdown Table */}
           <div className="details-section-card">
-            <h3 className="section-heading mb-3">Trainee Individual Evaluation Results</h3>
+            <h3 className="section-heading mb-3">Participant Individual Results</h3>
             <div className="table-responsive-wrapper">
               <table className="enterprise-table">
                 <thead>
                   <tr>
                     <th>Employee ID</th>
-                    <th>Trainee Name</th>
+                    <th>Participant Name</th>
                     <th>Score</th>
                     <th>Percentage</th>
                     <th>Result</th>
                     <th>Learning Status</th>
-                    <th>Evaluator Comment</th>
+                    <th>Trainer Comment</th>
                   </tr>
                 </thead>
                 <tbody>

@@ -209,39 +209,10 @@ export const TrainingManagement: React.FC<TrainingManagementProps> = ({ onNaviga
             Plan internal training programs, identify suitable trainers, collect availability and schedule sessions.
           </motion.p>
 
-          <motion.div
-            initial={{ opacity: 0, y: 6 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.4, delay: 0.25 }}
-            className="hero-compact-metrics-row"
-          >
-            <span className="hero-metric-pill">
-              <BookOpen size={14} className="pill-icon text-teal-600" />
-              <strong className="pill-val">{plannedCount}</strong>
-              <span className="pill-label">Active Plans</span>
-            </span>
-
-            <span className="hero-metric-pill">
-              <Clock3 size={14} className="pill-icon text-amber-600" />
-              <strong className="pill-val">{awaitingResponseCount}</strong>
-              <span className="pill-label">Pending Requests</span>
-            </span>
-
-            <span className="hero-metric-pill">
-              <UserCheck size={14} className="pill-icon text-emerald-600" />
-              <strong className="pill-val">{readyToScheduleCount}</strong>
-              <span className="pill-label">Ready to Schedule</span>
-            </span>
-          </motion.div>
         </div>
 
         {/* RIGHT SECTION: YEAR BADGE & PRIMARY ACTION BUTTON */}
         <div className="hero-section-right">
-          <div className="hero-context-badge">
-            <span className="badge-year">2026</span>
-            <span className="badge-label">L&amp;D SCHEDULER</span>
-          </div>
-
           <motion.div
             initial={{ opacity: 0, x: 14 }}
             animate={{ opacity: 1, x: 0 }}
@@ -527,11 +498,11 @@ export const TrainingManagement: React.FC<TrainingManagementProps> = ({ onNaviga
                         {/* Card Header & Content Body */}
                         <div>
                           <div className="plan-card-header-bar flex items-center justify-between mb-3">
-                            <div className="flex items-center gap-2">
+                            <div className="plan-card-classification flex items-center gap-2">
                               <span className={`track-pill-chip ${plan.track.toLowerCase()}`}>
                                 {plan.track}
                               </span>
-                              <span className="text-[11px] font-bold text-slate-500 bg-slate-100 dark:bg-slate-800 px-2 py-0.5 rounded-md">
+                              <span className="text-[11px] font-bold text-slate-500 dark:text-slate-400 bg-slate-100 dark:bg-slate-800/80 px-2 py-0.5 rounded-md">
                                 {plan.type}
                               </span>
                             </div>
@@ -547,7 +518,7 @@ export const TrainingManagement: React.FC<TrainingManagementProps> = ({ onNaviga
                           </p>
 
                           {/* Info Grid */}
-                          <div className="plan-details-rows bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-100 dark:border-slate-700/60 space-y-1.5 mb-3">
+                          <div className="plan-details-rows p-3 rounded-xl border border-slate-100 dark:border-slate-700/60 space-y-1.5 mb-3">
                             <div className="detail-meta-row flex justify-between text-xs">
                               <span className="text-slate-500 font-semibold">Tentative Date:</span>
                               <span className="font-bold text-slate-800 dark:text-slate-200">
@@ -574,7 +545,7 @@ export const TrainingManagement: React.FC<TrainingManagementProps> = ({ onNaviga
 
                           {/* WORKFLOW PROGRESS STRIP */}
                           <div className="workflow-progress-strip my-3 pt-2 border-t border-slate-100 dark:border-slate-800">
-                            <div className="flex justify-between items-center text-[10px] font-extrabold mb-1.5 text-slate-400 uppercase tracking-wider">
+                            <div className="workflow-progress-heading flex justify-between items-center text-[10px] font-extrabold mb-1.5 text-slate-400 uppercase tracking-wider">
                               <span>WORKFLOW STAGE</span>
                               <span className="text-teal-600 dark:text-teal-400 font-bold">
                                 {stageIdx === 1 ? '1/4 Plan' : stageIdx === 2 ? '2/4 Availability' : stageIdx === 3 ? '3/4 Ready' : '4/4 Scheduled'}

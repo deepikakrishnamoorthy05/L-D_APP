@@ -10,6 +10,7 @@ dist-ssr/
 # Scratch and temporary files
 scratch/
 *.log
+* - Copy*
 
 # Environment variables
 .env
