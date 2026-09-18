@@ -323,3 +323,284 @@ body::before {
     animation: none !important;
   }
 }
+
+/* ==========================================================================
+   COMPREHENSIVE DARK THEME MODAL & WIZARD STYLING SYSTEM
+   Applies deep slate enterprise theme to all modals in dark mode
+   ========================================================================== */
+
+[data-theme="dark"] .unified-modal-backdrop,
+html.dark .unified-modal-backdrop,
+[data-theme="dark"] .modal-backdrop-overlay,
+html.dark .modal-backdrop-overlay,
+[data-theme="dark"] .bootcamp-modal-backdrop,
+html.dark .bootcamp-modal-backdrop,
+[data-theme="dark"] .ui-modal-overlay,
+html.dark .ui-modal-overlay,
+[data-theme="dark"] .pts-backdrop,
+html.dark .pts-backdrop {
+  background: rgba(4, 10, 18, 0.76) !important;
+  backdrop-filter: blur(12px) !important;
+  -webkit-backdrop-filter: blur(12px) !important;
+}
+
+[data-theme="dark"] .unified-modal-shell,
+html.dark .unified-modal-shell,
+[data-theme="dark"] .modal-container-card,
+html.dark .modal-container-card,
+[data-theme="dark"] .bootcamp-modal-shell,
+html.dark .bootcamp-modal-shell,
+[data-theme="dark"] .ui-modal-content,
+html.dark .ui-modal-content,
+[data-theme="dark"] .pts-modal,
+html.dark .pts-modal,
+[data-theme="dark"] .premium-wizard-modal,
+html.dark .premium-wizard-modal,
+[data-theme="dark"] .assessment-wizard-modal,
+html.dark .assessment-wizard-modal {
+  background: #0D1B2A !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #F4F8FB !important;
+  box-shadow: 0 30px 90px rgba(0, 0, 0, 0.75), 0 0 0 1px rgba(255, 255, 255, 0.05) !important;
+}
+
+[data-theme="dark"] .unified-modal-header,
+html.dark .unified-modal-header,
+[data-theme="dark"] .modal-header-bar,
+html.dark .modal-header-bar,
+[data-theme="dark"] .ui-modal-header,
+html.dark .ui-modal-header,
+[data-theme="dark"] .pts-header,
+html.dark .pts-header {
+  background: #122235 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .modal-title-text,
+html.dark .modal-title-text,
+[data-theme="dark"] .modal-header-title h2,
+html.dark .modal-header-title h2,
+[data-theme="dark"] .ui-modal-title,
+html.dark .ui-modal-title,
+[data-theme="dark"] .step-title-text,
+html.dark .step-title-text,
+[data-theme="dark"] .pts-header h2,
+html.dark .pts-header h2,
+[data-theme="dark"] .pts-section-title h3,
+html.dark .pts-section-title h3 {
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .modal-subtitle-text,
+html.dark .modal-subtitle-text,
+[data-theme="dark"] .modal-header-title .subtitle,
+html.dark .modal-header-title .subtitle,
+[data-theme="dark"] .ui-modal-subtitle,
+html.dark .ui-modal-subtitle,
+[data-theme="dark"] .step-subtitle-text,
+html.dark .step-subtitle-text,
+[data-theme="dark"] .pts-header p,
+html.dark .pts-header p,
+[data-theme="dark"] .pts-section-title p,
+html.dark .pts-section-title p {
+  color: #B7C4D1 !important;
+}
+
+[data-theme="dark"] .unified-left-stepper,
+html.dark .unified-left-stepper,
+[data-theme="dark"] .modal-stepper-bar,
+html.dark .modal-stepper-bar,
+[data-theme="dark"] .pts-stepper,
+html.dark .pts-stepper {
+  background: #0F2033 !important;
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .stepper-item-title,
+html.dark .stepper-item-title,
+[data-theme="dark"] .step-label,
+html.dark .step-label,
+[data-theme="dark"] .pts-stepper button span,
+html.dark .pts-stepper button span {
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .stepper-item-sub,
+html.dark .stepper-item-sub {
+  color: #7F92A3 !important;
+}
+
+[data-theme="dark"] .stepper-circle-badge.future,
+html.dark .stepper-circle-badge.future,
+[data-theme="dark"] .pts-stepper button i,
+html.dark .pts-stepper button i {
+  border-color: rgba(255, 255, 255, 0.18) !important;
+  color: #7F92A3 !important;
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+[data-theme="dark"] .step-item,
+html.dark .step-item {
+  border-right: 1px solid rgba(255, 255, 255, 0.08) !important;
+  opacity: 0.7 !important;
+}
+
+[data-theme="dark"] .step-item.active,
+html.dark .step-item.active,
+[data-theme="dark"] .stepper-item-row.active,
+html.dark .stepper-item-row.active,
+[data-theme="dark"] .pts-stepper button.active,
+html.dark .pts-stepper button.active {
+  background: #1A304B !important;
+  border-color: rgba(32, 199, 190, 0.35) !important;
+  box-shadow: inset 0 -3px 0 #20C7BE !important;
+  opacity: 1 !important;
+}
+
+[data-theme="dark"] .step-item .step-num,
+html.dark .step-item .step-num {
+  background: rgba(32, 199, 190, 0.18) !important;
+  color: #20C7BE !important;
+}
+
+[data-theme="dark"] .step-item.active .step-num,
+html.dark .step-item.active .step-num {
+  background: #20C7BE !important;
+  color: #07111F !important;
+}
+
+[data-theme="dark"] .field-label,
+html.dark .field-label,
+[data-theme="dark"] .form-label,
+html.dark .form-label,
+[data-theme="dark"] .pts-form label > span,
+html.dark .pts-form label > span,
+[data-theme="dark"] .pts-editor-body label > span,
+html.dark .pts-editor-body label > span {
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .common-form-control,
+html.dark .common-form-control,
+[data-theme="dark"] .form-input,
+html.dark .form-input,
+[data-theme="dark"] .form-select,
+html.dark .form-select,
+[data-theme="dark"] .pts-form input,
+html.dark .pts-form input,
+[data-theme="dark"] .pts-form select,
+html.dark .pts-form select,
+[data-theme="dark"] .pts-form textarea,
+html.dark .pts-form textarea,
+[data-theme="dark"] .pts-input-icon,
+html.dark .pts-input-icon,
+[data-theme="dark"] .pts-editor-body input,
+html.dark .pts-editor-body input,
+[data-theme="dark"] .pts-editor-body textarea,
+html.dark .pts-editor-body textarea,
+[data-theme="dark"] .pts-search,
+html.dark .pts-search {
+  background: #14283E !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .common-form-control option,
+html.dark .common-form-control option,
+[data-theme="dark"] .form-select option,
+html.dark .form-select option,
+[data-theme="dark"] .pts-form select option,
+html.dark .pts-form select option,
+[data-theme="dark"] select option,
+html.dark select option {
+  background: #122235 !important;
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .common-form-control:focus,
+html.dark .common-form-control:focus,
+[data-theme="dark"] .form-input:focus,
+html.dark .form-input:focus,
+[data-theme="dark"] .form-select:focus,
+html.dark .form-select:focus,
+[data-theme="dark"] .pts-form input:focus,
+html.dark .pts-form input:focus,
+[data-theme="dark"] .pts-form select:focus,
+html.dark .pts-form select:focus,
+[data-theme="dark"] .pts-form textarea:focus,
+html.dark .pts-form textarea:focus {
+  border-color: #20C7BE !important;
+  box-shadow: 0 0 0 3px rgba(32, 199, 190, 0.22) !important;
+}
+
+[data-theme="dark"] input::placeholder,
+html.dark input::placeholder,
+[data-theme="dark"] textarea::placeholder,
+html.dark textarea::placeholder {
+  color: #7F92A3 !important;
+}
+
+[data-theme="dark"] .modal-footer-bar,
+html.dark .modal-footer-bar,
+[data-theme="dark"] .ui-modal-footer,
+html.dark .ui-modal-footer,
+[data-theme="dark"] .pts-footer,
+html.dark .pts-footer,
+[data-theme="dark"] .pts-editor > footer,
+html.dark .pts-editor > footer {
+  background: #122235 !important;
+  border-top: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+[data-theme="dark"] .pts-footer .secondary,
+html.dark .pts-footer .secondary,
+[data-theme="dark"] .pts-editor footer button:first-child,
+html.dark .pts-editor footer button:first-child {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border-color: rgba(255, 255, 255, 0.14) !important;
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .modal-close-btn,
+html.dark .modal-close-btn,
+[data-theme="dark"] .ui-modal-close,
+html.dark .ui-modal-close,
+[data-theme="dark"] .pts-header > button,
+html.dark .pts-header > button,
+[data-theme="dark"] .pts-editor header > button,
+html.dark .pts-editor header > button {
+  background: rgba(255, 255, 255, 0.08) !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  color: #B7C4D1 !important;
+}
+
+[data-theme="dark"] .modal-close-btn:hover,
+html.dark .modal-close-btn:hover,
+[data-theme="dark"] .ui-modal-close:hover,
+html.dark .ui-modal-close:hover,
+[data-theme="dark"] .pts-header > button:hover,
+html.dark .pts-header > button:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .pts-trainer-grid > button,
+html.dark .pts-trainer-grid > button,
+[data-theme="dark"] .trainer-card-shell,
+html.dark .trainer-card-shell,
+[data-theme="dark"] .pts-email,
+html.dark .pts-email,
+[data-theme="dark"] .pts-editor,
+html.dark .pts-editor {
+  background: #122235 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .pts-email-paper,
+html.dark .pts-email-paper {
+  background: #0F2033 !important;
+  color: #B7C4D1 !important;
+}
+
