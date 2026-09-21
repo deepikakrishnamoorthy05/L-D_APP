@@ -677,4 +677,87 @@ html.dark .trainee-enterprise-table tbody tr:hover {
   background: #14283E !important;
 }
 
+/* ==========================================================================
+   COMPREHENSIVE DARK THEME HERO BANNER & COHORT HEADER STYLING SYSTEM
+   Transforms white cohort header cards and summary panels to deep dark slate
+   ========================================================================== */
+
+[data-theme="dark"] .bootcamp-details-hero-redesigned,
+html.dark .bootcamp-details-hero-redesigned,
+[data-theme="dark"] .bootcamp-hero-card,
+html.dark .bootcamp-hero-card,
+[data-theme="dark"] .cohort-header-card,
+html.dark .cohort-header-card {
+  background: #0D1B2A !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 16px 40px rgba(0, 0, 0, 0.5) !important;
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .hero-bootcamp-title,
+html.dark .hero-bootcamp-title {
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .hero-description-text,
+html.dark .hero-description-text {
+  color: #B7C4D1 !important;
+}
+
+[data-theme="dark"] .hero-summary-panel-2x2,
+html.dark .hero-summary-panel-2x2 {
+  background: #122235 !important;
+  border: 1px solid rgba(255, 255, 255, 0.1) !important;
+  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.3) !important;
+}
+
+[data-theme="dark"] .summary-grid-cell .cell-label,
+html.dark .summary-grid-cell .cell-label {
+  color: #7F92A3 !important;
+}
+
+[data-theme="dark"] .summary-grid-cell .cell-value,
+html.dark .summary-grid-cell .cell-value {
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .hero-action-subtle,
+html.dark .hero-action-subtle {
+  background: #14283E !important;
+  color: #F4F8FB !important;
+  border: 1px solid rgba(255, 255, 255, 0.14) !important;
+}
+
+[data-theme="dark"] .hero-action-subtle:hover,
+html.dark .hero-action-subtle:hover {
+  background: #1A304B !important;
+  color: #FFFFFF !important;
+}
+
+[data-theme="dark"] .module-name,
+html.dark .module-name {
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .module-desc,
+html.dark .module-desc {
+  color: #7F92A3 !important;
+}
+
+[data-theme="dark"] .icon-action-btn-sm,
+html.dark .icon-action-btn-sm,
+[data-theme="dark"] .action-icon-danger-btn,
+html.dark .action-icon-danger-btn {
+  background: rgba(255, 255, 255, 0.08) !important;
+  color: #B7C4D1 !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+[data-theme="dark"] .icon-action-btn-sm:hover,
+html.dark .icon-action-btn-sm:hover {
+  background: rgba(255, 255, 255, 0.16) !important;
+  color: #FFFFFF !important;
+}
+
+
 
