@@ -12,9 +12,7 @@ import { SessionDetails } from '../Sessions/SessionDetails';
 import { AttendanceManagement } from '../Sessions/AttendanceManagement';
 import { AssessmentManagement } from '../Assessments/AssessmentManagement';
 import { FeedbackManagement } from '../Feedback/FeedbackManagement';
-import { SkillIntelligenceView } from '../SkillIntelligence/SkillIntelligenceView';
 import { CertificationIntelligenceView } from '../Certifications/CertificationIntelligenceView';
-import { AnalyticsView } from '../Analytics/AnalyticsView';
 import { useBootcamps } from '../../context/BootcampContext';
 import { CheckCircle2, Menu } from 'lucide-react';
 import systechLogo from '../../assets/systech-logo.png';
@@ -42,9 +40,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
       'sessions',
       'assessments',
       'feedback',
-      'skill-intelligence',
-      'certifications',
-      'analytics'
+      'certifications'
     ];
     return validNavs.includes(rawPath) ? (rawPath === 'sessions' ? 'calendar' : rawPath) : 'command-center';
   };
@@ -157,9 +153,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
     'attendance-record': 'Attendance',
     'assessments': 'Assessments',
     'feedback': 'Feedback',
-    'skill-intelligence': 'Skill Intelligence',
     'certifications': 'Certifications',
-    'analytics': 'Analytics',
   };
 
   return (
@@ -275,13 +269,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
 
           {currentNav === 'feedback' && <FeedbackManagement />}
 
-          {currentNav === 'skill-intelligence' && <SkillIntelligenceView />}
-
           {currentNav === 'certifications' && <CertificationIntelligenceView />}
-
-          {currentNav === 'analytics' && (
-            <AnalyticsView onNavigateToCommandCenter={() => setCurrentNav('command-center')} />
-          )}
         </main>
       </div>
     </TrainingProvider>

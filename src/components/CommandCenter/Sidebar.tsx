@@ -6,9 +6,7 @@ import {
   Calendar,
   ClipboardCheck,
   MessageSquare,
-  Brain,
   Award,
-  BarChart3,
   PanelLeftClose,
   PanelLeftOpen,
   LogOut,
@@ -101,23 +99,6 @@ export const Sidebar: React.FC<SidebarProps> = ({
           id: 'feedback',
           label: 'Feedback',
           icon: <MessageSquare size={18} />,
-          isFunctional: true,
-        },
-      ],
-    },
-    {
-      groupLabel: 'INTELLIGENCE',
-      items: [
-        {
-          id: 'skill-intelligence',
-          label: 'Skill Intelligence',
-          icon: <Brain size={18} />,
-          isFunctional: true,
-        },
-        {
-          id: 'analytics',
-          label: 'Analytics',
-          icon: <BarChart3 size={18} />,
           isFunctional: true,
         },
       ],
