@@ -4265,8 +4265,8 @@
 
 /* LIGHT TABLES & ROWS */
 .bootcamp-table-wrapper {
-  background: rgba(255, 255, 255, 0.92) !important;
-  border: 1px solid rgba(30, 130, 130, 0.13) !important;
+  background: var(--bg-surface, rgba(255, 255, 255, 0.92));
+  border: 1px solid var(--border-soft, rgba(30, 130, 130, 0.13));
   border-radius: 20px;
   box-shadow: 0 10px 30px rgba(20, 60, 70, 0.06);
 }

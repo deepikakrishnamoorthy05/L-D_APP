@@ -604,3 +604,77 @@ html.dark .pts-email-paper {
   color: #B7C4D1 !important;
 }
 
+/* ==========================================================================
+   COMPREHENSIVE DARK THEME TABLE CARD & WRAPPER STYLING SYSTEM
+   Only applies in dark mode: transforms white table cards to deep slate
+   ========================================================================== */
+
+[data-theme="dark"] .bootcamp-table-wrapper,
+html.dark .bootcamp-table-wrapper,
+[data-theme="dark"] .trainee-table-wrapper,
+html.dark .trainee-table-wrapper,
+[data-theme="dark"] .table-responsive-wrapper,
+html.dark .table-responsive-wrapper,
+[data-theme="dark"] .table-wrapper,
+html.dark .table-wrapper,
+[data-theme="dark"] .attendance-table-wrapper,
+html.dark .attendance-table-wrapper,
+[data-theme="dark"] .analytics-table-wrapper,
+html.dark .analytics-table-wrapper,
+[data-theme="dark"] .directory-table-container,
+html.dark .directory-table-container,
+[data-theme="dark"] .skill-matrix-container,
+html.dark .skill-matrix-container,
+[data-theme="dark"] .comparison-table-wrapper,
+html.dark .comparison-table-wrapper,
+[data-theme="dark"] .enterprise-table-container,
+html.dark .enterprise-table-container {
+  background: #0D1B2A !important;
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.45) !important;
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .enterprise-table,
+html.dark .enterprise-table,
+[data-theme="dark"] .trainee-enterprise-table,
+html.dark .trainee-enterprise-table,
+[data-theme="dark"] .enterprise-data-table,
+html.dark .enterprise-data-table {
+  background: transparent !important;
+  color: #F4F8FB !important;
+}
+
+[data-theme="dark"] .enterprise-table thead tr,
+html.dark .enterprise-table thead tr,
+[data-theme="dark"] .trainee-enterprise-table thead tr,
+html.dark .trainee-enterprise-table thead tr {
+  background: #0F2033 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .enterprise-table th,
+html.dark .enterprise-table th,
+[data-theme="dark"] .trainee-enterprise-table th,
+html.dark .trainee-enterprise-table th {
+  background: #0F2033 !important;
+  color: #8A9DA5 !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1) !important;
+}
+
+[data-theme="dark"] .enterprise-table tbody tr,
+html.dark .enterprise-table tbody tr,
+[data-theme="dark"] .trainee-enterprise-table tbody tr,
+html.dark .trainee-enterprise-table tbody tr {
+  background: #0D1B2A !important;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06) !important;
+}
+
+[data-theme="dark"] .enterprise-table tbody tr:hover,
+html.dark .enterprise-table tbody tr:hover,
+[data-theme="dark"] .trainee-enterprise-table tbody tr:hover,
+html.dark .trainee-enterprise-table tbody tr:hover {
+  background: #14283E !important;
+}
+
+
