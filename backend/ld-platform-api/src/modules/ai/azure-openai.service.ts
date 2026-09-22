@@ -12,32 +12,32 @@ export class AzureOpenAiService {
   private readonly logger = new Logger(AzureOpenAiService.name);
 
   /**
-   * Check if Azure OpenAI or OpenAI credentials/endpoint are configured
+   * Check if Azure OpenAI credentials are set in environment variables
    */
   isConfigured(): boolean {
-    const endpoint = process.env.AZURE_OPENAI_ENDPOINT || process.env.OPENAI_API_BASE;
     const key = process.env.AZURE_OPENAI_KEY || process.env.OPENAI_API_KEY;
+    const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
 
-    if (endpoint && !endpoint.includes('<your')) return true;
-    if (key && !key.includes('<your')) return true;
+    if (!key || !endpoint) return false;
+    if (key.includes('<your') || endpoint.includes('<your')) return false;
 
-    return false;
+    return true;
   }
 
   /**
    * Retrieve structured config from environment
    */
   getConfig(): AzureOpenAiConfig {
-    const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || process.env.OPENAI_API_BASE || '').trim().replace(/\/$/, '');
-    const apiKey = (process.env.AZURE_OPENAI_KEY || process.env.OPENAI_API_KEY || '').trim();
-    const deployment = (process.env.AZURE_OPENAI_DEPLOYMENT_NAME || process.env.OPENAI_MODEL || 'gpt-4o').trim();
-    const apiVersion = (process.env.AZURE_OPENAI_API_VERSION || '2024-12-01-preview').trim();
+    const endpoint = (process.env.AZURE_OPENAI_ENDPOINT || '').replace(/\/$/, '');
+    const apiKey = process.env.AZURE_OPENAI_KEY || process.env.OPENAI_API_KEY || '';
+    const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o';
+    const apiVersion = process.env.AZURE_OPENAI_API_VERSION || '2024-02-15-preview';
 
     return { endpoint, apiKey, deployment, apiVersion };
   }
 
   /**
-   * Execute chat completion against Azure OpenAI or OpenAI API endpoint
+   * Execute chat completion against Azure OpenAI deployment endpoint
    */
   async getCompletion(
     systemPrompt: string,
@@ -45,34 +45,16 @@ export class AzureOpenAiService {
     options?: { temperature?: number; jsonMode?: boolean }
   ): Promise<string> {
     if (!this.isConfigured()) {
-      throw new Error('Azure OpenAI service is not configured with valid endpoint or API credentials.');
+      throw new Error('Azure OpenAI service is not configured with valid credentials.');
     }
 
     const { endpoint, apiKey, deployment, apiVersion } = this.getConfig();
-
-    let url: string;
-    if (endpoint.includes('/chat/completions')) {
-      // Full target URL provided directly
-      url = endpoint.includes('api-version') ? endpoint : `${endpoint}?api-version=${apiVersion}`;
-    } else if (endpoint.includes('openai.azure.com') || endpoint.includes('cognitiveservices.azure.com')) {
-      // Azure OpenAI or Azure Cognitive Services resource URL
-      url = `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`;
-    } else if (endpoint) {
-      // Custom AI proxy or standard OpenAI base URL
-      url = endpoint.endsWith('/v1') ? `${endpoint}/chat/completions` : `${endpoint}/v1/chat/completions`;
-    } else {
-      // Default OpenAI REST API endpoint
-      url = `https://api.openai.com/v1/chat/completions`;
-    }
+    const url = `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`;
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'api-key': apiKey,
     };
-
-    if (apiKey) {
-      headers['api-key'] = apiKey;
-      headers['Authorization'] = `Bearer ${apiKey}`;
-    }
 
     const payload: any = {
       messages: [
@@ -82,15 +64,11 @@ export class AzureOpenAiService {
       temperature: options?.temperature ?? 0.7,
     };
 
-    if (!url.includes('/deployments/')) {
-      payload.model = deployment;
-    }
-
     if (options?.jsonMode) {
       payload.response_format = { type: 'json_object' };
     }
 
-    this.logger.log(`Invoking AI Chat Completion at endpoint: "${url}" (Deployment/Model: "${deployment}")`);
+    this.logger.log(`Invoking Azure OpenAI Chat Completion at deployment: "${deployment}"`);
 
     const res = await fetch(url, {
       method: 'POST',
@@ -100,15 +78,15 @@ export class AzureOpenAiService {
 
     if (!res.ok) {
       const errorText = await res.text().catch(() => '');
-      this.logger.error(`AI API request failed [${res.status}]: ${errorText}`);
-      throw new Error(`AI API returned status ${res.status}: ${errorText || res.statusText}`);
+      this.logger.error(`Azure OpenAI request failed [${res.status}]: ${errorText}`);
+      throw new Error(`Azure OpenAI returned status ${res.status}: ${errorText || res.statusText}`);
     }
 
     const data = await res.json();
     const content = data.choices?.[0]?.message?.content;
 
     if (!content) {
-      throw new Error('AI API returned empty response payload.');
+      throw new Error('Azure OpenAI returned empty response payload.');
     }
 
     return content;

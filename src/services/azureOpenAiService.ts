@@ -1,6 +1,6 @@
 /**
  * Azure OpenAI Frontend Service & Integration Provider
- * Connects the L&D Platform UI to Azure OpenAI / Cognitive Services / OpenAI endpoints
+ * Connects the L&D Platform UI to Azure OpenAI deployments (e.g., gpt-4o)
  * with backend proxy support and local rule-engine fallback.
  */
 
@@ -21,16 +21,16 @@ export interface CopilotAiResponse {
 
 export const azureOpenAiService = {
   /**
-   * Check if Azure OpenAI credentials or endpoint are configured in Vite env variables
+   * Check if Azure OpenAI credentials are configured in Vite env variables
    */
   isConfiguredLocally: (): boolean => {
     const endpoint = import.meta.env.VITE_AZURE_OPENAI_ENDPOINT;
     const key = import.meta.env.VITE_AZURE_OPENAI_KEY;
 
-    if (endpoint && !endpoint.includes('<your')) return true;
-    if (key && !key.includes('<your')) return true;
+    if (!endpoint || !key) return false;
+    if (endpoint.includes('<your') || key.includes('<your')) return false;
 
-    return false;
+    return true;
   },
 
   /**
@@ -38,10 +38,10 @@ export const azureOpenAiService = {
    */
   getConfig: (): AzureOpenAiConfig => {
     return {
-      endpoint: (import.meta.env.VITE_AZURE_OPENAI_ENDPOINT || '').trim().replace(/\/$/, ''),
-      apiKey: (import.meta.env.VITE_AZURE_OPENAI_KEY || '').trim(),
-      deployment: (import.meta.env.VITE_AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o').trim(),
-      apiVersion: (import.meta.env.VITE_AZURE_OPENAI_API_VERSION || '2024-12-01-preview').trim(),
+      endpoint: (import.meta.env.VITE_AZURE_OPENAI_ENDPOINT || '').replace(/\/$/, ''),
+      apiKey: import.meta.env.VITE_AZURE_OPENAI_KEY || '',
+      deployment: import.meta.env.VITE_AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o',
+      apiVersion: import.meta.env.VITE_AZURE_OPENAI_API_VERSION || '2024-02-15-preview',
     };
   },
 
@@ -56,47 +56,25 @@ export const azureOpenAiService = {
       systemPrompt ||
       `You are the Systech L&D Skill Intelligence AI Assistant. You assist enterprise decision-makers with talent readiness, Databricks/dbt/SQL skill gap insights, and bootcamp allocations. Be accurate, concise, professional, and structured.`;
 
-    // 1. Try Direct AI Endpoint if configured in client .env
+    // 1. Try Direct Azure OpenAI if configured in client .env
     if (azureOpenAiService.isConfiguredLocally()) {
       try {
         const { endpoint, apiKey, deployment, apiVersion } = azureOpenAiService.getConfig();
-
-        let url: string;
-        if (endpoint.includes('/chat/completions')) {
-          url = endpoint.includes('api-version') ? endpoint : `${endpoint}?api-version=${apiVersion}`;
-        } else if (endpoint.includes('openai.azure.com') || endpoint.includes('cognitiveservices.azure.com')) {
-          url = `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`;
-        } else if (endpoint) {
-          url = endpoint.endsWith('/v1') ? `${endpoint}/chat/completions` : `${endpoint}/v1/chat/completions`;
-        } else {
-          url = `https://api.openai.com/v1/chat/completions`;
-        }
-
-        const headers: Record<string, string> = {
-          'Content-Type': 'application/json',
-        };
-
-        if (apiKey) {
-          headers['api-key'] = apiKey;
-          headers['Authorization'] = `Bearer ${apiKey}`;
-        }
-
-        const payload: any = {
-          messages: [
-            { role: 'system', content: sysPrompt },
-            { role: 'user', content: queryText },
-          ],
-          temperature: 0.7,
-        };
-
-        if (!url.includes('/deployments/')) {
-          payload.model = deployment;
-        }
+        const url = `${endpoint}/openai/deployments/${deployment}/chat/completions?api-version=${apiVersion}`;
 
         const response = await fetch(url, {
           method: 'POST',
-          headers,
-          body: JSON.stringify(payload),
+          headers: {
+            'Content-Type': 'application/json',
+            'api-key': apiKey,
+          },
+          body: JSON.stringify({
+            messages: [
+              { role: 'system', content: sysPrompt },
+              { role: 'user', content: queryText },
+            ],
+            temperature: 0.7,
+          }),
         });
 
         if (response.ok) {
@@ -111,7 +89,7 @@ export const azureOpenAiService = {
           }
         }
       } catch (err: any) {
-        console.warn('Direct AI endpoint request failed, attempting backend API proxy...', err);
+        console.warn('Direct Azure OpenAI request failed, attempting backend API proxy...', err);
       }
     }
 
