@@ -50,36 +50,45 @@ export class AiQuizService {
 
     if (this.azureOpenAiService.isConfigured()) {
       try {
-        const rawContent = await this.azureOpenAiService.getCompletion(
-          `You are an expert L&D Technical Assessment Quiz Generator for enterprise training programs.
-Return ONLY valid JSON matching this exact structure:
+        const systemPrompt = `You are an expert Enterprise L&D Technical Assessment Quiz Generator. Your goal is to generate high-quality, practical evaluation quizzes for corporate training based specifically on the topic: "${topic}".
+
+Return ONLY a raw, valid JSON object matching this exact structure:
 {
-  "title": "Quiz Title based on Topic",
-  "topic": "Clean Topic Name",
+  "title": "${topic} Assessment Quiz",
+  "topic": "${topic}",
   "difficulty": "${difficulty}",
   "questionCount": ${questionCount},
   "questions": [
     {
       "id": "q1",
-      "question": "Clear, concise technical question?",
+      "question": "Clear, concise technical question about ${topic}?",
       "type": "multiple_choice",
       "options": ["Option A", "Option B", "Option C", "Option D"],
       "correctAnswer": "Option B",
-      "explanation": "Detailed explanation of why Option B is correct.",
+      "explanation": "Clear explanation of why Option B is correct.",
       "timeLimit": 30,
       "points": 10
     }
   ]
 }
+
 CRITICAL RULES:
-1. NO DUPLICATE QUESTIONS: All ${questionCount} questions MUST be 100% unique, distinct technical concepts. Never repeat any question topic or phrasing.
-2. CONCISE OPTIONS ONLY: Keep all multiple-choice options VERY SHORT (1 to 6 words each max). DO NOT write long paragraph options. For example, use "Partition Pruning" instead of "Applying idempotent partition pruning and columnar query filtering".
-3. Ensure options are plausible distractors with EXACTLY one clear correct answer matching one of the options.
-4. Respect difficulty level: ${difficulty}.
-5. Do NOT include markdown code blocks. Output raw JSON object only.`,
-          `Generate a ${questionCount}-question ${difficulty} multiple-choice quiz on topic: "${topic}". Ensure all ${questionCount} questions are distinct and all options are concise (1-6 words).`,
+1. TOPIC ACCURACY: Generate questions strictly tailored to the topic "${topic}".
+2. EXACT COUNT: Generate EXACTLY ${questionCount} questions.
+3. NO DUPLICATES: All ${questionCount} questions MUST be 100% unique, distinct technical concepts.
+4. SHORT OPTIONS: Keep all multiple-choice options VERY SHORT (1 to 6 words each max). E.g., use "Partition Pruning" instead of long paragraphs.
+5. CORRECTION MATCH: "correctAnswer" MUST be identical to one of the 4 strings in the "options" array.
+6. DIFFICULTY: Tailor complexity to ${difficulty} level.
+7. Output raw JSON object only. Do NOT include markdown code blocks.`;
+
+        const userPrompt = `Generate a ${questionCount}-question ${difficulty} multiple-choice quiz on the topic: "${topic}". Ensure options are concise (1-6 words) and all questions are distinct.`;
+
+        const rawContent = await this.azureOpenAiService.getCompletion(
+          systemPrompt,
+          userPrompt,
           { jsonMode: true }
         );
+
 
         const aiResponse = JSON.parse(rawContent);
         if (aiResponse && aiResponse.questions && aiResponse.questions.length > 0) {

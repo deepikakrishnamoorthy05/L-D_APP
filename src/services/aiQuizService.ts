@@ -11,7 +11,13 @@ export interface GeneratedQuizResult {
 }
 
 class AIQuizService {
-  private readonly baseUrl = '/api/ai/quizzes';
+  private getApiBaseUrl(): string {
+    const envUrl = import.meta.env.VITE_API_URL;
+    if (envUrl && envUrl.startsWith('http')) {
+      return `${envUrl.replace(/\/$/, '')}/ai/quizzes`;
+    }
+    return '/api/ai/quizzes';
+  }
 
   /**
    * Calls NestJS Backend API to generate AI Quiz via Azure OpenAI
@@ -27,7 +33,8 @@ class AIQuizService {
     };
 
     try {
-      const response = await fetch(`${this.baseUrl}/generate`, {
+      const endpoint = `${this.getApiBaseUrl()}/generate`;
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -63,7 +70,8 @@ class AIQuizService {
     action: 'easier' | 'harder' | 'different' | 'change_type'
   ): Promise<QuizQuestion> {
     try {
-      const response = await fetch(`${this.baseUrl}/regenerate-question`, {
+      const endpoint = `${this.getApiBaseUrl()}/regenerate-question`;
+      const response = await fetch(endpoint, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -86,6 +94,7 @@ class AIQuizService {
       return this.generateFallbackSingleQuestion(topic, questionId, currentQuestion, action);
     }
   }
+
 
   // --- Fallback client-side generator if NestJS backend server is unreached ---
   private generateFallbackQuiz(payload: AIQuizGenerationPayload, count: number): GeneratedQuizResult {
