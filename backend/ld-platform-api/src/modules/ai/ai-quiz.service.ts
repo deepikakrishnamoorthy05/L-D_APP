@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { AzureOpenAiService } from './azure-openai.service.js';
 
 export class GenerateQuizInput {
   sessionId?: string;
@@ -38,6 +39,8 @@ export class RegenerateQuestionInput {
 export class AiQuizService {
   private readonly logger = new Logger(AiQuizService.name);
 
+  constructor(private readonly azureOpenAiService: AzureOpenAiService) {}
+
   async generateQuiz(input: GenerateQuizInput): Promise<GeneratedQuizDto> {
     const topic = input.topic?.trim() || 'Data Engineering & SQL';
     const difficulty = input.difficulty || 'Intermediate';
@@ -45,18 +48,44 @@ export class AiQuizService {
 
     this.logger.log(`Generating AI Quiz for topic: "${topic}" (${difficulty}, ${questionCount} questions)`);
 
-    const apiKey = process.env.AZURE_OPENAI_KEY || process.env.OPENAI_API_KEY;
-    const endpoint = process.env.AZURE_OPENAI_ENDPOINT;
-    const deployment = process.env.AZURE_OPENAI_DEPLOYMENT_NAME || 'gpt-4o';
-
-    if (apiKey && endpoint) {
+    if (this.azureOpenAiService.isConfigured()) {
       try {
-        const aiResponse = await this.callAzureOpenAI(input, apiKey, endpoint, deployment);
+        const rawContent = await this.azureOpenAiService.getCompletion(
+          `You are an expert L&D Technical Assessment Quiz Generator for enterprise training programs.
+Return ONLY valid JSON matching this exact structure:
+{
+  "title": "Quiz Title based on Topic",
+  "topic": "Clean Topic Name",
+  "difficulty": "${difficulty}",
+  "questionCount": ${questionCount},
+  "questions": [
+    {
+      "id": "q1",
+      "question": "Clear, concise technical question?",
+      "type": "multiple_choice",
+      "options": ["Option A", "Option B", "Option C", "Option D"],
+      "correctAnswer": "Option B",
+      "explanation": "Detailed explanation of why Option B is correct.",
+      "timeLimit": 30,
+      "points": 10
+    }
+  ]
+}
+Rules:
+1. Generate accurate, practical, real-world questions specifically tailored to "${topic}".
+2. Ensure options are plausible distractors with EXACTLY one clear correct answer matching one of the options.
+3. Respect difficulty level: ${difficulty}.
+4. Do NOT include markdown code blocks. Output raw JSON object only.`,
+          `Generate a ${questionCount}-question ${difficulty} multiple-choice quiz on topic: "${topic}".`,
+          { jsonMode: true }
+        );
+
+        const aiResponse = JSON.parse(rawContent);
         if (aiResponse && aiResponse.questions && aiResponse.questions.length > 0) {
           return this.validateAndFormatResponse(aiResponse, topic, difficulty, questionCount);
         }
       } catch (err: any) {
-        this.logger.warn(`Azure OpenAI call failed, switching to structured fallback generator: ${err.message}`);
+        this.logger.warn(`Azure OpenAI quiz call failed, switching to structured fallback generator: ${err.message}`);
       }
     }
 

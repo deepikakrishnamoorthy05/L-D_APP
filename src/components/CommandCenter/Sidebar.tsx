@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import {
   LayoutDashboard,
+  BarChart3,
   Layers,
   GraduationCap,
   Calendar,
@@ -58,6 +59,12 @@ export const Sidebar: React.FC<SidebarProps> = ({
           id: 'command-center',
           label: 'Command Center',
           icon: <LayoutDashboard size={18} />,
+          isFunctional: true,
+        },
+        {
+          id: 'weekly-dashboard',
+          label: 'Weekly Dashboard',
+          icon: <BarChart3 size={18} />,
           isFunctional: true,
         },
       ],

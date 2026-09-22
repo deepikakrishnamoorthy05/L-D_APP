@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, ChevronDown, Edit3, Plus, Trash2, UserPlus, X } from 'lucide-react';
-import { Bootcamp } from '../../types/bootcamp';
+import { Bootcamp, BootcampType } from '../../types/bootcamp';
 import { useBootcamps } from '../../context/BootcampContext';
 import { useTrainees } from '../../context/TraineeContext';
 
@@ -13,6 +13,7 @@ export const CreateBootcampModal: React.FC<Props> = ({ initialData, isDuplicateM
   const isEdit = Boolean(initialData && !isDuplicateMode);
   const [step, setStep] = useState(1);
   const [name, setName] = useState(isDuplicateMode && initialData ? `${initialData.name} Copy` : initialData?.name || '');
+  const [bootcampType, setBootcampType] = useState<BootcampType>(initialData?.bootcampType || 'BOOTCAMP');
   const [startDate, setStartDate] = useState(initialData?.startDate || '');
   const [endDate, setEndDate] = useState(initialData?.endDate || '');
   const [showCurriculum, setShowCurriculum] = useState(false);
@@ -26,28 +27,31 @@ export const CreateBootcampModal: React.FC<Props> = ({ initialData, isDuplicateM
     if (value && !modules.includes(value)) setModules([...modules, value]);
     setModuleName('');
   };
+
   const validateDetails = () => {
-    if (!name.trim()) return setError('Bootcamp name is required.');
+    const trimmedName = name.trim();
+    if (!trimmedName) return setError('Bootcamp name is required.');
+    if (trimmedName.length > 100) return setError('Bootcamp name must be 100 characters or less.');
     if (!startDate) return setError('Start date is required.');
     if (!endDate) return setError('End date is required.');
-    if (new Date(endDate) < new Date(startDate)) return setError('End date must be after the start date.');
-    const year = new Date(`${startDate}T00:00:00`).getFullYear();
-    const type = name.toLowerCase().includes('lateral') ? 'LATERAL' : 'BOOTCAMP';
-    const duplicate = bootcamps.some(b => b.bootcampYear === year && b.bootcampType === type && (!isEdit || b.id !== initialData?.id));
-    if (duplicate) return setError(`${type === 'LATERAL' ? 'Lateral Bootcamp' : 'Bootcamp'} ${year} already exists. Only one is allowed per year.`);
+    if (new Date(endDate) < new Date(startDate)) return setError('End date must be on or after start date.');
     setError('');
     setStep(2);
   };
+
   const submit = (e: React.FormEvent) => {
     e.preventDefault();
     if (step === 1) { validateDetails(); return; }
-    const year = new Date(`${startDate}T00:00:00`).getFullYear();
+    const year = startDate ? new Date(`${startDate}T00:00:00`).getFullYear() : new Date().getFullYear();
     const sequence = bootcamps.filter(b => b.bootcampYear === year).length + 1;
     const data: Partial<Bootcamp> = {
-      name: name.trim(), startDate, endDate, bootcampYear: year,
+      name: name.trim(),
+      startDate,
+      endDate,
+      bootcampYear: year,
       code: initialData?.code || `BC-${year}-${String(sequence).padStart(2, '0')}`,
-      bootcampType: initialData?.bootcampType || (name.toLowerCase().includes('lateral') ? 'LATERAL' : 'BOOTCAMP'),
-      cohortName: initialData?.cohortName || name.trim(),
+      bootcampType,
+      cohortName: name.trim(),
       description: initialData?.description || `${name.trim()} learning cohort`,
       status: initialData?.status || 'Planned',
     };
@@ -74,7 +78,22 @@ export const CreateBootcampModal: React.FC<Props> = ({ initialData, isDuplicateM
       <div className="simple-modal-body">
         {error && <div className="simple-form-error">{error}</div>}
         {step===1 ? <>
-        <label className="simple-field full"><span>Bootcamp Name *</span><input autoFocus value={name} onChange={e=>setName(e.target.value)} placeholder="e.g. Bootcamp 2027" /></label>
+        <label className="simple-field full">
+          <span>Bootcamp Name *</span>
+          <input
+            autoFocus
+            value={name}
+            onChange={e=>setName(e.target.value)}
+            placeholder="Enter bootcamp name"
+          />
+        </label>
+        <label className="simple-field full">
+          <span>Type</span>
+          <select value={bootcampType} onChange={e=>setBootcampType(e.target.value as BootcampType)}>
+            <option value="BOOTCAMP">Regular Bootcamp</option>
+            <option value="LATERAL">Lateral Bootcamp</option>
+          </select>
+        </label>
         <div className="simple-date-grid">
           <label className="simple-field"><span>Start Date *</span><div><CalendarDays/><input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)}/></div></label>
           <label className="simple-field"><span>End Date *</span><div><CalendarDays/><input type="date" min={startDate} value={endDate} onChange={e=>setEndDate(e.target.value)}/></div></label>
@@ -94,3 +113,4 @@ export const CreateBootcampModal: React.FC<Props> = ({ initialData, isDuplicateM
     </motion.form>
   </div>;
 };
+

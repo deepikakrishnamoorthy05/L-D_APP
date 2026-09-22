@@ -13,7 +13,7 @@ export const MOCK_USERS: User[] = [
 export const MOCK_BOOTCAMPS: Bootcamp[] = [
   {
     id: 'bc-1',
-    name: 'SQL Data Architecture',
+    name: 'Bootcamp 2026',
     code: 'DE-B-2026-B01',
     bootcampType: 'BOOTCAMP',
     bootcampYear: 2026,
@@ -38,7 +38,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
   },
   {
     id: 'bc-2',
-    name: 'Python Data Engineering',
+    name: 'Bootcamp 2026',
     code: 'DE-B-2026-B02',
     bootcampType: 'BOOTCAMP',
     bootcampYear: 2026,
@@ -61,7 +61,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
   },
   {
     id: 'bc-3',
-    name: 'Lateral Data Engineering Acceleration',
+    name: 'Lateral Bootcamp 2026',
     code: 'DE-L-2026-B01',
     bootcampType: 'LATERAL',
     bootcampYear: 2026,
@@ -84,7 +84,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
   },
   {
     id: 'bc-4',
-    name: 'Power BI & DAX Intelligence',
+    name: 'Bootcamp 2026',
     code: 'BI-B-2026-B01',
     bootcampType: 'BOOTCAMP',
     bootcampYear: 2026,
@@ -107,7 +107,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
   },
   {
     id: 'bc-5',
-    name: 'Lateral Cloud Data Platform Acceleration',
+    name: 'Lateral Bootcamp 2025',
     code: 'DE-L-2025-B02',
     bootcampType: 'LATERAL',
     bootcampYear: 2025,
@@ -130,7 +130,7 @@ export const MOCK_BOOTCAMPS: Bootcamp[] = [
   },
   {
     id: 'bc-6',
-    name: 'Data Engineering Foundation 2025',
+    name: 'Bootcamp 2025',
     code: 'DE-B-2025-B01',
     bootcampType: 'BOOTCAMP',
     bootcampYear: 2025,

@@ -38,7 +38,8 @@ export const BootcampManagement: React.FC<BootcampManagementProps> = ({ onSelect
         existing.trainees += traineeCount;
         if (bootcamp.status === 'Active') existing.status = 'Active';
         else if (bootcamp.status === 'Planned' && existing.status !== 'Active') existing.status = 'Planned';
-      } else grouped.set(key, {
+      } else {
+        grouped.set(key, {
           id: bootcamp.id,
           type: bootcamp.bootcampType,
           year: bootcamp.bootcampYear,
@@ -46,13 +47,18 @@ export const BootcampManagement: React.FC<BootcampManagementProps> = ({ onSelect
           trainees: traineeCount,
           status: bootcamp.status,
           programs: [bootcamp],
-      });
+        });
+      }
     });
-    return Array.from(grouped.values()).sort((a,b)=>b.year-a.year || a.type.localeCompare(b.type));
+    return Array.from(grouped.values()).sort((a, b) => b.year - a.year || a.type.localeCompare(b.type));
   }, [bootcamps, enrollmentsMap]);
 
   const years = Array.from(new Set(groups.map((group) => group.year))).sort((a, b) => b - a);
-  const visibleGroups = groups.filter((group) => (selectedYear === 'All' || group.year === selectedYear) && (selectedType === 'All' || group.type === selectedType));
+  const visibleGroups = groups.filter(
+    (group) =>
+      (selectedYear === 'All' || group.year === selectedYear) &&
+      (selectedType === 'All' || group.type === selectedType)
+  );
 
   return (
     <motion.main className="bootcamp-groups-page page-container space-y-6" initial={{ opacity: 0, y: 6 }} animate={{ opacity: 1, y: 0 }}>

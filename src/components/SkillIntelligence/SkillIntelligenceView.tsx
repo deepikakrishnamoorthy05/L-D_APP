@@ -139,27 +139,37 @@ export const SkillIntelligenceView: React.FC = () => {
   // Tooltip State for Formula
   const [showFormulaTooltip, setShowFormulaTooltip] = useState(false);
 
-  // Click suggestion handler
-  const handleCopilotQuestion = (questionText: string) => {
+  // Click suggestion handler with Azure OpenAI integration
+  const handleCopilotQuestion = async (questionText: string) => {
     setIsCopilotThinking(true);
-    setTimeout(() => {
-      setIsCopilotThinking(false);
-      const res = skillIntelligenceService.askCopilot(questionText);
+    try {
+      const res = await skillIntelligenceService.askCopilotAsync(questionText);
       setCopilotResponse(res);
-    }, 500);
+    } catch (err) {
+      const fallbackRes = skillIntelligenceService.askCopilot(questionText);
+      setCopilotResponse(fallbackRes);
+    } finally {
+      setIsCopilotThinking(false);
+    }
   };
 
-  const handleCustomSubmit = (e: React.FormEvent) => {
+  const handleCustomSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!customInputText.trim()) return;
+    const query = customInputText;
+    setCustomInputText('');
     setIsCopilotThinking(true);
-    setTimeout(() => {
-      setIsCopilotThinking(false);
-      const res = skillIntelligenceService.askCopilot(customInputText);
+    try {
+      const res = await skillIntelligenceService.askCopilotAsync(query);
       setCopilotResponse(res);
-      setCustomInputText('');
-    }, 500);
+    } catch (err) {
+      const fallbackRes = skillIntelligenceService.askCopilot(query);
+      setCopilotResponse(fallbackRes);
+    } finally {
+      setIsCopilotThinking(false);
+    }
   };
+
 
   // Run Talent Match animation trigger
   const runProjectMatch = () => {
@@ -403,12 +413,23 @@ export const SkillIntelligenceView: React.FC = () => {
                 <div className="ski-response-card">
                   <h4 className="ski-response-headline">{copilotResponse?.headline}</h4>
 
+                  {copilotResponse?.aiGeneratedAnswer && (
+                    <div className="text-xs text-teal-900 bg-teal-50 border border-teal-200 p-3 rounded-xl mb-3">
+                      <div className="flex items-center gap-1.5 font-bold mb-1 text-teal-900">
+                        <Sparkles size={14} className="text-teal-700" />
+                        <span>Azure OpenAI Synthesis ({copilotResponse.aiSource}):</span>
+                      </div>
+                      <div className="whitespace-pre-line leading-relaxed">{copilotResponse.aiGeneratedAnswer}</div>
+                    </div>
+                  )}
+
                   {/* OVERALL DIVERGENCE CONTEXT IF PROJECT FIT DIFFERS */}
                   {copilotResponse?.overallDivergenceContext && (
-                    <div className="text-xs text-amber-900 bg-amber-50 border border-amber-200 p-2.5 rounded-xl font-medium">
+                    <div className="text-xs text-amber-900 bg-amber-50 border border-amber-200 p-2.5 rounded-xl font-medium mb-3">
                       💡 <strong>Overall Readiness Context:</strong> {copilotResponse.overallDivergenceContext}
                     </div>
                   )}
+
 
                   <div className="ski-response-items-list">
                     {copilotResponse?.topMatches.map((item) => (

@@ -1,6 +1,7 @@
 import React, { useLayoutEffect, useRef, useState } from 'react';
 import { Sidebar } from './Sidebar';
 import { CommandCenterView } from './CommandCenterView';
+import { WeeklyDashboard } from '../Dashboard/WeeklyDashboard';
 import { BootcampManagement } from '../Bootcamps/BootcampManagement';
 import { BootcampDetails } from '../Bootcamps/BootcampDetails';
 import { TraineeManagement } from '../Trainees/TraineeManagement';
@@ -33,6 +34,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
     }
     const validNavs = [
       'command-center',
+      'weekly-dashboard',
       'bootcamps',
       'training',
       'trainees',
@@ -142,6 +144,7 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
 
   const pageTitleMap: Record<string, string> = {
     'command-center': 'Command Center',
+    'weekly-dashboard': 'Weekly Dashboard',
     'bootcamps': 'Bootcamps',
     'bootcamp-details': 'Cohort Details',
     'training': 'Training Management',
@@ -205,6 +208,8 @@ export const AppShell: React.FC<AppShellProps> = ({ onLogout }) => {
               onSelectBootcamp={handleSelectBootcamp}
             />
           )}
+
+          {currentNav === 'weekly-dashboard' && <WeeklyDashboard />}
 
           {currentNav === 'bootcamps' && (
             <BootcampManagement onSelectBootcamp={handleSelectBootcamp} />

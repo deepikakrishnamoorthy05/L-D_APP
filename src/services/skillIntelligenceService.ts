@@ -63,6 +63,8 @@ export interface ProjectCandidateMatch {
   readinessStatus: string;
 }
 
+import { azureOpenAiService } from './azureOpenAiService';
+
 export interface CopilotQueryResult {
   intent: 'OVERALL_READINESS' | 'PROJECT_FIT' | 'TRACK_RECOMMENDATION' | 'DEVELOPMENT_GAP' | 'COHORT_SKILLS' | 'INTERVENTION';
   question: string;
@@ -84,7 +86,10 @@ export interface CopilotQueryResult {
   }>;
   overallDivergenceContext?: string;
   telemetrySources: string[];
+  aiGeneratedAnswer?: string;
+  aiSource?: 'AZURE_OPENAI' | 'BACKEND_PROXY' | 'LOCAL_FALLBACK';
 }
+
 
 // Master Trainee Telemetry Seed Data
 const MASTER_TRAINEES: TraineeTelemetryRecord[] = [
@@ -611,12 +616,42 @@ export const skillIntelligenceService = {
           { label: 'Assessment', value: `${t.assessmentScore}%` },
           { label: 'Feedback', value: `${t.trainerFeedbackRating} / 5` },
         ],
-        whyRationale: `Calculated readiness score of ${t.overallReadinessScore}%.`,
+      whyRationale: `Calculated readiness score of ${t.overallReadinessScore}%.`,
       })),
     };
   },
 
+  // 7b. Async Copilot Query with Azure OpenAI Integration
+  askCopilotAsync: async (queryText: string): Promise<CopilotQueryResult> => {
+    // Get deterministic structural metrics & rankings
+    const baseResult = skillIntelligenceService.askCopilot(queryText);
+
+    // Attempt live Azure OpenAI call
+    try {
+      const aiRes = await azureOpenAiService.askAzureCopilot(
+        queryText,
+        `You are the Systech L&D Intelligence Copilot assistant. Synthesize enterprise L&D data for queries about trainee readiness, Databricks, SQL, dbt, and track allocations. Be concise, professional, and clear.`
+      );
+
+      if (aiRes.source !== 'LOCAL_FALLBACK' && aiRes.answer) {
+        return {
+          ...baseResult,
+          aiGeneratedAnswer: aiRes.answer,
+          aiSource: aiRes.source,
+        };
+      }
+    } catch (err) {
+      console.warn('Azure OpenAI integration call failed, using local result.', err);
+    }
+
+    return {
+      ...baseResult,
+      aiSource: 'LOCAL_FALLBACK',
+    };
+  },
+
   // 8. Get Evidence Explanation for a Trainee
+
   getEvidenceExplanation: (traineeId: string, contextTitle?: string) => {
     const list = skillIntelligenceService.getTrainees();
     const trainee =
