@@ -19,7 +19,8 @@ export class StartSessionDto {
 }
 
 export class JoinSessionDto {
-  joinCode!: string;
+  sessionId?: string;
+  joinCode?: string;
   employeeId?: string;
   employeeName!: string;
 }
@@ -29,5 +30,6 @@ export class SubmitAnswerDto {
   questionId!: string;
   participantId!: string;
   selectedAnswer!: string;
+  responseTimeMs?: number;
   responseTimeSec?: number;
 }

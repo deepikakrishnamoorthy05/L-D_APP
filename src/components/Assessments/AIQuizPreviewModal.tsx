@@ -41,6 +41,8 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
 
   const [questions, setQuestions] = useState<QuizQuestion[]>(quizResult.questions || []);
   const [quizTitle, setQuizTitle] = useState<string>(quizResult.title || `${quizResult.topic} Quiz`);
+  const [durationMinutes, setDurationMinutes] = useState<number>(15);
+  const [passPercentage, setPassPercentage] = useState<number>(70);
 
   const [regeneratingQuestionId, setRegeneratingQuestionId] = useState<string | null>(null);
   const [activeRegenerateMenuId, setActiveRegenerateMenuId] = useState<string | null>(null);
@@ -51,7 +53,22 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
   const [editCorrectAnswer, setEditCorrectAnswer] = useState('');
   const [editExplanation, setEditExplanation] = useState('');
   const [editTimeLimit, setEditTimeLimit] = useState(30);
-  const [editPoints, setEditPoints] = useState(10);
+  const [editPoints, setEditPoints] = useState(1);
+
+  const handleAddManualQuestion = () => {
+    const newQ: QuizQuestion = {
+      id: `q-manual-${Date.now()}`,
+      question: 'Enter custom technical question text here',
+      type: 'multiple_choice',
+      options: ['Option A', 'Option B', 'Option C', 'Option D'],
+      correctAnswer: 'Option A',
+      explanation: 'Provide justification for the correct answer.',
+      timeLimit: 30,
+      points: 1,
+    };
+    setQuestions((prev) => [...prev, newQ]);
+    handleOpenEditModal(newQ);
+  };
 
   const handleRegenerateQuestion = async (
     q: QuizQuestion,
@@ -89,7 +106,7 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
     setEditCorrectAnswer(q.correctAnswer);
     setEditExplanation(q.explanation);
     setEditTimeLimit(q.timeLimit || 30);
-    setEditPoints(q.points || 10);
+    setEditPoints(q.points || 1);
   };
 
   const handleSaveQuestionEdit = () => {
@@ -113,11 +130,13 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
     setEditingQuestion(null);
   };
 
-  const currentQuizData: GeneratedQuizResult = {
+  const currentQuizData: GeneratedQuizResult & { durationMinutes?: number; passPercentage?: number } = {
     ...quizResult,
     title: quizTitle,
     questionCount: questions.length,
     questions,
+    durationMinutes,
+    passPercentage,
   };
 
   return (
@@ -164,7 +183,36 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
 
         {/* MODAL BODY */}
         <div className="ai-quiz-modal-body">
-          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          {/* QUIZ DURATION & PASS % SETTINGS STRIP */}
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '12px', padding: '14px 18px', background: 'var(--surface-2)', borderRadius: '14px', border: '1px solid var(--border-1)', marginBottom: '16px' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Clock size={16} style={{ color: '#0d9488' }} />
+              <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-1)' }}>Duration (Minutes):</label>
+              <input
+                type="number"
+                min={1}
+                max={180}
+                value={durationMinutes}
+                onChange={(e) => setDurationMinutes(Math.max(1, Number(e.target.value)))}
+                style={{ width: '60px', padding: '4px 8px', borderRadius: '8px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-1)', fontWeight: 700, fontSize: '0.85rem' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <Award size={16} style={{ color: '#10b981' }} />
+              <label style={{ fontSize: '0.82rem', fontWeight: 700, color: 'var(--text-1)' }}>Pass Percentage (%):</label>
+              <input
+                type="number"
+                min={1}
+                max={100}
+                value={passPercentage}
+                onChange={(e) => setPassPercentage(Math.max(1, Math.min(100, Number(e.target.value))))}
+                style={{ width: '60px', padding: '4px 8px', borderRadius: '8px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', color: 'var(--text-1)', fontWeight: 700, fontSize: '0.85rem' }}
+              />
+            </div>
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '16px' }}>
             <span style={{ fontSize: '0.78rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-2)' }}>
               Review &amp; Edit Questions ({questions.length})
             </span>
@@ -182,28 +230,50 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
                   animate={{ opacity: 1, y: 0 }}
                   className="ai-question-card"
                   style={{
-                    borderColor: isRegenerating ? '#0d9488' : undefined,
-                    background: isRegenerating ? 'rgba(13, 148, 136, 0.05)' : undefined
+                    padding: '22px',
+                    borderRadius: '20px',
+                    background: isRegenerating ? 'rgba(13, 148, 136, 0.05)' : 'var(--surface-1)',
+                    border: `1.5px solid ${isRegenerating ? '#0d9488' : 'var(--border-1)'}`,
+                    boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)',
+                    display: 'flex',
+                    flexDirection: 'column',
+                    gap: '16px',
                   }}
                 >
                   {/* QUESTION CARD HEADER */}
-                  <div className="q-header">
-                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '12px' }}>
-                      <div className="q-num-badge">
+                  <div className="q-header" style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', gap: '16px' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-start', gap: '14px', flex: 1 }}>
+                      <div
+                        className="q-num-badge"
+                        style={{
+                          width: '36px',
+                          height: '36px',
+                          borderRadius: '10px',
+                          background: 'rgba(13, 148, 136, 0.12)',
+                          color: '#0d9488',
+                          fontWeight: 900,
+                          fontSize: '0.9rem',
+                          display: 'flex',
+                          alignItems: 'center',
+                          justifyContent: 'center',
+                          flexShrink: 0,
+                          border: '1px solid rgba(13, 148, 136, 0.25)',
+                        }}
+                      >
                         {String(idx + 1).padStart(2, '0')}
                       </div>
-                      <div>
-                        <div className="q-title">{q.question}</div>
-                        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginTop: '4px', fontSize: '0.76rem', color: 'var(--text-2)' }}>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Clock size={12} style={{ color: '#f59e0b' }} /> {q.timeLimit || 30}s
+                      <div style={{ flex: 1 }}>
+                        <h3 className="q-title" style={{ fontSize: '1.05rem', fontWeight: 800, color: 'var(--text-1)', margin: '0 0 6px 0', lineHeight: 1.45 }}>
+                          {q.question}
+                        </h3>
+                        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flexWrap: 'wrap', fontSize: '0.78rem', color: 'var(--text-2)' }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '6px', background: 'rgba(245, 158, 11, 0.1)', color: '#d97706', fontWeight: 700 }}>
+                            <Clock size={12} /> {q.timeLimit || 30}s
                           </span>
-                          <span>•</span>
-                          <span style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-                            <Award size={12} style={{ color: '#4f46e5' }} /> {q.points || 10} pts
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '6px', background: 'rgba(79, 70, 229, 0.1)', color: '#4f46e5', fontWeight: 700 }}>
+                            <Award size={12} /> {q.points || 10} pts
                           </span>
-                          <span>•</span>
-                          <span style={{ textTransform: 'capitalize', fontWeight: 700 }}>
+                          <span style={{ display: 'inline-flex', alignItems: 'center', gap: '4px', padding: '3px 8px', borderRadius: '6px', background: 'var(--surface-2)', color: 'var(--text-2)', fontWeight: 700 }}>
                             {q.type === 'multiple_choice' ? 'Multiple Choice' : 'Type Answer'}
                           </span>
                         </div>
@@ -211,14 +281,14 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
                     </div>
 
                     {/* QUESTION CARD ACTIONS */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '6px', position: 'relative' }}>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '8px', flexShrink: 0, position: 'relative' }}>
                       <button
                         type="button"
                         onClick={() => handleOpenEditModal(q)}
                         className="ai-quiz-btn-secondary"
-                        style={{ padding: '6px 12px', fontSize: '0.76rem', display: 'flex', alignItems: 'center', gap: '4px' }}
+                        style={{ padding: '7px 14px', borderRadius: '10px', fontSize: '0.78rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px' }}
                       >
-                        <Edit size={12} /> Edit
+                        <Edit size={13} /> Edit
                       </button>
 
                       <div style={{ position: 'relative' }}>
@@ -227,38 +297,38 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
                           onClick={() => setActiveRegenerateMenuId(isMenuOpen ? null : q.id)}
                           disabled={isRegenerating}
                           className="ai-quiz-btn-secondary"
-                          style={{ padding: '6px 12px', fontSize: '0.76rem', display: 'flex', alignItems: 'center', gap: '4px', color: '#0d9488', borderColor: 'rgba(13, 148, 136, 0.3)' }}
+                          style={{ padding: '7px 14px', borderRadius: '10px', fontSize: '0.78rem', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#0d9488', borderColor: 'rgba(13, 148, 136, 0.3)' }}
                         >
-                          <RotateCcw size={12} /> Regenerate <ChevronDown size={10} />
+                          <RotateCcw size={13} /> Regenerate <ChevronDown size={11} />
                         </button>
 
                         {isMenuOpen && (
-                          <div style={{ position: 'absolute', right: 0, marginTop: '4px', width: '180px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '12px', boxShadow: 'var(--card-shadow)', zIndex: 30, overflow: 'hidden', padding: '4px' }}>
+                          <div style={{ position: 'absolute', right: 0, marginTop: '6px', width: '190px', background: 'var(--surface-1)', border: '1px solid var(--border-1)', borderRadius: '14px', boxShadow: '0 10px 30px rgba(0,0,0,0.15)', zIndex: 30, overflow: 'hidden', padding: '6px' }}>
                             <button
                               type="button"
                               onClick={() => handleRegenerateQuestion(q, 'easier')}
-                              style={{ width: '100%', padding: '8px 12px', textAlign: 'left', background: 'none', border: 'none', color: 'var(--text-1)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                              style={{ width: '100%', padding: '8px 12px', textAlign: 'left', background: 'none', border: 'none', borderRadius: '8px', color: 'var(--text-1)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
                             >
                               Make Easier
                             </button>
                             <button
                               type="button"
                               onClick={() => handleRegenerateQuestion(q, 'harder')}
-                              style={{ width: '100%', padding: '8px 12px', textAlign: 'left', background: 'none', border: 'none', color: 'var(--text-1)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                              style={{ width: '100%', padding: '8px 12px', textAlign: 'left', background: 'none', border: 'none', borderRadius: '8px', color: 'var(--text-1)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
                             >
                               Make Harder
                             </button>
                             <button
                               type="button"
                               onClick={() => handleRegenerateQuestion(q, 'different')}
-                              style={{ width: '100%', padding: '8px 12px', textAlign: 'left', background: 'none', border: 'none', color: 'var(--text-1)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                              style={{ width: '100%', padding: '8px 12px', textAlign: 'left', background: 'none', border: 'none', borderRadius: '8px', color: 'var(--text-1)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
                             >
                               Create Different Question
                             </button>
                             <button
                               type="button"
                               onClick={() => handleRegenerateQuestion(q, 'change_type')}
-                              style={{ width: '100%', padding: '8px 12px', textAlign: 'left', background: 'none', border: 'none', color: 'var(--text-1)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
+                              style={{ width: '100%', padding: '8px 12px', textAlign: 'left', background: 'none', border: 'none', borderRadius: '8px', color: 'var(--text-1)', fontSize: '0.78rem', fontWeight: 600, cursor: 'pointer' }}
                             >
                               Change Question Type
                             </button>
@@ -269,16 +339,16 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
                       <button
                         type="button"
                         onClick={() => handleDeleteQuestion(q.id)}
-                        style={{ padding: '6px', background: 'transparent', border: 'none', color: 'var(--text-3)', cursor: 'pointer' }}
+                        style={{ padding: '8px', background: 'transparent', border: 'none', borderRadius: '8px', color: 'var(--text-3)', cursor: 'pointer', transition: 'color 0.2s' }}
                       >
-                        <Trash2 size={15} />
+                        <Trash2 size={16} />
                       </button>
                     </div>
                   </div>
 
-                  {/* OPTIONS LIST */}
+                  {/* 2x2 OPTIONS GRID WITH NEAT ALIGNMENT */}
                   {q.type === 'multiple_choice' && q.options && (
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))', gap: '8px' }}>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px', marginTop: '4px' }}>
                       {q.options.map((opt, optIdx) => {
                         const isCorrect = opt === q.correctAnswer;
                         const optionLabel = String.fromCharCode(65 + optIdx);
@@ -286,17 +356,59 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
                         return (
                           <div
                             key={optIdx}
-                            className={`ai-option-item ${isCorrect ? 'correct' : ''}`}
+                            style={{
+                              padding: '12px 16px',
+                              borderRadius: '12px',
+                              background: isCorrect ? 'rgba(16, 185, 129, 0.08)' : 'var(--surface-2)',
+                              border: `1.5px solid ${isCorrect ? '#10b981' : 'var(--border-1)'}`,
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'space-between',
+                              gap: '12px',
+                              boxShadow: isCorrect ? '0 0 12px rgba(16, 185, 129, 0.15)' : 'none',
+                              transition: 'all 0.2s ease',
+                              minHeight: '48px',
+                            }}
                           >
-                            <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                              <span style={{ width: '20px', height: '20px', borderRadius: '4px', background: 'var(--surface-1)', color: 'var(--text-2)', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '10px', flex: 1, minWidth: 0 }}>
+                              <span
+                                style={{
+                                  width: '28px',
+                                  height: '28px',
+                                  borderRadius: '8px',
+                                  background: isCorrect ? 'rgba(16, 185, 129, 0.18)' : 'var(--surface-1)',
+                                  color: isCorrect ? '#10b981' : 'var(--text-2)',
+                                  border: `1px solid ${isCorrect ? '#10b981' : 'var(--border-1)'}`,
+                                  fontSize: '0.78rem',
+                                  fontWeight: 800,
+                                  display: 'flex',
+                                  alignItems: 'center',
+                                  justifyContent: 'center',
+                                  flexShrink: 0,
+                                }}
+                              >
                                 {optionLabel}
                               </span>
-                              <span>{opt}</span>
+                              <span style={{ fontSize: '0.88rem', fontWeight: isCorrect ? 800 : 600, color: 'var(--text-1)', lineHeight: 1.35, wordBreak: 'break-word' }}>
+                                {opt}
+                              </span>
                             </div>
                             {isCorrect && (
-                              <span style={{ display: 'flex', alignItems: 'center', gap: '4px', color: '#10b981', fontWeight: 800 }}>
-                                <CheckCircle2 size={14} /> Correct
+                              <span
+                                style={{
+                                  display: 'inline-flex',
+                                  alignItems: 'center',
+                                  gap: '4px',
+                                  color: '#10b981',
+                                  fontWeight: 800,
+                                  fontSize: '0.76rem',
+                                  padding: '4px 10px',
+                                  borderRadius: '20px',
+                                  background: 'rgba(16, 185, 129, 0.15)',
+                                  flexShrink: 0,
+                                }}
+                              >
+                                <CheckCircle2 size={13} /> Correct
                               </span>
                             )}
                           </div>
@@ -307,11 +419,21 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
 
                   {/* EXPLANATION BOX */}
                   {q.explanation && (
-                    <div style={{ padding: '12px 14px', borderRadius: '12px', background: 'rgba(13, 148, 136, 0.06)', border: '1px solid rgba(13, 148, 136, 0.2)', fontSize: '0.78rem', color: 'var(--text-1)' }}>
-                      <span style={{ fontWeight: 800, color: '#0d9488', textTransform: 'uppercase', fontSize: '0.68rem', display: 'block', marginBottom: '2px' }}>
-                        Explanation:
+                    <div
+                      style={{
+                        padding: '14px 18px',
+                        borderRadius: '14px',
+                        background: 'rgba(13, 148, 136, 0.06)',
+                        border: '1px solid rgba(13, 148, 136, 0.22)',
+                        fontSize: '0.82rem',
+                        color: 'var(--text-1)',
+                        marginTop: '2px',
+                      }}
+                    >
+                      <span style={{ fontWeight: 900, color: '#0d9488', textTransform: 'uppercase', fontSize: '0.72rem', letterSpacing: '0.5px', display: 'block', marginBottom: '4px' }}>
+                        EXPLANATION:
                       </span>
-                      <p style={{ margin: 0, lineHeight: 1.4 }}>{q.explanation}</p>
+                      <p style={{ margin: 0, lineHeight: 1.5, color: 'var(--text-1)', fontWeight: 500 }}>{q.explanation}</p>
                     </div>
                   )}
                 </motion.div>
@@ -346,10 +468,10 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
             <button
               type="button"
               onClick={() => onSaveAsAssessment(currentQuizData, 'Scheduled')}
-              className="ai-quiz-btn-secondary"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0d9488', borderColor: 'rgba(13, 148, 136, 0.4)' }}
+              className="ai-quiz-btn-primary"
+              style={{ display: 'flex', alignItems: 'center', gap: '6px', background: '#10b981', color: '#fff' }}
             >
-              <CheckCircle2 size={14} /> Save Assessment
+              <CheckCircle2 size={14} /> Publish &amp; Assign Candidates
             </button>
 
             <button
@@ -358,7 +480,7 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
               className="ai-quiz-btn-primary"
               style={{ background: 'linear-gradient(135deg, #0d9488, #4f46e5)', boxShadow: '0 4px 14px rgba(13, 148, 136, 0.4)' }}
             >
-              <Zap size={14} /> Start Live Quiz
+              <Zap size={14} /> Start Live Host Session
             </button>
           </div>
         </div>

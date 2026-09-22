@@ -9,6 +9,7 @@ import { SessionProvider } from './context/SessionContext';
 import { AssessmentProvider } from './context/AssessmentContext';
 import { FeedbackProvider } from './context/FeedbackContext';
 import { LiveQuizParticipantView } from './components/Assessments/LiveQuizParticipantView';
+import { CandidateQuizAttemptView } from './components/Assessments/CandidateQuizAttemptView';
 import { getHealthStatus, apiClient } from './services/api';
 import './App.css';
 
@@ -41,7 +42,7 @@ const MainAppContent: React.FC = () => {
 
   useEffect(() => {
     if (!isAuthenticated) {
-      if (window.location.pathname !== '/login') {
+      if (!window.location.pathname.startsWith('/quiz/')) {
         window.history.replaceState(null, '', '/login');
         setLocationPath('/login');
       }
@@ -52,6 +53,22 @@ const MainAppContent: React.FC = () => {
       }
     }
   }, [isAuthenticated]);
+
+  // Support /quiz/attempt/:token URL route for candidate secure invitations
+  const isQuizAttemptPath = window.location.pathname.startsWith('/quiz/attempt/');
+  const attemptTokenParam = window.location.pathname.split('/quiz/attempt/')[1] || '';
+
+  if (isQuizAttemptPath && attemptTokenParam) {
+    return (
+      <CandidateQuizAttemptView
+        token={attemptTokenParam}
+        onExit={() => {
+          window.history.pushState(null, '', '/command-center');
+          setLocationPath('/command-center');
+        }}
+      />
+    );
+  }
 
   // Support /quiz/join URL route for participants
   const isQuizJoinPath = window.location.pathname.startsWith('/quiz/join');

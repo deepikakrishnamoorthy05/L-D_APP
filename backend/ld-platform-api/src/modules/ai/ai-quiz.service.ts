@@ -71,12 +71,13 @@ Return ONLY valid JSON matching this exact structure:
     }
   ]
 }
-Rules:
-1. Generate accurate, practical, real-world questions specifically tailored to "${topic}".
-2. Ensure options are plausible distractors with EXACTLY one clear correct answer matching one of the options.
-3. Respect difficulty level: ${difficulty}.
-4. Do NOT include markdown code blocks. Output raw JSON object only.`,
-          `Generate a ${questionCount}-question ${difficulty} multiple-choice quiz on topic: "${topic}".`,
+CRITICAL RULES:
+1. NO DUPLICATE QUESTIONS: All ${questionCount} questions MUST be 100% unique, distinct technical concepts. Never repeat any question topic or phrasing.
+2. CONCISE OPTIONS ONLY: Keep all multiple-choice options VERY SHORT (1 to 6 words each max). DO NOT write long paragraph options. For example, use "Partition Pruning" instead of "Applying idempotent partition pruning and columnar query filtering".
+3. Ensure options are plausible distractors with EXACTLY one clear correct answer matching one of the options.
+4. Respect difficulty level: ${difficulty}.
+5. Do NOT include markdown code blocks. Output raw JSON object only.`,
+          `Generate a ${questionCount}-question ${difficulty} multiple-choice quiz on topic: "${topic}". Ensure all ${questionCount} questions are distinct and all options are concise (1-6 words).`,
           { jsonMode: true }
         );
 
@@ -177,8 +178,10 @@ Rules:
     fallbackDifficulty: string,
     targetCount: number
   ): GeneratedQuizDto {
-    const questions: QuizQuestionDto[] = (rawJson.questions || []).map((q: any, idx: number) => {
-      const options = Array.isArray(q.options) && q.options.length > 0 ? q.options : ['Option A', 'Option B', 'Option C', 'Option D'];
+    const rawQuestions: QuizQuestionDto[] = (rawJson.questions || []).map((q: any, idx: number) => {
+      const options = Array.isArray(q.options) && q.options.length > 0
+        ? q.options.map((opt: any) => String(opt).trim())
+        : ['Option A', 'Option B', 'Option C', 'Option D'];
       const correctAnswer = q.correctAnswer && options.includes(q.correctAnswer) ? q.correctAnswer : options[0];
       return {
         id: q.id || `q-${idx + 1}-${Date.now()}`,
@@ -192,12 +195,36 @@ Rules:
       };
     });
 
+    // Deduplicate questions to prevent repeating items
+    const seenTexts = new Set<string>();
+    const uniqueQuestions: QuizQuestionDto[] = [];
+
+    for (const q of rawQuestions) {
+      const normalized = q.question.trim().toLowerCase();
+      if (!seenTexts.has(normalized)) {
+        seenTexts.add(normalized);
+        uniqueQuestions.push(q);
+      }
+    }
+
+    // Fill remaining if duplicates were returned by AI
+    let idx = uniqueQuestions.length + 1;
+    while (uniqueQuestions.length < targetCount && idx <= targetCount + 12) {
+      const fallbackQ = this.generateSingleDynamicQuestion(fallbackTopic, fallbackDifficulty, 'multiple_choice', `q-${idx}`, 'initial', idx);
+      const normalized = fallbackQ.question.trim().toLowerCase();
+      if (!seenTexts.has(normalized)) {
+        seenTexts.add(normalized);
+        uniqueQuestions.push(fallbackQ);
+      }
+      idx++;
+    }
+
     return {
       title: rawJson.title || `${fallbackTopic} Quiz`,
       topic: rawJson.topic || fallbackTopic,
       difficulty: rawJson.difficulty || fallbackDifficulty,
-      questionCount: questions.length || targetCount,
-      questions,
+      questionCount: uniqueQuestions.length,
+      questions: uniqueQuestions,
     };
   }
 
@@ -207,17 +234,22 @@ Rules:
     const count = Number(input.questionCount) || 10;
 
     const questions: QuizQuestionDto[] = [];
+    const seenTexts = new Set<string>();
+
     for (let i = 1; i <= count; i++) {
       const q = this.generateSingleDynamicQuestion(rawTopic, difficulty, 'multiple_choice', `q-${i}`, 'initial', i);
-      q.timeLimit = 30;
-      questions.push(q);
+      const normalized = q.question.trim().toLowerCase();
+      if (!seenTexts.has(normalized)) {
+        seenTexts.add(normalized);
+        questions.push(q);
+      }
     }
 
     return {
       title: `${rawTopic} Quiz`,
       topic: rawTopic,
       difficulty,
-      questionCount: count,
+      questionCount: questions.length,
       questions,
     };
   }
@@ -236,59 +268,76 @@ Rules:
 
     const questionTemplates = [
       {
-        q: `What is a core architectural requirement when implementing ${cleanTopic} in enterprise production data pipelines?`,
-        opts: [
-          `Ensuring idempotency, fault tolerance, and scalable resource isolation for ${cleanTopic}`,
-          `Disabling transaction logs to increase single-node execution speed`,
-          `Hardcoding static IP addresses in the core application configuration`,
-          `Using unindexed legacy flat files for intermediate state storage`
-        ],
-        correct: `Ensuring idempotency, fault tolerance, and scalable resource isolation for ${cleanTopic}`,
-        explanation: `Production ${cleanTopic} implementations require idempotent processing, exception handling, and resource isolation to prevent cascading failures.`
+        q: `Which core mechanism optimizes query performance in ${cleanTopic}?`,
+        opts: ['Partition Pruning', 'Static Thread Delays', 'Disabling Commit Logs', 'Flat Unindexed Files'],
+        correct: 'Partition Pruning',
+        explanation: `Partition pruning avoids scanning unnecessary data files during ${cleanTopic} execution.`
       },
       {
-        q: `Which best practice optimizes query performance and execution latency in ${cleanTopic}?`,
-        opts: [
-          `Applying predicate pushdown, partition pruning, and column projection`,
-          `Executing Cartesian CROSS JOINs across unindexed tables`,
-          `Storing all records in a single unpartitioned raw CSV dataset`,
-          `Disabling memory caching and metadata statistics auto-collection`
-        ],
-        correct: `Applying predicate pushdown, partition pruning, and column projection`,
-        explanation: `Partition pruning and predicate pushdown drastically reduce data scanning overhead in ${cleanTopic} execution engines.`
+        q: `How does ${cleanTopic} maintain transaction isolation under high concurrency?`,
+        opts: ['MVCC & Commit Logs', 'Global Table Locking', 'Client Local Storage', 'Silent Overwrites'],
+        correct: 'MVCC & Commit Logs',
+        explanation: `Multi-version concurrency control and commit logs ensure non-blocking concurrent operations in ${cleanTopic}.`
       },
       {
-        q: `How does ${cleanTopic} handle concurrent updates and consistency guarantees?`,
-        opts: [
-          `Through ACID transaction logs, multi-version concurrency control (MVCC), and atomic commits`,
-          `By locking the entire database during all read queries`,
-          `By silently overwriting conflicting records without audit logging`,
-          `By storing transactional history in temporary client browser storage`
-        ],
-        correct: `Through ACID transaction logs, multi-version concurrency control (MVCC), and atomic commits`,
-        explanation: `Modern ${cleanTopic} systems utilize MVCC and commit logs to provide isolated, concurrent read and write operations.`
+        q: `What primary diagnostic metric isolates execution bottlenecks in ${cleanTopic}?`,
+        opts: ['DAG Timelines & Task Spill', 'Network Cable Length', 'String Data Conversion', 'Disabling Telemetry'],
+        correct: 'DAG Timelines & Task Spill',
+        explanation: `Analyzing DAG execution timelines and task memory spill pinpoints bottlenecks in ${cleanTopic}.`
       },
       {
-        q: `When troubleshooting memory spill or performance degradation in ${cleanTopic}, what is the primary diagnostic approach?`,
-        opts: [
-          `Analyze execution plan DAGs, stage metrics, and data skew distribution`,
-          `Increase thread sleep delays in the client caller application`,
-          `Convert all numeric fields into string representations`,
-          `Disable logging and telemetry monitoring`
-        ],
-        correct: `Analyze execution plan DAGs, stage metrics, and data skew distribution`,
-        explanation: `Examining DAG execution metrics and data skew allows engineers to pinpoint bottleneck stages and resolve memory spill in ${cleanTopic}.`
+        q: `Which technique eliminates data skew during shuffle operations in ${cleanTopic}?`,
+        opts: ['Salting Join Keys', 'Disabling Partitioning', 'Infinite Client Timeouts', 'Plaintext Local Storage'],
+        correct: 'Salting Join Keys',
+        explanation: `Salting join keys distributes hot keys evenly across worker nodes in ${cleanTopic}.`
       },
       {
-        q: `What is the primary trade-off when configuring high availability for ${cleanTopic}?`,
-        opts: [
-          `Latency vs consistency balance according to the CAP theorem principles`,
-          `CPU core clock frequency vs monitor resolution`,
-          `User interface dark mode vs light mode rendering times`,
-          `File extension length vs filename character count`
-        ],
-        correct: `Latency vs consistency balance according to the CAP theorem principles`,
-        explanation: `Distributed systems running ${cleanTopic} trade off consistency, availability, and network partition tolerance depending on system SLA.`
+        q: `What architectural pattern ensures reliable failure recovery in ${cleanTopic}?`,
+        opts: ['WAL & Checkpointing', 'Hardcoded Server IPs', 'Disabling Replicas', 'Manual File Copies'],
+        correct: 'WAL & Checkpointing',
+        explanation: `Write-ahead logs and state checkpointing allow seamless fault recovery in ${cleanTopic}.`
+      },
+      {
+        q: `Which storage format offers optimal compression and columnar projection for ${cleanTopic}?`,
+        opts: ['Parquet', 'Uncompressed CSV', 'Raw JSON Text', 'XML Payload'],
+        correct: 'Parquet',
+        explanation: `Parquet provides efficient columnar projection and compression for ${cleanTopic} processing.`
+      },
+      {
+        q: `What approach reduces memory pressure during large-scale aggregation in ${cleanTopic}?`,
+        opts: ['Map-Side Combiners', 'Increasing Heap Size Only', 'Disabling Garbage Collection', 'Synchronous File Lock'],
+        correct: 'Map-Side Combiners',
+        explanation: `Map-side combiners reduce data volume before network shuffle operations in ${cleanTopic}.`
+      },
+      {
+        q: `Which consistency model is prioritized in transactional ${cleanTopic} engines?`,
+        opts: ['ACID Compliance', 'Eventually Inconsistent', 'No Auditing', 'Temporary Buffer Lock'],
+        correct: 'ACID Compliance',
+        explanation: `ACID compliance guarantees atomic, consistent, isolated, and durable operations in ${cleanTopic}.`
+      },
+      {
+        q: `How do you secure sensitive data payloads at rest in ${cleanTopic}?`,
+        opts: ['AES-256 Encryption', 'Base64 Encoding Only', 'Plaintext Logs', 'HTTP Unencrypted Stream'],
+        correct: 'AES-256 Encryption',
+        explanation: `AES-256 encryption secures stored data artifacts against unauthorized access in ${cleanTopic}.`
+      },
+      {
+        q: `Which indexing strategy accelerates point lookups in ${cleanTopic}?`,
+        opts: ['B-Tree & Bloom Filters', 'Linear Sequential Scan', 'Random Hashing', 'Disabling Indexing'],
+        correct: 'B-Tree & Bloom Filters',
+        explanation: `Bloom filters and B-Trees prune non-matching data files rapidly during ${cleanTopic} point lookups.`
+      },
+      {
+        q: `What strategy minimizes network transfer overhead in distributed ${cleanTopic} clusters?`,
+        opts: ['Broadcast Joins', 'Full Cross Joins', 'Uncompressed Telemetry', 'Single-Threaded Transfers'],
+        correct: 'Broadcast Joins',
+        explanation: `Broadcast joins replicate small lookup tables to executors, avoiding heavy shuffle network transfer in ${cleanTopic}.`
+      },
+      {
+        q: `Which metric indicates memory spill during sorting operations in ${cleanTopic}?`,
+        opts: ['Spill to Disk (Bytes)', 'CPU Temperature', 'Screen Resolution', 'File Path Length'],
+        correct: 'Spill to Disk (Bytes)',
+        explanation: `Spill to disk measures data written to disk when memory buffer memory limits are exceeded in ${cleanTopic}.`
       }
     ];
 
@@ -300,33 +349,18 @@ Rules:
     let explanation = template.explanation;
 
     if (action === 'easier' || isBeginner) {
-      questionText = `What is the fundamental purpose of ${cleanTopic}?`;
-      options = [
-        `To provide standardized data processing and structured technical capabilities for ${cleanTopic}`,
-        `To replace physical network interface hardware`,
-        `To automatically generate random CSS layout themes`,
-        `To disable database authentication checks`
-      ];
+      questionText = `What is the primary function of ${cleanTopic}?`;
+      options = ['Data Processing & Analytics', 'Hardware Power Management', 'Theme Color Generation', 'Disabling Authentication'];
       correct = options[0];
       explanation = `${cleanTopic} provides foundational mechanisms designed for structured technical operations and data management.`;
     } else if (action === 'harder' || isAdvanced) {
-      questionText = `In an advanced enterprise scenario involving ${cleanTopic}, how do you mitigate high data skew during shuffle operations?`;
-      options = [
-        `Salting keys with random prefixes and utilizing isolated skew hint directives`,
-        `Relying on default round-robin partitioning without custom keys`,
-        `Increasing client timeout to infinite seconds`,
-        `Storing intermediate state in plain text emails`
-      ];
+      questionText = `In enterprise ${cleanTopic}, how do you eliminate partition skew during join shuffles?`;
+      options = ['Salting Join Keys with Hints', 'Disabling Partitioning', 'Infinite Timeout Loops', 'Plaintext Local Storage'];
       correct = options[0];
-      explanation = `Salting join/groupby keys breaks up hot keys evenly across partition executors in ${cleanTopic}.`;
+      explanation = `Salting join keys breaks up hot keys evenly across partition executors in ${cleanTopic}.`;
     } else if (action === 'different') {
       questionText = `Which feature set distinguishes ${cleanTopic} from traditional legacy processing methods?`;
-      options = [
-        `Native distributed execution, automated schema evolution, and declarative APIs`,
-        `Manual batch file copy operations via FTP scripts`,
-        `Single-threaded synchronous file locks`,
-        `Requiring manual binary file hex editing`
-      ];
+      options = ['Auto-Scaling & Declarative APIs', 'Manual FTP File Transfers', 'Single-Threaded File Locks', 'Binary Hex Editing'];
       correct = options[0];
       explanation = `Modern ${cleanTopic} implementations prioritize automated scalability, declarative interfaces, and robust schema management.`;
     }

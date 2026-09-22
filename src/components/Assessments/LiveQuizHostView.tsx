@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Users,
@@ -18,10 +18,17 @@ import {
   ShieldCheck,
   Save,
   RotateCcw,
+  UserPlus,
+  ChevronDown,
+  Search,
+  CheckSquare,
+  Square,
+  Trash2,
 } from 'lucide-react';
 import { QuizQuestion } from '../../types/assessment';
 import { GeneratedQuizResult } from '../../services/aiQuizService';
 import { nativeQuizService, NativeQuizParticipant, NativeQuizSessionSummary } from '../../services/nativeQuizService';
+import { useTrainees } from '../../context/TraineeContext';
 
 interface LiveQuizHostViewProps {
   isOpen: boolean;
@@ -90,6 +97,79 @@ export const LiveQuizHostView: React.FC<LiveQuizHostViewProps> = ({
   const [joinCode, setJoinCode] = useState<string>('482913');
   const [sessionId, setSessionId] = useState<string>('');
   const [participants, setParticipants] = useState<NativeQuizParticipant[]>(DEMO_PARTICIPANTS);
+
+  const { trainees } = useTrainees();
+
+  // Candidate selection states & refs
+  const [isCandidateDropdownOpen, setIsCandidateDropdownOpen] = useState(false);
+  const [candidateSearchQuery, setCandidateSearchQuery] = useState('');
+  const candidateDropdownRef = useRef<HTMLDivElement>(null);
+
+  // Unified candidate pool combining DEMO_PARTICIPANTS + TraineeContext
+  const candidatePool: NativeQuizParticipant[] = useMemo(() => {
+    const map = new Map<string, NativeQuizParticipant>();
+
+    // 1. Add default demo participants
+    DEMO_PARTICIPANTS.forEach((p) => {
+      map.set(p.employeeId, p);
+    });
+
+    // 2. Add trainees from TraineeContext if available
+    if (trainees && trainees.length > 0) {
+      trainees.forEach((t) => {
+        const empId = t.employeeId || `EMP-${t.id}`;
+        if (!map.has(empId)) {
+          map.set(empId, {
+            id: t.id || empId,
+            employeeId: empId,
+            employeeName: t.name,
+            score: 0,
+            correctAnswersCount: 0,
+            totalQuestions: questions.length || 10,
+            totalTimeMs: 0,
+            formattedTime: '00:00',
+            joinedAt: new Date().toISOString(),
+          });
+        }
+      });
+    }
+
+    return Array.from(map.values());
+  }, [trainees, questions.length]);
+
+  // Click outside listener for candidate dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (candidateDropdownRef.current && !candidateDropdownRef.current.contains(event.target as Node)) {
+        setIsCandidateDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const toggleCandidate = (candidate: NativeQuizParticipant) => {
+    setParticipants((prev) => {
+      const exists = prev.some((p) => p.employeeId === candidate.employeeId);
+      if (exists) {
+        return prev.filter((p) => p.employeeId !== candidate.employeeId);
+      } else {
+        return [...prev, candidate];
+      }
+    });
+  };
+
+  const handleSelectAllCandidates = () => {
+    setParticipants(candidatePool);
+  };
+
+  const handleDeselectAllCandidates = () => {
+    setParticipants([]);
+  };
+
+  const handleRemoveCandidate = (employeeId: string) => {
+    setParticipants((prev) => prev.filter((p) => p.employeeId !== employeeId));
+  };
 
   const [copiedCode, setCopiedCode] = useState(false);
   const [copiedUrl, setCopiedUrl] = useState(false);
@@ -444,16 +524,177 @@ export const LiveQuizHostView: React.FC<LiveQuizHostViewProps> = ({
                 </div>
               </div>
 
-              {/* PARTICIPANT CARDS GRID */}
+              {/* PARTICIPANT CARDS GRID & CANDIDATE SELECTOR */}
               <div>
-                <h4 style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-2)', marginBottom: '12px' }}>
-                  Joined Trainees ({participants.length})
-                </h4>
+                <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '14px', flexWrap: 'wrap', gap: '12px' }}>
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                    <h4 style={{ fontSize: '0.85rem', fontWeight: 800, textTransform: 'uppercase', letterSpacing: '0.5px', color: 'var(--text-2)', margin: 0 }}>
+                      Joined Trainees ({participants.length})
+                    </h4>
+                    <span style={{ fontSize: '0.75rem', padding: '3px 10px', borderRadius: '12px', background: 'rgba(13, 148, 136, 0.15)', color: '#0d9488', fontWeight: 700 }}>
+                      {participants.length} of {candidatePool.length} Selected
+                    </span>
+                  </div>
+
+                  {/* CANDIDATE SELECTION CONTROLS */}
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '10px', position: 'relative' }} ref={candidateDropdownRef}>
+                    {/* MULTI-SELECT DROPDOWN TRIGGER BUTTON */}
+                    <button
+                      type="button"
+                      onClick={() => setIsCandidateDropdownOpen(!isCandidateDropdownOpen)}
+                      className="ai-quiz-btn-secondary"
+                      style={{
+                        padding: '8px 14px',
+                        fontSize: '0.82rem',
+                        fontWeight: 700,
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '8px',
+                        background: isCandidateDropdownOpen ? 'rgba(13, 148, 136, 0.2)' : 'var(--surface-2)',
+                        border: '1.5px solid #0d9488',
+                        color: '#0d9488',
+                      }}
+                    >
+                      <UserPlus size={15} />
+                      Select Candidates
+                      <ChevronDown size={14} style={{ transform: isCandidateDropdownOpen ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }} />
+                    </button>
+
+                    {/* MULTI-SELECT POPOVER DROPDOWN MENU */}
+                    {isCandidateDropdownOpen && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 8, scale: 0.96 }}
+                        animate={{ opacity: 1, y: 0, scale: 1 }}
+                        exit={{ opacity: 0, y: 8, scale: 0.96 }}
+                        transition={{ duration: 0.15 }}
+                        style={{
+                          position: 'absolute',
+                          top: 'calc(100% + 8px)',
+                          right: 0,
+                          width: '320px',
+                          maxHeight: '380px',
+                          background: 'var(--surface-2, #1e293b)',
+                          border: '1px solid var(--border-1, #334155)',
+                          borderRadius: '14px',
+                          boxShadow: '0 12px 32px rgba(0, 0, 0, 0.35)',
+                          zIndex: 999,
+                          display: 'flex',
+                          flexDirection: 'column',
+                          overflow: 'hidden',
+                        }}
+                      >
+                        {/* SEARCH & ACTION HEADER */}
+                        <div style={{ padding: '12px', borderBottom: '1px solid var(--border-1)', display: 'flex', flexDirection: 'column', gap: '8px', background: 'var(--surface-1)' }}>
+                          <div style={{ position: 'relative', display: 'flex', alignItems: 'center' }}>
+                            <Search size={14} style={{ position: 'absolute', left: '10px', color: 'var(--text-3)' }} />
+                            <input
+                              type="text"
+                              value={candidateSearchQuery}
+                              onChange={(e) => setCandidateSearchQuery(e.target.value)}
+                              placeholder="Search candidate name or ID..."
+                              style={{
+                                width: '100%',
+                                padding: '6px 10px 6px 30px',
+                                borderRadius: '8px',
+                                background: 'var(--surface-2)',
+                                border: '1px solid var(--border-1)',
+                                color: 'var(--text-1)',
+                                fontSize: '0.8rem',
+                                outline: 'none',
+                              }}
+                            />
+                            {candidateSearchQuery && (
+                              <button
+                                type="button"
+                                onClick={() => setCandidateSearchQuery('')}
+                                style={{ position: 'absolute', right: '8px', background: 'none', border: 'none', color: 'var(--text-3)', cursor: 'pointer', padding: 0 }}
+                              >
+                                <X size={12} />
+                              </button>
+                            )}
+                          </div>
+
+                          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                            <button
+                              type="button"
+                              onClick={handleSelectAllCandidates}
+                              style={{ background: 'none', border: 'none', color: '#0d9488', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: '2px 4px' }}
+                            >
+                              ✓ Select All ({candidatePool.length})
+                            </button>
+                            <button
+                              type="button"
+                              onClick={handleDeselectAllCandidates}
+                              style={{ background: 'none', border: 'none', color: '#ef4444', fontSize: '0.75rem', fontWeight: 700, cursor: 'pointer', padding: '2px 4px' }}
+                            >
+                              ✕ Clear All
+                            </button>
+                          </div>
+                        </div>
+
+                        {/* CANDIDATES LIST */}
+                        <div style={{ overflowY: 'auto', flex: 1, padding: '6px 0' }}>
+                          {candidatePool
+                            .filter(
+                              (c) =>
+                                c.employeeName.toLowerCase().includes(candidateSearchQuery.toLowerCase()) ||
+                                c.employeeId.toLowerCase().includes(candidateSearchQuery.toLowerCase())
+                            )
+                            .map((c) => {
+                              const isSelected = participants.some((p) => p.employeeId === c.employeeId);
+                              return (
+                                <div
+                                  key={c.employeeId}
+                                  onClick={() => toggleCandidate(c)}
+                                  style={{
+                                    padding: '8px 14px',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '10px',
+                                    cursor: 'pointer',
+                                    background: isSelected ? 'rgba(13, 148, 136, 0.12)' : 'transparent',
+                                    transition: 'background 0.15s',
+                                  }}
+                                >
+                                  <input
+                                    type="checkbox"
+                                    checked={isSelected}
+                                    onChange={() => {}} // Handled by outer div click
+                                    style={{ cursor: 'pointer', accentColor: '#0d9488', width: '16px', height: '16px' }}
+                                  />
+                                  <div style={{ width: '26px', height: '26px', borderRadius: '50%', background: isSelected ? '#0d9488' : 'var(--border-1)', color: '#fff', fontSize: '0.7rem', fontWeight: 800, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                                    {c.employeeName.charAt(0)}
+                                  </div>
+                                  <div style={{ flex: 1, minWidth: 0 }}>
+                                    <div style={{ fontSize: '0.8rem', fontWeight: isSelected ? 700 : 500, color: 'var(--text-1)', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>
+                                      {c.employeeName}
+                                    </div>
+                                    <div style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>{c.employeeId}</div>
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          {candidatePool.filter(
+                            (c) =>
+                              c.employeeName.toLowerCase().includes(candidateSearchQuery.toLowerCase()) ||
+                              c.employeeId.toLowerCase().includes(candidateSearchQuery.toLowerCase())
+                          ).length === 0 && (
+                            <div style={{ padding: '16px', textAlign: 'center', fontSize: '0.8rem', color: 'var(--text-3)' }}>
+                              No candidates match your search
+                            </div>
+                          )}
+                        </div>
+                      </motion.div>
+                    )}
+                  </div>
+                </div>
+
+                {/* SELECTED CANDIDATES GRID */}
                 <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(180px, 1fr))', gap: '10px' }}>
                   <AnimatePresence>
                     {participants.map((p) => (
                       <motion.div
-                        key={p.id}
+                        key={p.id || p.employeeId}
                         initial={{ opacity: 0, scale: 0.85 }}
                         animate={{ opacity: 1, scale: 1 }}
                         exit={{ opacity: 0, scale: 0.85 }}
@@ -477,10 +718,33 @@ export const LiveQuizHostView: React.FC<LiveQuizHostViewProps> = ({
                           </div>
                           <div style={{ fontSize: '0.7rem', color: 'var(--text-3)' }}>{p.employeeId}</div>
                         </div>
+                        <button
+                          type="button"
+                          onClick={() => handleRemoveCandidate(p.employeeId)}
+                          title="Remove candidate"
+                          style={{
+                            background: 'rgba(239, 68, 68, 0.1)',
+                            border: 'none',
+                            color: '#ef4444',
+                            cursor: 'pointer',
+                            padding: '4px',
+                            borderRadius: '6px',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                          }}
+                        >
+                          <X size={13} />
+                        </button>
                       </motion.div>
                     ))}
                   </AnimatePresence>
                 </div>
+                {participants.length === 0 && (
+                  <div style={{ padding: '24px', textAlign: 'center', borderRadius: '12px', background: 'var(--surface-2)', border: '1px dashed var(--border-1)', color: 'var(--text-3)', fontSize: '0.85rem' }}>
+                    No candidates selected for this quiz. Use the <strong>Select Candidates</strong> dropdown above to add participants.
+                  </div>
+                )}
               </div>
 
               {/* LOBBY FOOTER ACTION */}

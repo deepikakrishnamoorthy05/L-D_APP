@@ -335,37 +335,55 @@ export const LiveQuizParticipantView: React.FC<LiveQuizParticipantViewProps> = (
               {questionText}
             </div>
 
-            {/* 4 TOUCHABLE ANSWER BUTTONS */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+            {/* 2x2 OPTIONS GRID */}
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '12px' }}>
               {options.map((opt, idx) => {
-                const label = String.fromCharCode(65 + idx);
+                const numberBadge = idx + 1;
                 const isSelected = selectedAnswer === opt;
 
                 return (
                   <motion.button
                     key={idx}
-                    whileTap={viewState === 'question' ? { scale: 0.98 } : undefined}
+                    whileTap={viewState === 'question' ? { scale: 0.985 } : undefined}
+                    whileHover={viewState === 'question' ? { scale: 1.01 } : undefined}
                     type="button"
                     disabled={viewState === 'answered'}
                     onClick={() => handleSelectOption(opt)}
                     style={{
                       padding: '14px 16px',
-                      borderRadius: '12px',
-                      border: '1.5px solid',
-                      borderColor: isSelected ? '#0d9488' : 'var(--border-1)',
-                      background: isSelected ? 'rgba(13, 148, 136, 0.15)' : 'var(--surface-2)',
+                      borderRadius: '14px',
+                      border: `1.5px solid ${isSelected ? '#10b981' : 'var(--border-1)'}`,
+                      background: isSelected ? 'rgba(16, 185, 129, 0.08)' : 'var(--surface-1)',
+                      boxShadow: isSelected ? '0 0 12px rgba(16, 185, 129, 0.25)' : '0 2px 6px rgba(0,0,0,0.03)',
                       display: 'flex',
                       alignItems: 'center',
                       gap: '12px',
                       textAlign: 'left',
                       cursor: viewState === 'question' ? 'pointer' : 'default',
+                      transition: 'all 0.2s ease',
                     }}
                   >
-                    <span style={{ width: '28px', height: '28px', borderRadius: '6px', background: isSelected ? '#0d9488' : 'var(--surface-1)', color: isSelected ? '#fff' : 'var(--text-1)', fontSize: '0.82rem', fontWeight: 900, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                      {label}
+                    <div
+                      style={{
+                        width: '32px',
+                        height: '32px',
+                        borderRadius: '8px',
+                        background: isSelected ? 'rgba(16, 185, 129, 0.15)' : 'rgba(59, 130, 246, 0.1)',
+                        border: `1px solid ${isSelected ? '#10b981' : 'rgba(59, 130, 246, 0.25)'}`,
+                        color: isSelected ? '#10b981' : '#3b82f6',
+                        fontSize: '0.88rem',
+                        fontWeight: 800,
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        flexShrink: 0,
+                      }}
+                    >
+                      {isSelected ? <Check size={16} style={{ color: '#10b981' }} /> : numberBadge}
+                    </div>
+                    <span style={{ fontSize: '0.88rem', fontWeight: isSelected ? 800 : 600, color: 'var(--text-1)', flex: 1, lineHeight: 1.35 }}>
+                      {opt}
                     </span>
-                    <span style={{ fontSize: '0.88rem', fontWeight: 700, color: 'var(--text-1)', flex: 1 }}>{opt}</span>
-                    {isSelected && <Check size={16} style={{ color: '#0d9488' }} />}
                   </motion.button>
                 );
               })}
