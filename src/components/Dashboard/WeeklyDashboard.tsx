@@ -1,24 +1,32 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import {
   Calendar,
   ChevronLeft,
   ChevronRight,
-  Download,
+  ChevronDown,
   Send,
+  Plus,
+  Search,
+  Filter,
   CheckCircle2,
-  BookOpen,
-  Users,
-  Award,
-  MessageSquare,
-  Mail,
-  Zap,
   Clock,
-  Sparkles,
-  TrendingUp,
+  AlertTriangle,
+  PauseCircle,
   FileText,
   X,
   Printer,
+  Grid,
+  Layers,
+  Award,
+  BookOpen,
+  Sparkles,
+  Users,
+  MessageSquare,
+  Zap,
+  TrendingUp,
+  Mail,
+  RefreshCw
 } from 'lucide-react';
 import { useSessions } from '../../context/SessionContext';
 import { useAssessments } from '../../context/AssessmentContext';
@@ -26,85 +34,114 @@ import { useFeedback } from '../../context/FeedbackContext';
 import { useBootcamps } from '../../context/BootcampContext';
 import { useTrainees } from '../../context/TraineeContext';
 import { apiClient } from '../../services/api/apiClient';
+
+import {
+  PROGRAM_TRACKERS_DATA,
+  CERTIFICATION_INITIATIVES_DATA,
+  OTHER_INITIATIVES_DATA,
+  ProgramTracker,
+  WeeklyRow,
+  CertificationInitiative,
+  OtherInitiative
+} from '../../data/weeklyTrackerData';
 import './WeeklyDashboard.css';
 
-interface WeeklyActivityItem {
-  id: string;
-  date: string;
-  displayDate: string;
-  activity: string;
-  type: 'Training' | 'Assessment' | 'Communication' | 'Feedback' | 'Certification';
-  owner: string;
-  participants: string;
-  status: 'Completed' | 'Sent' | 'Scheduled' | 'Pending';
-}
+// Week Options List
+const AVAILABLE_WEEKS = [
+  { date: '2026-09-09', label: '09 Sep – 15 Sep 2026 (WK_03)' },
+  { date: '2026-09-16', label: '16 Sep – 22 Sep 2026 (WK_04)' },
+  { date: '2026-09-23', label: '23 Sep – 29 Sep 2026 (WK_05)' },
+];
 
 export const WeeklyDashboard: React.FC = () => {
+  const { showToast } = useBootcamps();
   const { sessions } = useSessions();
   const { assessments } = useAssessments();
-  const { sessionSummaries, participantResponses, trainerFeedbacks, pendingRequests } = useFeedback();
-  const { showToast } = useBootcamps();
-  const { trainees } = useTrainees();
 
-  // Selected Week Offset (0 = Current Week: 15 Sep – 21 Sep 2026)
-  const [weekOffset, setWeekOffset] = useState(0);
-  const [showExportModal, setShowExportModal] = useState(false);
+  // Selected Week Date State (Primary filter for fetching week-specific dashboard)
+  const [selectedWeekDate, setSelectedWeekDate] = useState<string>('2026-09-16');
+  const [activeTab, setActiveTab] = useState<'slides' | 'programs' | 'certifications' | 'activities'>('slides');
+  const [selectedProgramId, setSelectedProgramId] = useState<string>(PROGRAM_TRACKERS_DATA[0].id);
+  const [currentSlideIndex, setCurrentSlideIndex] = useState<number>(0);
+  const [searchQuery, setSearchQuery] = useState<string>('');
+  const [statusFilter, setStatusFilter] = useState<string>('ALL');
+
+  // Backend & Weekly Data State
+  const [weeklyData, setWeeklyData] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  // Modals
   const [showSendModal, setShowSendModal] = useState(false);
+  const [showAddLogModal, setShowAddLogModal] = useState(false);
   const [recipientEmail, setRecipientEmail] = useState('management@systechusa.com');
   const [isSending, setIsSending] = useState(false);
 
-  // Compute Week Range based on weekOffset (Base week: Sep 15 - Sep 21, 2026)
-  const weekRange = useMemo(() => {
-    const baseStart = new Date(2026, 8, 15); // Sep 15, 2026
-    const baseEnd = new Date(2026, 8, 21); // Sep 21, 2026
+  // New Log Form State
+  const [newLogProgramId, setNewLogProgramId] = useState(PROGRAM_TRACKERS_DATA[0].id);
+  const [newLogDateRange, setNewLogDateRange] = useState('17/09/2026 - 23/09/2026');
+  const [newLogTopic, setNewLogTopic] = useState('');
+  const [newLogTrainer, setNewLogTrainer] = useState('L&D');
+  const [newLogStatus, setNewLogStatus] = useState<'Completed' | 'In Progress' | 'Yet To Start'>('In Progress');
 
-    const startDate = new Date(baseStart);
-    startDate.setDate(startDate.getDate() + weekOffset * 7);
+  // Programs Data state (Updated when switching weeks or adding logs)
+  const [programsData, setProgramsData] = useState<ProgramTracker[]>(PROGRAM_TRACKERS_DATA);
 
-    const endDate = new Date(baseEnd);
-    endDate.setDate(endDate.getDate() + weekOffset * 7);
-
-    const formatDayMonth = (d: Date) => {
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return `${d.getDate()} ${monthNames[d.getMonth()]}`;
-    };
-
-    const formatFull = (d: Date) => {
-      const monthNames = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
-      return `${d.getDate()} ${monthNames[d.getMonth()]} ${d.getFullYear()}`;
-    };
-
-    const startISO = startDate.toISOString().split('T')[0];
-    const endISO = endDate.toISOString().split('T')[0];
-
-    return {
-      startISO,
-      endISO,
-      label: `${formatDayMonth(startDate)} – ${formatFull(endDate)}`,
-    };
-  }, [weekOffset]);
-
-  // Try fetching backend aggregated data or fallback to local context calculations
-  const [backendData, setBackendData] = useState<any | null>(null);
-
-  React.useEffect(() => {
+  // Fetch Week-Specific Dashboard from Backend whenever selectedWeekDate changes!
+  useEffect(() => {
     let isMounted = true;
+    setIsLoading(true);
+
     apiClient
-      .get<any>(`/dashboard/weekly?startDate=${weekRange.startISO}&endDate=${weekRange.endISO}`)
+      .get<any>(`/dashboard/weekly?weekDate=${selectedWeekDate}`)
       .then((res) => {
-        if (isMounted && res) setBackendData(res);
+        if (isMounted && res) {
+          setWeeklyData(res);
+          if (res.programs && res.programs.length > 0) {
+            setProgramsData(res.programs);
+          }
+        }
       })
       .catch(() => {
-        // Fallback to local calculations
+        // Fallback local filtering for requested week
+      })
+      .finally(() => {
+        if (isMounted) setIsLoading(false);
       });
+
     return () => {
       isMounted = false;
     };
-  }, [weekRange]);
+  }, [selectedWeekDate]);
 
-  // Derived Metrics
-  const kpiData = useMemo(() => {
-    if (backendData?.kpis) return backendData.kpis;
+  // Current Selected Week Label
+  const currentWeekLabel = useMemo(() => {
+    const found = AVAILABLE_WEEKS.find((w) => w.date === selectedWeekDate);
+    return found ? found.label : `${selectedWeekDate} Weekly Report`;
+  }, [selectedWeekDate]);
+
+  // Navigate to Previous Week
+  const handlePrevWeek = () => {
+    const idx = AVAILABLE_WEEKS.findIndex((w) => w.date === selectedWeekDate);
+    if (idx > 0) {
+      setSelectedWeekDate(AVAILABLE_WEEKS[idx - 1].date);
+    } else {
+      showToast('No earlier weeks stored in database');
+    }
+  };
+
+  // Navigate to Next Week
+  const handleNextWeek = () => {
+    const idx = AVAILABLE_WEEKS.findIndex((w) => w.date === selectedWeekDate);
+    if (idx < AVAILABLE_WEEKS.length - 1) {
+      setSelectedWeekDate(AVAILABLE_WEEKS[idx + 1].date);
+    } else {
+      showToast('No later weeks stored in database');
+    }
+  };
+
+  // Dynamic KPI Metrics for Selected Week (Fetched from Backend or Computed)
+  const weekKpi = useMemo(() => {
+    if (weeklyData?.kpis) return weeklyData.kpis;
     return {
       trainingsConducted: 8,
       sessionsScheduled: 11,
@@ -112,75 +149,137 @@ export const WeeklyDashboard: React.FC = () => {
       assessmentsCompleted: 6,
       feedbackReceived: 94,
       communicationsSent: 32,
+      passedThisWeek: 4,
     };
-  }, [backendData]);
+  }, [weeklyData]);
 
-  // Weekly Activity Table Data
-  const weeklyActivities: WeeklyActivityItem[] = useMemo(() => {
-    if (backendData?.weeklyActivities) return backendData.weeklyActivities;
+  // Dynamic Weekly Activity List for Selected Week
+  const weekActivities = useMemo(() => {
+    if (weeklyData?.weeklyActivities) return weeklyData.weeklyActivities;
     return [
-      { id: 'act-1', date: '2026-09-16', displayDate: '16 Sep', activity: 'Databricks Optimization', type: 'Training', owner: 'Sarah David', participants: '18', status: 'Completed' },
-      { id: 'act-2', date: '2026-09-17', displayDate: '17 Sep', activity: 'SQL Module Test', type: 'Assessment', owner: 'L&D Team', participants: '22', status: 'Completed' },
-      { id: 'act-3', date: '2026-09-18', displayDate: '18 Sep', activity: 'Trainer Availability Request', type: 'Communication', owner: 'L&D Team', participants: '5 Trainers', status: 'Sent' },
-      { id: 'act-4', date: '2026-09-19', displayDate: '19 Sep', activity: 'Bootcamp Feedback Request', type: 'Feedback', owner: 'L&D Team', participants: '28 Trainees', status: 'Sent' },
-      { id: 'act-5', date: '2026-09-20', displayDate: '20 Sep', activity: 'Power BI DAX Workshop', type: 'Training', owner: 'Alex Thomas', participants: '24', status: 'Completed' },
-      { id: 'act-6', date: '2026-09-21', displayDate: '21 Sep', activity: 'Snowflake Prep Review', type: 'Certification', owner: 'John Mathew', participants: '16', status: 'Completed' },
+      { id: 'act-1', date: selectedWeekDate, displayDate: '16 Sep', activity: 'Databricks Optimization', type: 'Training', owner: 'Samuel Davidson', participants: '18', status: 'Completed' },
+      { id: 'act-2', date: selectedWeekDate, displayDate: '17 Sep', activity: 'SQL Module Test', type: 'Assessment', owner: 'L&D Team', participants: '22', status: 'Completed' },
+      { id: 'act-3', date: selectedWeekDate, displayDate: '18 Sep', activity: 'Trainer Availability Request', type: 'Communication', owner: 'L&D Team', participants: '5 Trainers', status: 'Sent' },
     ];
-  }, [backendData]);
+  }, [weeklyData, selectedWeekDate]);
 
-  // Training Summary
-  const trainingSummary = useMemo(() => {
-    if (backendData?.trainingSummary) return backendData.trainingSummary;
-    return { completed: 8, upcoming: 4, rescheduled: 1, totalHours: '18.5 hrs' };
-  }, [backendData]);
+  // Selected Program for slide / detail view
+  const selectedProgram = useMemo(() => {
+    return programsData.find((p) => p.id === selectedProgramId) || programsData[0];
+  }, [programsData, selectedProgramId]);
 
-  // Participation Summary
-  const participationSummary = useMemo(() => {
-    if (backendData?.participationSummary) return backendData.participationSummary;
-    return { totalParticipants: 126, uniqueEmployees: 82, avgAttendance: '91%', highestSession: 'Databricks Optimization', highestCount: 28 };
-  }, [backendData]);
-
-  // Assessment Summary
-  const assessmentSummary = useMemo(() => {
-    if (backendData?.assessmentSummary) return backendData.assessmentSummary;
-    return { quizzesGenerated: 6, assessmentsConducted: 5, avgScore: '78%', topAssessment: 'SQL Window Functions', topScore: '84%' };
-  }, [backendData]);
-
-  // Feedback Summary
-  const feedbackSummary = useMemo(() => {
-    if (backendData?.feedbackSummary) return backendData.feedbackSummary;
-    return { trainerFeedbacks: 18, traineeFeedbacks: 76, ldReviews: 8, avgRating: '4.5 / 5' };
-  }, [backendData]);
-
-  // Communication Summary
-  const communicationSummary = useMemo(() => {
-    if (backendData?.communicationSummary) return backendData.communicationSummary;
-    return { trainerRequests: 12, feedbackRequests: 28, remindersSent: 16, failedMessages: 0 };
-  }, [backendData]);
-
-  // Certification Summary
-  const certificationSummary = useMemo(() => {
-    if (backendData?.certificationSummary) return backendData.certificationSummary;
-    return { managementRequests: 3, resourcesShared: 10, newCertifications: 4, renewalAlerts: 2 };
-  }, [backendData]);
-
-  // Weekly Highlights
-  const weeklyHighlights = useMemo(() => {
-    if (backendData?.weeklyHighlights) return backendData.weeklyHighlights;
-    return [
-      '8 training sessions completed',
-      '126 employee participations',
-      '94 feedback responses collected',
-      '6 AI quizzes created',
-      '10 certified resources shared',
+  // Slide deck list (Title Slide + Program Slides + Cert Slides)
+  const slideDeck = useMemo(() => {
+    const slides: Array<{ type: 'title' | 'program' | 'cert' | 'other_cert'; title: string; data?: any }> = [
+      { type: 'title', title: `L&D Weekly Tracker (${currentWeekLabel})` },
     ];
-  }, [backendData]);
+    programsData.forEach((prog) => {
+      slides.push({ type: 'program', title: prog.programName, data: prog });
+    });
+    slides.push({ type: 'cert', title: 'Certification Initiatives — Weekly Status' });
+    slides.push({ type: 'other_cert', title: 'Other Initiatives — Databricks Expert Program' });
+    return slides;
+  }, [programsData, currentWeekLabel]);
 
-  // Next Week Plan
-  const nextWeekPlan = useMemo(() => {
-    if (backendData?.nextWeekPlan) return backendData.nextWeekPlan;
-    return { upcomingTrainings: 5, scheduledAssessments: 3, pendingTrainerResponses: 4, openCertifications: 2, importantFollowups: 2 };
-  }, [backendData]);
+  // Navigation for slides
+  const nextSlide = () => {
+    setCurrentSlideIndex((prev) => (prev < slideDeck.length - 1 ? prev + 1 : 0));
+  };
+  const prevSlide = () => {
+    setCurrentSlideIndex((prev) => (prev > 0 ? prev - 1 : slideDeck.length - 1));
+  };
+
+  // Filtered Programs
+  const filteredPrograms = useMemo(() => {
+    return programsData.filter((prog) => {
+      const matchesSearch =
+        prog.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        prog.programName.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        prog.weeklyRows.some((r) => r.topic.toLowerCase().includes(searchQuery.toLowerCase()));
+      const matchesStatus = statusFilter === 'ALL' || prog.status.toUpperCase().replace(/\s+/g, '_') === statusFilter;
+      return matchesSearch && matchesStatus;
+    });
+  }, [programsData, searchQuery, statusFilter]);
+
+  // Program KPI Counts
+  const programMetrics = useMemo(() => {
+    const totalPrograms = programsData.length;
+    const completedCount = programsData.filter((p) => p.status === 'Completed').length;
+    const inProgressCount = programsData.filter((p) => p.status === 'In Progress').length;
+    const delayedCount = programsData.filter((p) => p.status === 'Delayed').length;
+    const onHoldCount = programsData.filter((p) => p.status === 'On Hold').length;
+
+    return { totalPrograms, completedCount, inProgressCount, delayedCount, onHoldCount };
+  }, [programsData]);
+
+  // Handle Add Weekly Log and Persist to Backend
+  const handleAddLogSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newLogTopic.trim()) {
+      showToast('Please enter a topic or update description');
+      return;
+    }
+
+    const updatedPrograms = programsData.map((prog) => {
+      if (prog.id === newLogProgramId) {
+        return {
+          ...prog,
+          weeklyRows: [
+            ...prog.weeklyRows,
+            {
+              dateRange: newLogDateRange,
+              topic: newLogTopic,
+              trainer: newLogTrainer,
+              status: newLogStatus,
+            },
+          ],
+        };
+      }
+      return prog;
+    });
+
+    setProgramsData(updatedPrograms);
+
+    // Save to Backend Database
+    try {
+      await apiClient.post('/dashboard/weekly', {
+        weekDate: selectedWeekDate,
+        weekLabel: currentWeekLabel,
+        kpis: weekKpi,
+        weeklyActivities: weekActivities,
+        programs: updatedPrograms,
+      });
+      showToast(`Status log saved to backend for week ${currentWeekLabel}`);
+    } catch (err) {
+      showToast(`Log added locally for week ${currentWeekLabel}`);
+    }
+
+    setShowAddLogModal(false);
+    setNewLogTopic('');
+  };
+
+  // Render Status Badge for Program Cards & Tables
+  const renderStatusPill = (status: string) => {
+    const upper = status.toUpperCase();
+    if (upper === 'IN PROGRESS') {
+      return <span className="ppt-status-pill status-in-progress">In Progress</span>;
+    }
+    if (upper === 'DELAYED') {
+      return <span className="ppt-status-pill status-delayed">Delayed</span>;
+    }
+    if (upper === 'ON HOLD') {
+      return <span className="ppt-status-pill status-on-hold">On Hold</span>;
+    }
+    if (upper === 'COMPLETED') {
+      return <span className="ppt-status-pill status-completed">Completed</span>;
+    }
+    if (upper === 'YET TO START') {
+      return <span className="ppt-status-pill status-yet-to-start">Yet To Start</span>;
+    }
+    return <span className="ppt-status-pill">{status}</span>;
+  };
+
+
 
   const handleSendReport = (e: React.FormEvent) => {
     e.preventDefault();
@@ -188,423 +287,733 @@ export const WeeklyDashboard: React.FC = () => {
     setTimeout(() => {
       setIsSending(false);
       setShowSendModal(false);
-      showToast(`Weekly Summary sent to ${recipientEmail}`);
+      showToast(`Weekly Tracker presentation summary sent to ${recipientEmail}`);
     }, 800);
-  };
-
-  const handleExportCSV = () => {
-    const csvContent = [
-      ['L&D Weekly Report Summary', weekRange.label],
-      [''],
-      ['KPI Metrics', 'Value'],
-      ['Trainings Conducted', kpiData.trainingsConducted],
-      ['Sessions Scheduled', kpiData.sessionsScheduled],
-      ['Total Participants', kpiData.totalParticipants],
-      ['Assessments Completed', kpiData.assessmentsCompleted],
-      ['Feedback Received', kpiData.feedbackReceived],
-      ['Communications Sent', kpiData.communicationsSent],
-      [''],
-      ['Weekly Activity'],
-      ['Date', 'Activity', 'Type', 'Owner', 'Participants', 'Status'],
-      ...weeklyActivities.map((a) => [a.displayDate, a.activity, a.type, a.owner, a.participants, a.status]),
-    ]
-      .map((row) => row.map((cell) => `"${cell}"`).join(','))
-      .join('\n');
-
-    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-    const url = URL.createObjectURL(blob);
-    const link = document.createElement('a');
-    link.href = url;
-    link.setAttribute('download', `LD_Weekly_Report_${weekRange.startISO}_to_${weekRange.endISO}.csv`);
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
-    showToast('Weekly report downloaded successfully as CSV format.');
-  };
-
-  const getTypeBadgeClass = (type: string) => {
-    switch (type) {
-      case 'Training': return 'type-training';
-      case 'Assessment': return 'type-assessment';
-      case 'Communication': return 'type-communication';
-      case 'Feedback': return 'type-feedback';
-      case 'Certification': return 'type-certification';
-      default: return 'type-default';
-    }
   };
 
   return (
     <motion.main
-      className="weekly-dashboard-page page-container"
-      initial={{ opacity: 0, y: 4 }}
+      className="weekly-dashboard-container"
+      initial={{ opacity: 0, y: 5 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.25 }}
     >
-      {/* 1. PAGE HEADER */}
-      <div className="weekly-dashboard-header-card">
-        <div className="header-text-block">
-          <div className="eyebrow-badge">
-            <Calendar size={12} />
-            <span>L&amp;D OPERATIONS DASHBOARD</span>
-          </div>
-          <h1>L&amp;D Weekly Dashboard</h1>
-          <p>Weekly summary of learning and development activities.</p>
+      {/* 1. TOP EXECUTIVE APP BAR */}
+      <header className="weekly-app-header">
+        <div className="header-branding">
+          <div className="brand-badge">L&amp;D OPERATIONS DASHBOARD</div>
+          <h1>L&amp;D Weekly Dashboard &amp; Tracker</h1>
+          <span className="header-date">Week Date: {selectedWeekDate}</span>
         </div>
 
-        <div className="header-controls-block">
-          {/* Week Selector */}
-          <div className="week-selector-group">
-            <button
-              type="button"
-              className="week-nav-btn"
-              onClick={() => setWeekOffset((prev) => prev - 1)}
-              title="Previous Week"
-              aria-label="Previous Week"
+        {/* Week Selector Dropdown & Buttons */}
+        <div className="week-selector-group">
+          <button
+            type="button"
+            className="week-nav-btn"
+            onClick={handlePrevWeek}
+            title="Previous Week"
+          >
+            <ChevronLeft size={16} />
+            <span>Prev Week</span>
+          </button>
+
+          <div className="week-select-wrapper">
+            <Calendar size={15} className="week-select-icon" />
+            <select
+              value={selectedWeekDate}
+              onChange={(e) => setSelectedWeekDate(e.target.value)}
+              className="week-select-dropdown"
             >
-              <ChevronLeft size={14} />
-              <span>Previous</span>
-            </button>
-
-            <div className="week-display-badge">
-              <Calendar size={13} />
-              <span>{weekRange.label}</span>
-            </div>
-
-            <button
-              type="button"
-              className="week-nav-btn"
-              onClick={() => setWeekOffset((prev) => prev + 1)}
-              title="Next Week"
-              aria-label="Next Week"
-            >
-              <span>Next</span>
-              <ChevronRight size={14} />
-            </button>
+              {AVAILABLE_WEEKS.map((w) => (
+                <option key={w.date} value={w.date}>
+                  {w.label}
+                </option>
+              ))}
+            </select>
+            <ChevronDown size={15} className="week-select-arrow" />
           </div>
 
-          {/* Action Buttons */}
-          <div className="header-actions-group">
-            <button
-              type="button"
-              className="action-btn secondary-btn"
-              onClick={() => setShowExportModal(true)}
-            >
-              <Download size={14} />
-              <span>Export</span>
-            </button>
-
-            <button
-              type="button"
-              className="action-btn primary-btn"
-              onClick={() => setShowSendModal(true)}
-            >
-              <Send size={14} />
-              <span>Send Summary</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      {/* 2. TOP KPI ROW (6 Compact Cards) */}
-      <section className="weekly-kpi-grid" aria-label="Key Performance Indicators">
-        <div className="weekly-kpi-card">
-          <div className="kpi-icon-wrapper teal"><BookOpen size={16} /></div>
-          <div className="kpi-body">
-            <span className="kpi-label">Trainings Conducted</span>
-            <span className="kpi-value">{kpiData.trainingsConducted}</span>
-          </div>
+          <button
+            type="button"
+            className="week-nav-btn"
+            onClick={handleNextWeek}
+            title="Next Week"
+          >
+            <span>Next Week</span>
+            <ChevronRight size={16} />
+          </button>
         </div>
 
-        <div className="weekly-kpi-card">
-          <div className="kpi-icon-wrapper blue"><Clock size={16} /></div>
-          <div className="kpi-body">
-            <span className="kpi-label">Sessions Scheduled</span>
-            <span className="kpi-value">{kpiData.sessionsScheduled}</span>
-          </div>
+        {/* View Tab Selector */}
+        <div className="view-tab-nav">
+          <button
+            type="button"
+            className={`tab-btn ${activeTab === 'slides' ? 'active' : ''}`}
+            onClick={() => setActiveTab('slides')}
+          >
+            <Layers size={15} />
+            <span>Slide Deck</span>
+          </button>
+
+          <button
+            type="button"
+            className={`tab-btn ${activeTab === 'programs' ? 'active' : ''}`}
+            onClick={() => setActiveTab('programs')}
+          >
+            <BookOpen size={15} />
+            <span>Programs ({programsData.length})</span>
+          </button>
+
+          <button
+            type="button"
+            className={`tab-btn ${activeTab === 'certifications' ? 'active' : ''}`}
+            onClick={() => setActiveTab('certifications')}
+          >
+            <Award size={15} />
+            <span>Certifications</span>
+          </button>
         </div>
 
-        <div className="weekly-kpi-card">
-          <div className="kpi-icon-wrapper purple"><Users size={16} /></div>
-          <div className="kpi-body">
-            <span className="kpi-label">Total Participants</span>
-            <span className="kpi-value">{kpiData.totalParticipants}</span>
-          </div>
-        </div>
+        {/* Quick Actions */}
+        <div className="header-quick-actions">
+          <button
+            type="button"
+            className="action-btn primary-teal"
+            onClick={() => setShowAddLogModal(true)}
+          >
+            <Plus size={14} />
+            <span>Add Log</span>
+          </button>
 
-        <div className="weekly-kpi-card">
-          <div className="kpi-icon-wrapper amber"><CheckCircle2 size={16} /></div>
-          <div className="kpi-body">
-            <span className="kpi-label">Assessments Completed</span>
-            <span className="kpi-value">{kpiData.assessmentsCompleted}</span>
-          </div>
+          <button
+            type="button"
+            className="action-btn outline-btn"
+            onClick={() => setShowSendModal(true)}
+          >
+            <Send size={14} />
+            <span>Send</span>
+          </button>
         </div>
+      </header>
 
-        <div className="weekly-kpi-card">
-          <div className="kpi-icon-wrapper emerald"><MessageSquare size={16} /></div>
-          <div className="kpi-body">
-            <span className="kpi-label">Feedback Received</span>
-            <span className="kpi-value">{kpiData.feedbackReceived}</span>
-          </div>
+      {/* 2. DYNAMIC WEEK-SPECIFIC KPI OVERVIEW BAR */}
+      <section className="weekly-kpi-bar">
+        <div className="kpi-mini-card">
+          <span className="kpi-mini-label">Trainings Conducted</span>
+          <span className="kpi-mini-val">{weekKpi.trainingsConducted}</span>
         </div>
-
-        <div className="weekly-kpi-card">
-          <div className="kpi-icon-wrapper indigo"><Mail size={16} /></div>
-          <div className="kpi-body">
-            <span className="kpi-label">Communications Sent</span>
-            <span className="kpi-value">{kpiData.communicationsSent}</span>
-          </div>
+        <div className="kpi-mini-card blue">
+          <span className="kpi-mini-label">Sessions Scheduled</span>
+          <span className="kpi-mini-val">{weekKpi.sessionsScheduled}</span>
+        </div>
+        <div className="kpi-mini-card purple">
+          <span className="kpi-mini-label">Total Participants</span>
+          <span className="kpi-mini-val">{weekKpi.totalParticipants}</span>
+        </div>
+        <div className="kpi-mini-card green">
+          <span className="kpi-mini-label">Assessments Completed</span>
+          <span className="kpi-mini-val">{weekKpi.assessmentsCompleted}</span>
+        </div>
+        <div className="kpi-mini-card teal">
+          <span className="kpi-mini-label">Passed This Week</span>
+          <span className="kpi-mini-val">{weekKpi.passedThisWeek}</span>
+        </div>
+        <div className="kpi-mini-card red">
+          <span className="kpi-mini-label">Delayed Programs</span>
+          <span className="kpi-mini-val">{programMetrics.delayedCount}</span>
         </div>
       </section>
 
-      {/* 3-COLUMN SINGLE SCREEN DASHBOARD BODY GRID */}
-      <div className="weekly-dashboard-body-grid">
-        {/* COLUMN 1: WEEKLY ACTIVITY & HIGHLIGHTS */}
-        <div className="dashboard-col col-main">
-          {/* WEEKLY ACTIVITY SUMMARY */}
-          <section className="weekly-section-card flex-1">
-            <div className="section-card-header">
-              <div className="section-title-wrapper">
-                <Zap size={15} className="section-icon teal" />
-                <h2>Weekly Activity</h2>
-              </div>
-              <span className="section-meta-tag">{weeklyActivities.length} Logged</span>
+      {/* 3. MAIN CONTENT BODY */}
+
+      {/* TAB 1: PRESENTATION SLIDE DECK VIEW FOR SELECTED WEEK */}
+      {activeTab === 'slides' && (
+        <section className="slides-view-section">
+          {/* Slide Navigation Controls Bar */}
+          <div className="slide-nav-bar">
+            <div className="slide-counter-info">
+              <span className="slide-num">Slide {currentSlideIndex + 1} of {slideDeck.length}</span>
+              <span className="slide-title-text">{slideDeck[currentSlideIndex].title}</span>
             </div>
 
-            <div className="weekly-table-wrapper">
-              <table className="weekly-activity-table">
-                <thead>
-                  <tr>
-                    <th>Date</th>
-                    <th>Activity</th>
-                    <th>Type</th>
-                    <th>Owner</th>
-                    <th>Participants</th>
-                    <th>Status</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {weeklyActivities.map((act) => (
-                    <tr key={act.id}>
-                      <td className="cell-date">{act.displayDate}</td>
-                      <td className="cell-activity">{act.activity}</td>
-                      <td><span className={`type-badge ${getTypeBadgeClass(act.type)}`}>{act.type}</span></td>
-                      <td className="cell-owner">{act.owner}</td>
-                      <td className="cell-participants">{act.participants}</td>
-                      <td><span className={`status-pill ${act.status.toLowerCase()}`}><i />{act.status}</span></td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          </section>
+            <div className="slide-arrows-group">
+              <button
+                type="button"
+                className="slide-nav-arrow"
+                onClick={prevSlide}
+                title="Previous Slide"
+              >
+                <ChevronLeft size={18} />
+                <span>Prev Slide</span>
+              </button>
 
-          {/* WEEKLY HIGHLIGHTS */}
-          <section className="weekly-section-card">
-            <div className="section-card-header">
-              <div className="section-title-wrapper">
-                <Sparkles size={15} className="section-icon teal" />
-                <h2>Weekly Highlights</h2>
-              </div>
+              <button
+                type="button"
+                className="slide-nav-arrow"
+                onClick={nextSlide}
+                title="Next Slide"
+              >
+                <span>Next Slide</span>
+                <ChevronRight size={18} />
+              </button>
             </div>
-            <ul className="weekly-highlights-list">
-              {weeklyHighlights.map((hl: string, idx: number) => (
-                <li key={idx}>
-                  <CheckCircle2 size={14} className="hl-check" />
-                  <span>{hl}</span>
-                </li>
+          </div>
+
+          {/* SLIDE CANVAS DISPLAY CONTAINER */}
+          <div className="ppt-slide-canvas-frame">
+            {/* SLIDE TYPE 1: COVER TITLE SLIDE */}
+            {slideDeck[currentSlideIndex].type === 'title' && (
+              <div className="ppt-slide cover-slide">
+                <div className="cover-slide-content">
+                  <h1 className="cover-title">L&amp;D Weekly Tracker</h1>
+                  <div className="cover-date">{selectedWeekDate}</div>
+                  <p style={{ marginTop: '1rem', color: '#64748b' }}>Weekly Report: {currentWeekLabel}</p>
+                </div>
+              </div>
+            )}
+
+            {/* SLIDE TYPE 2: PROGRAM TRACKER SLIDE */}
+            {slideDeck[currentSlideIndex].type === 'program' && slideDeck[currentSlideIndex].data && (
+              <div className="ppt-slide program-slide">
+                {/* PPT Navy Banner */}
+                <div className="ppt-banner">
+                  <h2 className="ppt-banner-title">
+                    {slideDeck[currentSlideIndex].data.title}
+                  </h2>
+                  <span className="ppt-banner-request-date">
+                    Request Date: {slideDeck[currentSlideIndex].data.requestDate}
+                  </span>
+                </div>
+
+                {/* Top Metrics Cards Row */}
+                <div className="ppt-metrics-row">
+                  <div className="ppt-metric-box">
+                    <span className="ppt-metric-title">Total Participants:</span>
+                    <span className="ppt-metric-value">{slideDeck[currentSlideIndex].data.totalParticipants}</span>
+                  </div>
+
+                  <div className="ppt-metric-box">
+                    <span className="ppt-metric-title">Status:</span>
+                    <span className="ppt-metric-value">
+                      {renderStatusPill(slideDeck[currentSlideIndex].data.status)}
+                    </span>
+                  </div>
+
+                  <div className="ppt-metric-box">
+                    <span className="ppt-metric-title">Planned End Date:</span>
+                    <span className="ppt-metric-value">{slideDeck[currentSlideIndex].data.plannedEndDate || 'NA'}</span>
+                  </div>
+
+                  {slideDeck[currentSlideIndex].data.revisedEndDate && (
+                    <div className="ppt-metric-box">
+                      <span className="ppt-metric-title">Revised End Date:</span>
+                      <span className="ppt-metric-value">{slideDeck[currentSlideIndex].data.revisedEndDate}</span>
+                    </div>
+                  )}
+                </div>
+
+                {/* Weekly Activity Table */}
+                <div className="ppt-table-container">
+                  <table className="ppt-tracker-table">
+                    <thead>
+                      <tr>
+                        <th style={{ width: '22%' }}>Week Start Date</th>
+                        <th style={{ width: '48%' }}>Topic</th>
+                        <th style={{ width: '15%' }}>Trainer</th>
+                        <th style={{ width: '15%' }}>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {slideDeck[currentSlideIndex].data.weeklyRows.map((row: WeeklyRow, rIdx: number) => (
+                        <tr key={rIdx}>
+                          <td className="cell-date-range">{row.dateRange}</td>
+                          <td className="cell-topic-text">{row.topic}</td>
+                          <td className="cell-trainer">{row.trainer}</td>
+                          <td className="cell-status">
+                            <span className={`status-badge-cell ${row.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                              {row.status}
+                            </span>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* SLIDE TYPE 3: CERTIFICATION INITIATIVES WEEKLY STATUS SLIDE */}
+            {slideDeck[currentSlideIndex].type === 'cert' && (
+              <div className="ppt-slide cert-slide">
+                <div className="ppt-banner cert-banner-styled">
+                  <div className="cert-banner-accent" />
+                  <div className="cert-banner-text-group">
+                    <span className="cert-eyebrow">CERTIFICATION TRACKER</span>
+                    <h2 className="ppt-banner-title">Certification Initiatives — Weekly Status</h2>
+                  </div>
+                  <div className="cert-banner-meta">
+                    Week: <strong>{selectedWeekDate}</strong> &nbsp;|&nbsp; Owner: <strong>L&amp;D Team</strong>
+                  </div>
+                </div>
+
+                {/* Top 4 KPI Cards */}
+                <div className="cert-kpi-row">
+                  <div className="cert-kpi-card teal-bar">
+                    <span className="cert-kpi-number">14</span>
+                    <span className="cert-kpi-label">Certifications</span>
+                    <span className="cert-kpi-sub">This quarter</span>
+                  </div>
+
+                  <div className="cert-kpi-card navy-bar">
+                    <span className="cert-kpi-number">109</span>
+                    <span className="cert-kpi-label">Total Nominees</span>
+                    <span className="cert-kpi-sub">Across all certs</span>
+                  </div>
+
+                  <div className="cert-kpi-card green-bar">
+                    <span className="cert-kpi-number">{String(weekKpi.passedThisWeek).padStart(2, '0')}</span>
+                    <span className="cert-kpi-label">Passed This Week</span>
+                    <span className="cert-kpi-sub">New completions</span>
+                  </div>
+
+                  <div className="cert-kpi-card cyan-bar">
+                    <span className="cert-kpi-number">70</span>
+                    <span className="cert-kpi-label">Passed this Quarter</span>
+                    <span className="cert-kpi-sub">This quarter</span>
+                  </div>
+                </div>
+
+                <div className="cert-subheader-bar">CERTIFICATION DETAILS</div>
+
+                <div className="ppt-table-container cert-table-scroll">
+                  <table className="cert-details-table">
+                    <thead>
+                      <tr>
+                        <th>Certification / Program</th>
+                        <th>Practice / Requested</th>
+                        <th>Provider</th>
+                        <th>Deadline</th>
+                        <th>Nominees</th>
+                        <th>Enrolled</th>
+                        <th>Passed</th>
+                        <th>Pass Rate</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {CERTIFICATION_INITIATIVES_DATA.map((c) => (
+                        <tr key={c.id}>
+                          <td className="cert-name-cell">{c.certification}</td>
+                          <td>{c.practiceOrTeam}</td>
+                          <td>{c.provider}</td>
+                          <td>{c.deadline}</td>
+                          <td>{String(c.nominees).padStart(2, '0')}</td>
+                          <td>{String(c.enrolled).padStart(2, '0')}</td>
+                          <td><strong>{String(c.passed).padStart(2, '0')}</strong></td>
+                          <td className="pass-rate-cell">{c.passRate}</td>
+                          <td className={`cert-status-cell ${c.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                            {c.status}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+
+            {/* SLIDE TYPE 4: OTHER INITIATIVES SLIDE */}
+            {slideDeck[currentSlideIndex].type === 'other_cert' && (
+              <div className="ppt-slide cert-slide">
+                <div className="ppt-banner cert-banner-styled">
+                  <div className="cert-banner-accent" />
+                  <div className="cert-banner-text-group">
+                    <span className="cert-eyebrow">CERTIFICATION TRACKER</span>
+                    <h2 className="ppt-banner-title">Other Initiatives — Databricks Expert Program</h2>
+                  </div>
+                </div>
+
+                <div className="ppt-table-container" style={{ marginTop: '1.5rem' }}>
+                  <table className="cert-details-table">
+                    <thead>
+                      <tr>
+                        <th>Certification / Program</th>
+                        <th>Required</th>
+                        <th>Deadline</th>
+                        <th>Nominees</th>
+                        <th>Completed</th>
+                        <th>Completion Rate</th>
+                        <th>Status</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {OTHER_INITIATIVES_DATA.map((o) => (
+                        <tr key={o.id}>
+                          <td className="cert-name-cell">{o.program}</td>
+                          <td>{o.required}</td>
+                          <td>{o.deadline}</td>
+                          <td>{o.nominees}</td>
+                          <td><strong>{o.completed}</strong></td>
+                          <td className="pass-rate-cell">{o.completionRate}</td>
+                          <td className={`cert-status-cell ${o.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                            {o.status}
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Slide Thumbnails Tray */}
+          <div className="slide-thumbnails-tray">
+            {slideDeck.map((s, idx) => (
+              <button
+                key={idx}
+                type="button"
+                className={`thumb-card ${currentSlideIndex === idx ? 'selected' : ''}`}
+                onClick={() => setCurrentSlideIndex(idx)}
+              >
+                <span className="thumb-num">{idx + 1}</span>
+                <span className="thumb-title">{s.title}</span>
+              </button>
+            ))}
+          </div>
+        </section>
+      )}
+
+      {/* TAB 2: INTERACTIVE TRAINING PROGRAMS VIEW FOR SELECTED WEEK */}
+      {activeTab === 'programs' && (
+        <section className="programs-view-section">
+          <div className="programs-filter-bar">
+            <div className="search-box-wrapper">
+              <Search size={16} className="search-icon" />
+              <input
+                type="text"
+                placeholder="Search training programs or topics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              {searchQuery && (
+                <button type="button" className="clear-search" onClick={() => setSearchQuery('')}>
+                  <X size={14} />
+                </button>
+              )}
+            </div>
+
+            <div className="status-filter-pills">
+              <button
+                type="button"
+                className={`filter-pill ${statusFilter === 'ALL' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('ALL')}
+              >
+                All ({programsData.length})
+              </button>
+              <button
+                type="button"
+                className={`filter-pill ${statusFilter === 'IN_PROGRESS' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('IN_PROGRESS')}
+              >
+                In Progress ({programMetrics.inProgressCount})
+              </button>
+              <button
+                type="button"
+                className={`filter-pill ${statusFilter === 'DELAYED' ? 'active' : ''}`}
+                onClick={() => setStatusFilter('DELAYED')}
+              >
+                Delayed ({programMetrics.delayedCount})
+              </button>
+            </div>
+          </div>
+
+          <div className="programs-master-detail-grid">
+            <div className="program-cards-list">
+              {filteredPrograms.map((prog) => (
+                <div
+                  key={prog.id}
+                  className={`prog-card-item ${selectedProgramId === prog.id ? 'active' : ''}`}
+                  onClick={() => setSelectedProgramId(prog.id)}
+                >
+                  <div className="card-top-row">
+                    <h3 className="prog-title-text">{prog.title}</h3>
+                    {renderStatusPill(prog.status)}
+                  </div>
+                  <div className="card-sub-info">
+                    <span>Req: {prog.requestDate}</span>
+                    <span>Participants: <strong>{prog.totalParticipants}</strong></span>
+                  </div>
+                </div>
               ))}
-            </ul>
-          </section>
-        </div>
+            </div>
 
-        {/* COLUMN 2: TRAINING, ASSESSMENT & COMMUNICATION */}
-        <div className="dashboard-col">
-          {/* TRAINING SUMMARY */}
-          <section className="weekly-section-card">
-            <div className="section-card-header">
-              <div className="section-title-wrapper">
-                <BookOpen size={15} className="section-icon teal" />
-                <h2>Training Summary</h2>
-              </div>
-            </div>
-            <div className="summary-metrics-list">
-              <div className="metric-row"><span className="metric-name">Completed</span><span className="metric-badge success">{trainingSummary.completed}</span></div>
-              <div className="metric-row"><span className="metric-name">Upcoming</span><span className="metric-badge info">{trainingSummary.upcoming}</span></div>
-              <div className="metric-row"><span className="metric-name">Rescheduled</span><span className="metric-badge warning">{trainingSummary.rescheduled}</span></div>
-              <div className="metric-row highlight"><span className="metric-name">Training Hours</span><span className="metric-value-text">{trainingSummary.totalHours}</span></div>
-            </div>
-          </section>
+            <div className="program-detail-board">
+              {selectedProgram ? (
+                <div className="detail-board-inner">
+                  <div className="ppt-banner">
+                    <h2 className="ppt-banner-title">{selectedProgram.title}</h2>
+                    <span className="ppt-banner-request-date">
+                      Request Date: {selectedProgram.requestDate}
+                    </span>
+                  </div>
 
-          {/* ASSESSMENT SUMMARY */}
-          <section className="weekly-section-card">
-            <div className="section-card-header">
-              <div className="section-title-wrapper">
-                <CheckCircle2 size={15} className="section-icon amber" />
-                <h2>Assessment &amp; Quiz</h2>
-              </div>
-            </div>
-            <div className="summary-metrics-list">
-              <div className="metric-row"><span className="metric-name">Quizzes Generated</span><span className="metric-value-text">{assessmentSummary.quizzesGenerated}</span></div>
-              <div className="metric-row"><span className="metric-name">Conducted</span><span className="metric-value-text">{assessmentSummary.assessmentsConducted}</span></div>
-              <div className="metric-row"><span className="metric-name">Average Score</span><span className="metric-badge success">{assessmentSummary.avgScore}</span></div>
-              <div className="metric-row highlight"><span className="metric-name">Top Assessment</span><span className="metric-subtext"><strong>{assessmentSummary.topAssessment}</strong> ({assessmentSummary.topScore})</span></div>
-            </div>
-          </section>
+                  <div className="ppt-metrics-row">
+                    <div className="ppt-metric-box">
+                      <span className="ppt-metric-title">Total Participants:</span>
+                      <span className="ppt-metric-value">{selectedProgram.totalParticipants}</span>
+                    </div>
 
-          {/* COMMUNICATION & AUTOMATION */}
-          <section className="weekly-section-card">
-            <div className="section-card-header">
-              <div className="section-title-wrapper">
-                <Mail size={15} className="section-icon indigo" />
-                <h2>Communication</h2>
-              </div>
-            </div>
-            <div className="summary-metrics-list">
-              <div className="metric-row"><span className="metric-name">Trainer Requests</span><span className="metric-value-text">{communicationSummary.trainerRequests}</span></div>
-              <div className="metric-row"><span className="metric-name">Feedback Requests</span><span className="metric-value-text">{communicationSummary.feedbackRequests}</span></div>
-              <div className="metric-row"><span className="metric-name">Reminders Sent</span><span className="metric-value-text">{communicationSummary.remindersSent}</span></div>
-              <div className="metric-row"><span className="metric-name">Failed Messages</span><span className="metric-badge zero">{communicationSummary.failedMessages}</span></div>
-            </div>
-          </section>
-        </div>
+                    <div className="ppt-metric-box">
+                      <span className="ppt-metric-title">Status:</span>
+                      <span className="ppt-metric-value">{renderStatusPill(selectedProgram.status)}</span>
+                    </div>
 
-        {/* COLUMN 3: PARTICIPATION, FEEDBACK, CERTIFICATION & NEXT WEEK */}
-        <div className="dashboard-col">
-          {/* PARTICIPATION SUMMARY */}
-          <section className="weekly-section-card">
-            <div className="section-card-header">
-              <div className="section-title-wrapper">
-                <Users size={15} className="section-icon blue" />
-                <h2>Participation</h2>
-              </div>
-            </div>
-            <div className="summary-metrics-list">
-              <div className="metric-row"><span className="metric-name">Total / Unique</span><span className="metric-value-text">{participationSummary.totalParticipants} / {participationSummary.uniqueEmployees}</span></div>
-              <div className="metric-row"><span className="metric-name">Avg Attendance</span><span className="metric-badge success">{participationSummary.avgAttendance}</span></div>
-              <div className="metric-row highlight"><span className="metric-name">Highest Attended</span><span className="metric-subtext"><strong>{participationSummary.highestSession}</strong> ({participationSummary.highestCount})</span></div>
-            </div>
-          </section>
+                    <div className="ppt-metric-box">
+                      <span className="ppt-metric-title">Planned End Date:</span>
+                      <span className="ppt-metric-value">{selectedProgram.plannedEndDate || 'NA'}</span>
+                    </div>
+                  </div>
 
-          {/* FEEDBACK SUMMARY */}
-          <section className="weekly-section-card">
-            <div className="section-card-header">
-              <div className="section-title-wrapper">
-                <MessageSquare size={15} className="section-icon emerald" />
-                <h2>Feedback</h2>
-              </div>
+                  <div className="ppt-table-container">
+                    <table className="ppt-tracker-table">
+                      <thead>
+                        <tr>
+                          <th style={{ width: '22%' }}>Week Start Date</th>
+                          <th style={{ width: '48%' }}>Topic</th>
+                          <th style={{ width: '15%' }}>Trainer</th>
+                          <th style={{ width: '15%' }}>Status</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selectedProgram.weeklyRows.map((row, rIdx) => (
+                          <tr key={rIdx}>
+                            <td className="cell-date-range">{row.dateRange}</td>
+                            <td className="cell-topic-text">{row.topic}</td>
+                            <td className="cell-trainer">{row.trainer}</td>
+                            <td className="cell-status">
+                              <span className={`status-badge-cell ${row.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                                {row.status}
+                              </span>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ) : (
+                <div className="empty-selection">Select a program to view details</div>
+              )}
             </div>
-            <div className="summary-metrics-list">
-              <div className="metric-row"><span className="metric-name">Trainer / Trainee</span><span className="metric-value-text">{feedbackSummary.trainerFeedbacks} / {feedbackSummary.traineeFeedbacks}</span></div>
-              <div className="metric-row"><span className="metric-name">L&amp;D Reviews</span><span className="metric-value-text">{feedbackSummary.ldReviews}</span></div>
-              <div className="metric-row highlight"><span className="metric-name">Average Rating</span><span className="metric-badge rating">{feedbackSummary.avgRating}</span></div>
-            </div>
-          </section>
+          </div>
+        </section>
+      )}
 
-          {/* CERTIFICATION ACTIVITY */}
-          <section className="weekly-section-card">
-            <div className="section-card-header">
-              <div className="section-title-wrapper">
-                <Award size={15} className="section-icon purple" />
-                <h2>Certification Activity</h2>
-              </div>
+      {/* TAB 3: CERTIFICATION INITIATIVES FULL VIEW */}
+      {activeTab === 'certifications' && (
+        <section className="cert-full-section">
+          <div className="ppt-banner cert-banner-styled">
+            <div className="cert-banner-accent" />
+            <div className="cert-banner-text-group">
+              <span className="cert-eyebrow">CERTIFICATION TRACKER</span>
+              <h2 className="ppt-banner-title">Certification Initiatives — Weekly Status</h2>
             </div>
-            <div className="summary-metrics-list">
-              <div className="metric-row"><span className="metric-name">Requests / Resources</span><span className="metric-value-text">{certificationSummary.managementRequests} / {certificationSummary.resourcesShared}</span></div>
-              <div className="metric-row"><span className="metric-name">New Certs / Renewals</span><span className="metric-badge success">+{certificationSummary.newCertifications}</span></div>
-            </div>
-          </section>
+          </div>
 
-          {/* NEXT WEEK PLAN */}
-          <section className="weekly-section-card plan-card">
-            <div className="section-card-header">
-              <div className="section-title-wrapper">
-                <TrendingUp size={15} className="section-icon blue" />
-                <h2>Next Week Plan</h2>
-              </div>
+          <div className="cert-kpi-row">
+            <div className="cert-kpi-card teal-bar">
+              <span className="cert-kpi-number">14</span>
+              <span className="cert-kpi-label">Certifications</span>
+              <span className="cert-kpi-sub">This quarter</span>
             </div>
-            <div className="summary-metrics-list">
-              <div className="metric-row"><span className="metric-name">Trainings Planned</span><span className="metric-badge info">{nextWeekPlan.upcomingTrainings} Planned</span></div>
-              <div className="metric-row"><span className="metric-name">Assessments / Open</span><span className="metric-value-text">{nextWeekPlan.scheduledAssessments} / {nextWeekPlan.openCertifications} Open</span></div>
-            </div>
-          </section>
-        </div>
-      </div>
 
-      {/* MODAL: EXPORT REPORT */}
+            <div className="cert-kpi-card navy-bar">
+              <span className="cert-kpi-number">109</span>
+              <span className="cert-kpi-label">Total Nominees</span>
+              <span className="cert-kpi-sub">Across all certs</span>
+            </div>
+
+            <div className="cert-kpi-card green-bar">
+              <span className="cert-kpi-number">{String(weekKpi.passedThisWeek).padStart(2, '0')}</span>
+              <span className="cert-kpi-label">Passed This Week</span>
+              <span className="cert-kpi-sub">New completions</span>
+            </div>
+
+            <div className="cert-kpi-card cyan-bar">
+              <span className="cert-kpi-number">70</span>
+              <span className="cert-kpi-label">Passed this Quarter</span>
+              <span className="cert-kpi-sub">This quarter</span>
+            </div>
+          </div>
+
+          <div className="cert-subheader-bar">CERTIFICATION DETAILS</div>
+
+          <div className="ppt-table-container">
+            <table className="cert-details-table">
+              <thead>
+                <tr>
+                  <th>Certification / Program</th>
+                  <th>Practice / Requested</th>
+                  <th>Provider</th>
+                  <th>Deadline</th>
+                  <th>Nominees</th>
+                  <th>Enrolled</th>
+                  <th>Passed</th>
+                  <th>Pass Rate</th>
+                  <th>Status</th>
+                </tr>
+              </thead>
+              <tbody>
+                {CERTIFICATION_INITIATIVES_DATA.map((c) => (
+                  <tr key={c.id}>
+                    <td className="cert-name-cell">{c.certification}</td>
+                    <td>{c.practiceOrTeam}</td>
+                    <td>{c.provider}</td>
+                    <td>{c.deadline}</td>
+                    <td>{String(c.nominees).padStart(2, '0')}</td>
+                    <td>{String(c.enrolled).padStart(2, '0')}</td>
+                    <td><strong>{String(c.passed).padStart(2, '0')}</strong></td>
+                    <td className="pass-rate-cell">{c.passRate}</td>
+                    <td className={`cert-status-cell ${c.status.toLowerCase().replace(/\s+/g, '-')}`}>
+                      {c.status}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </section>
+      )}
+
+      {/* 4. MODALS */}
+
+      {/* MODAL: ADD STATUS LOG FOR SELECTED WEEK */}
       <AnimatePresence>
-        {showExportModal && (
-          <div className="simple-modal-backdrop" onClick={() => setShowExportModal(false)}>
+        {showAddLogModal && (
+          <div className="modal-backdrop-overlay" onClick={() => setShowAddLogModal(false)}>
             <motion.div
-              className="weekly-export-modal"
+              className="weekly-modal-card"
               onClick={(e) => e.stopPropagation()}
-              initial={{ opacity: 0, scale: 0.96, y: 15 }}
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 15 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
             >
-              <div className="modal-header">
-                <div className="modal-title-group">
-                  <FileText className="modal-title-icon" size={18} />
-                  <div>
-                    <h3>Export Weekly Report</h3>
-                    <p>Report summary for {weekRange.label}</p>
+              <form onSubmit={handleAddLogSubmit}>
+                <div className="modal-header-row">
+                  <div className="modal-title-wrap">
+                    <Plus className="icon-teal" size={20} />
+                    <div>
+                      <h3>Add Log to Week ({selectedWeekDate})</h3>
+                      <p>Save status update for week: {currentWeekLabel}</p>
+                    </div>
                   </div>
+                  <button type="button" className="close-btn" onClick={() => setShowAddLogModal(false)}>
+                    <X size={16} />
+                  </button>
                 </div>
-                <button type="button" className="close-btn" onClick={() => setShowExportModal(false)}>
-                  <X size={16} />
-                </button>
-              </div>
 
-              <div className="modal-body">
-                <div className="report-preview-box">
-                  <div className="report-preview-header">
-                    <h4>SYSTECH L&amp;D WEEKLY EXECUTIVE SUMMARY</h4>
-                    <span>Week: {weekRange.label}</span>
+                <div className="modal-body-content">
+                  <label className="form-field">
+                    <span>Select Training Program *</span>
+                    <select
+                      value={newLogProgramId}
+                      onChange={(e) => setNewLogProgramId(e.target.value)}
+                      className="form-input-select"
+                    >
+                      {programsData.map((p) => (
+                        <option key={p.id} value={p.id}>{p.programName}</option>
+                      ))}
+                    </select>
+                  </label>
+
+                  <div className="form-row-two">
+                    <label className="form-field">
+                      <span>Week Date Range *</span>
+                      <input
+                        type="text"
+                        required
+                        value={newLogDateRange}
+                        onChange={(e) => setNewLogDateRange(e.target.value)}
+                        placeholder="e.g. 17/09/2026 - 23/09/2026"
+                        className="form-input-text"
+                      />
+                    </label>
+
+                    <label className="form-field">
+                      <span>Trainer / Owner *</span>
+                      <input
+                        type="text"
+                        required
+                        value={newLogTrainer}
+                        onChange={(e) => setNewLogTrainer(e.target.value)}
+                        placeholder="e.g. Janakiraman & Team"
+                        className="form-input-text"
+                      />
+                    </label>
                   </div>
-                  <div className="report-preview-metrics">
-                    <div><span>Trainings:</span> <strong>{kpiData.trainingsConducted}</strong></div>
-                    <div><span>Participants:</span> <strong>{kpiData.totalParticipants}</strong></div>
-                    <div><span>Assessments:</span> <strong>{kpiData.assessmentsCompleted}</strong></div>
-                    <div><span>Feedback Avg:</span> <strong>{feedbackSummary.avgRating}</strong></div>
-                  </div>
-                  <p className="report-preview-note">
-                    Contains full activity details, participation breakdown, assessment results, and next week plan.
-                  </p>
+
+                  <label className="form-field">
+                    <span>Weekly Topic &amp; Progress Description *</span>
+                    <textarea
+                      required
+                      rows={3}
+                      value={newLogTopic}
+                      onChange={(e) => setNewLogTopic(e.target.value)}
+                      placeholder="Describe progress for this week..."
+                      className="form-input-textarea"
+                    />
+                  </label>
+
+                  <label className="form-field">
+                    <span>Weekly Status *</span>
+                    <select
+                      value={newLogStatus}
+                      onChange={(e) => setNewLogStatus(e.target.value as any)}
+                      className="form-input-select"
+                    >
+                      <option value="In Progress">In Progress</option>
+                      <option value="Completed">Completed</option>
+                      <option value="Yet To Start">Yet To Start</option>
+                    </select>
+                  </label>
                 </div>
-              </div>
 
-              <div className="modal-footer">
-                <button type="button" className="action-btn secondary-btn" onClick={() => window.print()}>
-                  <Printer size={14} />
-                  <span>Print PDF</span>
-                </button>
-                <button type="button" className="action-btn primary-btn" onClick={handleExportCSV}>
-                  <Download size={14} />
-                  <span>Download CSV</span>
-                </button>
-              </div>
+                <div className="modal-footer-row">
+                  <button type="button" className="action-btn outline-btn" onClick={() => setShowAddLogModal(false)}>
+                    Cancel
+                  </button>
+                  <button type="submit" className="action-btn primary-teal">
+                    Save Status Entry
+                  </button>
+                </div>
+              </form>
             </motion.div>
           </div>
         )}
       </AnimatePresence>
 
-      {/* MODAL: SEND SUMMARY */}
+
+
+      {/* MODAL: SEND SUMMARY EMAIL */}
       <AnimatePresence>
         {showSendModal && (
-          <div className="simple-modal-backdrop" onClick={() => setShowSendModal(false)}>
+          <div className="modal-backdrop-overlay" onClick={() => setShowSendModal(false)}>
             <motion.div
-              className="weekly-export-modal send-modal"
+              className="weekly-modal-card"
               onClick={(e) => e.stopPropagation()}
-              initial={{ opacity: 0, scale: 0.96, y: 15 }}
+              initial={{ opacity: 0, scale: 0.95, y: 15 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.96, y: 15 }}
+              exit={{ opacity: 0, scale: 0.95, y: 15 }}
             >
               <form onSubmit={handleSendReport}>
-                <div className="modal-header">
-                  <div className="modal-title-group">
-                    <Send className="modal-title-icon" size={18} />
+                <div className="modal-header-row">
+                  <div className="modal-title-wrap">
+                    <Send className="icon-teal" size={20} />
                     <div>
-                      <h3>Send Weekly Summary</h3>
-                      <p>Share report with management or reporting manager</p>
+                      <h3>Send Weekly Executive Summary</h3>
+                      <p>Send report for week: {currentWeekLabel}</p>
                     </div>
                   </div>
                   <button type="button" className="close-btn" onClick={() => setShowSendModal(false)}>
@@ -612,8 +1021,8 @@ export const WeeklyDashboard: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="modal-body">
-                  <label className="input-field-label">
+                <div className="modal-body-content">
+                  <label className="form-field">
                     <span>Recipient Email Address *</span>
                     <input
                       type="email"
@@ -621,28 +1030,17 @@ export const WeeklyDashboard: React.FC = () => {
                       value={recipientEmail}
                       onChange={(e) => setRecipientEmail(e.target.value)}
                       placeholder="e.g. management@systechusa.com"
-                      className="email-input"
+                      className="form-input-text"
                     />
                   </label>
-                  <p className="send-info-text">
-                    An formatted email with executive highlights, KPI summary, and next week plan for{' '}
-                    <strong>{weekRange.label}</strong> will be sent immediately.
-                  </p>
                 </div>
 
-                <div className="modal-footer">
-                  <button type="button" className="action-btn secondary-btn" onClick={() => setShowSendModal(false)}>
-                    <span>Cancel</span>
+                <div className="modal-footer-row">
+                  <button type="button" className="action-btn outline-btn" onClick={() => setShowSendModal(false)}>
+                    Cancel
                   </button>
-                  <button type="submit" className="action-btn primary-btn" disabled={isSending}>
-                    {isSending ? (
-                      <span>Sending...</span>
-                    ) : (
-                      <>
-                        <Send size={14} />
-                        <span>Send Summary Email</span>
-                      </>
-                    )}
+                  <button type="submit" className="action-btn primary-teal" disabled={isSending}>
+                    {isSending ? 'Sending...' : 'Send Summary Email'}
                   </button>
                 </div>
               </form>

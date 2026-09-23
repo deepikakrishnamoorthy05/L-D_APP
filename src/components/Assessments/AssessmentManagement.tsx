@@ -150,6 +150,26 @@ export const AssessmentManagement: React.FC = () => {
     }
   };
 
+  const handleStartQuizAndSendInvite = (quiz: any) => {
+    const targetAssessment: QuizAssessment = {
+      id: quiz.id || `quiz-${Date.now()}`,
+      title: quiz.name || quiz.title || 'Technical Assessment',
+      topic: quiz.moduleName || quiz.topic || 'Data & Analytics',
+      description: quiz.description || `Assessment for ${quiz.name || quiz.title}`,
+      difficulty: 'Intermediate',
+      durationMinutes: quiz.durationMinutes || 15,
+      passPercentage: quiz.passPercentage || 70,
+      status: 'Published',
+      createdAt: quiz.createdAt || new Date().toISOString(),
+      expiresAt: new Date(Date.now() + 7 * 24 * 60 * 60 * 1000).toISOString(),
+      allowAnswerReview: true,
+      allowRetake: false,
+      questions: quiz.questions || [],
+    };
+    setActiveAssessmentForAssign(targetAssessment);
+    setShowAssignModal(true);
+  };
+
   const handleOpenLiveDashboard = (quizId: string) => {
     setActiveQuizIdForDashboard(quizId || 'quiz-de-sample');
     setShowDashboardModal(true);
@@ -297,13 +317,24 @@ export const AssessmentManagement: React.FC = () => {
                   <td>{quiz.totalParticipants}</td>
                   <td>{quiz.averageScore !== undefined ? `${quiz.averageScore}%` : '—'}</td>
                   <td><span className={`quiz-status ${quiz.status.toLowerCase().replace(' ', '-')}`}>{quiz.status}</span></td>
-                  <td>
+                  <td style={{ display: 'flex', alignItems: 'center', gap: '12px', flexWrap: 'wrap' }}>
+                    <button
+                      className="assessment-text-link"
+                      type="button"
+                      onClick={() => handleStartQuizAndSendInvite(quiz)}
+                      title="Start quiz and send candidate invite link"
+                      style={{ color: '#0d9488', fontWeight: 700, display: 'inline-flex', alignItems: 'center', gap: '4px' }}
+                    >
+                      Start <ArrowRight size={13} />
+                    </button>
                     <button
                       className="assessment-text-link"
                       type="button"
                       onClick={() => handleOpenLiveDashboard(quiz.id)}
+                      title="Open live assessment dashboard"
+                      style={{ display: 'inline-flex', alignItems: 'center', gap: '4px' }}
                     >
-                      {quiz.status === 'Completed' || quiz.status === 'Published' ? 'Live Dashboard' : 'Start'} <ArrowRight size={13} />
+                      Live Dashboard <ArrowRight size={13} />
                     </button>
                   </td>
                 </tr>

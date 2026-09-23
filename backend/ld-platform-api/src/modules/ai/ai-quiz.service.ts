@@ -1,10 +1,25 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { IsString, IsOptional, IsNumber, Min, Max, IsIn, IsObject } from 'class-validator';
+import { Type } from 'class-transformer';
 import { AzureOpenAiService } from './azure-openai.service.js';
 
 export class GenerateQuizInput {
+  @IsOptional()
+  @IsString()
   sessionId?: string;
+
+  @IsString()
   topic!: string;
+
+  @IsOptional()
+  @IsNumber()
+  @Type(() => Number)
+  @Min(1)
+  @Max(50)
   questionCount?: number;
+
+  @IsOptional()
+  @IsIn(['Beginner', 'Intermediate', 'Advanced'])
   difficulty?: 'Beginner' | 'Intermediate' | 'Advanced';
 }
 
@@ -28,10 +43,21 @@ export interface GeneratedQuizDto {
 }
 
 export class RegenerateQuestionInput {
+  @IsString()
   topic!: string;
+
+  @IsString()
   questionId!: string;
+
+  @IsObject()
   currentQuestion!: QuizQuestionDto;
+
+  @IsString()
+  @IsIn(['easier', 'harder', 'different', 'change_type'])
   action!: 'easier' | 'harder' | 'different' | 'change_type';
+
+  @IsOptional()
+  @IsString()
   difficulty?: string;
 }
 
@@ -45,8 +71,9 @@ export class AiQuizService {
     const topic = input.topic?.trim() || 'Data Engineering & SQL';
     const difficulty = input.difficulty || 'Intermediate';
     const questionCount = Number(input.questionCount) || 10;
+    const generationSeed = `run_${Date.now()}_${Math.floor(Math.random() * 1000000)}`;
 
-    this.logger.log(`Generating AI Quiz for topic: "${topic}" (${difficulty}, ${questionCount} questions)`);
+    this.logger.log(`Generating AI Quiz for topic: "${topic}" (${difficulty}, ${questionCount} questions, seed: ${generationSeed})`);
 
     if (this.azureOpenAiService.isConfigured()) {
       try {
@@ -72,13 +99,13 @@ Return ONLY valid JSON matching this exact structure:
   ]
 }
 CRITICAL RULES:
-1. NO DUPLICATE QUESTIONS: All ${questionCount} questions MUST be 100% unique, distinct technical concepts. Never repeat any question topic or phrasing.
+1. MANDATORY UNIQUNESS (Seed: "${generationSeed}"): Every single generation run MUST produce a brand-new, 100% unique set of questions for topic "${topic}". Explore diverse subtopics, architectural choices, performance tuning, or real-world debugging scenarios. DO NOT output repetitive questions from previous runs.
 2. CONCISE OPTIONS ONLY: Keep all multiple-choice options VERY SHORT (1 to 6 words each max). DO NOT write long paragraph options. For example, use "Partition Pruning" instead of "Applying idempotent partition pruning and columnar query filtering".
 3. Ensure options are plausible distractors with EXACTLY one clear correct answer matching one of the options.
 4. Respect difficulty level: ${difficulty}.
 5. Do NOT include markdown code blocks. Output raw JSON object only.`,
-          `Generate a ${questionCount}-question ${difficulty} multiple-choice quiz on topic: "${topic}". Ensure all ${questionCount} questions are distinct and all options are concise (1-6 words).`,
-          { jsonMode: true }
+          `Generation Seed: ${generationSeed}. Generate a fresh, unique ${questionCount}-question ${difficulty} multiple-choice quiz on topic: "${topic}". Ensure all ${questionCount} questions cover different aspects of the topic and all options are concise (1-6 words).`,
+          { jsonMode: true, temperature: 0.9 }
         );
 
         const aiResponse = JSON.parse(rawContent);
@@ -95,18 +122,77 @@ CRITICAL RULES:
 
   async regenerateQuestion(input: RegenerateQuestionInput): Promise<QuizQuestionDto> {
     const { topic, action, currentQuestion } = input;
-    this.logger.log(`Regenerating single question [${currentQuestion.id}] with action: "${action}" for topic: "${topic}"`);
+    this.logger.log(`Regenerating single question [${currentQuestion?.id}] with action: "${action}" for topic: "${topic}" via Azure OpenAI`);
 
     let newDifficulty = input.difficulty || 'Intermediate';
     if (action === 'easier') newDifficulty = 'Beginner';
     if (action === 'harder') newDifficulty = 'Advanced';
 
     const newType = action === 'change_type'
-      ? (currentQuestion.type === 'multiple_choice' ? 'type_answer' : 'multiple_choice')
-      : currentQuestion.type;
+      ? (currentQuestion?.type === 'multiple_choice' ? 'type_answer' : 'multiple_choice')
+      : (currentQuestion?.type || 'multiple_choice');
 
-    const regenerated = this.generateSingleDynamicQuestion(topic, newDifficulty, newType, currentQuestion.id, action);
-    return regenerated;
+    if (this.azureOpenAiService.isConfigured()) {
+      try {
+        let actionPrompt = '';
+        if (action === 'easier') {
+          actionPrompt = `Create a SIMPLER, easier conceptual question on topic "${topic}" suitable for a Beginner. Simplify the terminology and options.`;
+        } else if (action === 'harder') {
+          actionPrompt = `Create a MORE ADVANCED, expert-level scenario/troubleshooting question on topic "${topic}".`;
+        } else if (action === 'change_type') {
+          actionPrompt = `Create a question on topic "${topic}" using format "${newType}". (If type_answer, options MUST be an empty array []; if multiple_choice, provide 4 short options).`;
+        } else {
+          actionPrompt = `Create a fresh, completely DIFFERENT question on topic "${topic}" testing a distinct sub-concept.`;
+        }
+
+        const systemPrompt = `You are an expert L&D quiz generator.
+Return ONLY valid JSON for a SINGLE question with this exact structure:
+{
+  "id": "${currentQuestion?.id || 'q-regen'}",
+  "question": "Clear, concise technical question?",
+  "type": "${newType}",
+  "options": ${newType === 'type_answer' ? '[]' : '["Option A", "Option B", "Option C", "Option D"]'},
+  "correctAnswer": "Correct Option or Answer String",
+  "explanation": "Clear explanation of why this answer is correct.",
+  "timeLimit": 30,
+  "points": 10
+}
+CRITICAL RULES:
+1. DO NOT repeat the previous question: "${currentQuestion?.question || ''}".
+2. ${newType === 'multiple_choice' ? 'Keep options VERY SHORT (1 to 6 words each).' : 'Set options to an empty array [].'}
+3. Difficulty target: ${newDifficulty}.
+4. Output raw JSON object only. No markdown.`;
+
+        const userPrompt = `${actionPrompt}\nPrevious question was: "${currentQuestion?.question || ''}". Generate 1 new question now. (Nonce: ${Date.now()}_${Math.floor(Math.random() * 10000)})`;
+
+        const rawContent = await this.azureOpenAiService.getCompletion(systemPrompt, userPrompt, {
+          jsonMode: true,
+          temperature: 0.85,
+        });
+
+        const q = JSON.parse(rawContent);
+        if (q && q.question) {
+          const options = Array.isArray(q.options) && newType === 'multiple_choice'
+            ? q.options.map((opt: any) => String(opt).trim())
+            : [];
+          const correctAnswer = q.correctAnswer && options.includes(q.correctAnswer) ? q.correctAnswer : (options[0] || String(q.correctAnswer || ''));
+          return {
+            id: currentQuestion?.id || `q-${Date.now()}`,
+            question: String(q.question),
+            type: newType,
+            options,
+            correctAnswer,
+            explanation: String(q.explanation || `Correct answer is ${correctAnswer}.`),
+            timeLimit: Number(q.timeLimit) || 30,
+            points: Number(q.points) || 10,
+          };
+        }
+      } catch (err: any) {
+        this.logger.warn(`Azure OpenAI single question regeneration failed, switching to fallback: ${err.message}`);
+      }
+    }
+
+    return this.generateSingleDynamicQuestion(topic, newDifficulty, newType, currentQuestion?.id || 'q-1', action);
   }
 
   private async callAzureOpenAI(

@@ -1,6 +1,6 @@
 import React, { useMemo, useState, useEffect } from 'react';
 import { AnimatePresence, motion } from 'framer-motion';
-import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, CheckCircle2, Clock3, Edit3, Search, Send, X } from 'lucide-react';
+import { ArrowLeft, ArrowRight, BookOpen, CalendarDays, Check, CheckCircle2, Clock3, Edit3, Search, Send, X, XCircle } from 'lucide-react';
 import { TrainingPlan } from '../../types/training';
 import { useTraining } from '../../context/TrainingContext';
 import './PlanTrainingModal.css';
@@ -31,7 +31,7 @@ const computeDuration = (sDate: string, eDate: string, sTime: string, eTime: str
 };
 
 export const PlanTrainingModal: React.FC<Props> = ({ onClose, onSuccess }) => {
-  const { trainers, createTrainingPlan } = useTraining();
+  const { trainers, createTrainingPlan, availabilityRequests, updateTrainerResponse } = useTraining();
   const [step, setStep] = useState(1);
   const [name, setName] = useState('');
   const [startDate, setStartDate] = useState('');
@@ -45,6 +45,7 @@ export const PlanTrainingModal: React.FC<Props> = ({ onClose, onSuccess }) => {
   const [selected, setSelected] = useState<string[]>([]);
   const [error, setError] = useState('');
   const [editing, setEditing] = useState(false);
+  const [simulatedResponse, setSimulatedResponse] = useState<'Available' | 'Not Available' | null>(null);
 
   useEffect(() => {
     if (!isUserDuration) {
@@ -56,7 +57,7 @@ export const PlanTrainingModal: React.FC<Props> = ({ onClose, onSuccess }) => {
   const defaultTemplate: EmailTemplate = {
     subject: 'Trainer Availability Request – {{TrainingSessionName}}',
     greeting: 'Hi {{TrainerName}},',
-    body: 'We are planning {{TrainingSessionName}} from {{Date}} ({{Time}}) for {{Duration}}.\n\n{{Description}}\n\nPlease confirm your availability for this session.',
+    body: 'We are planning {{TrainingSessionName}} from {{Date}} ({{Time}}) for {{Duration}}.\n\n{{Description}}\n\nPlease review the session schedule and respond by clicking Accept or Decline below:',
     closing: 'Regards,\nL&D Operations Team',
   };
   const [template, setTemplate] = useState(defaultTemplate);
@@ -137,6 +138,14 @@ export const PlanTrainingModal: React.FC<Props> = ({ onClose, onSuccess }) => {
       priority: 'Medium',
       selectedTrainerIds: selected,
     });
+
+    if (simulatedResponse) {
+      setTimeout(() => {
+        const createdReqs = availabilityRequests.filter((r) => r.trainingPlanId === plan.id);
+        createdReqs.forEach((req) => updateTrainerResponse(req.id, simulatedResponse));
+      }, 50);
+    }
+
     onSuccess?.(plan);
     onClose();
   };
@@ -397,6 +406,37 @@ export const PlanTrainingModal: React.FC<Props> = ({ onClose, onSuccess }) => {
                       .map((line: string, i: number) => (
                         <p key={i}>{line || <br />}</p>
                       ))}
+
+                    {/* Interactive Accept / Decline Email Action Box */}
+                    <div className="pts-email-actions-box">
+                      <span className="pts-action-box-title">TRAINER QUICK RESPONSE ACTION:</span>
+                      <div className="pts-action-buttons-group">
+                        <button
+                          type="button"
+                          className={`pts-email-btn pts-btn-accept ${simulatedResponse === 'Available' ? 'active' : ''}`}
+                          onClick={() => setSimulatedResponse('Available')}
+                        >
+                          <Check size={14} /> Accept Session Request
+                        </button>
+                        <button
+                          type="button"
+                          className={`pts-email-btn pts-btn-decline ${simulatedResponse === 'Not Available' ? 'active' : ''}`}
+                          onClick={() => setSimulatedResponse('Not Available')}
+                        >
+                          <X size={14} /> Decline Session
+                        </button>
+                      </div>
+                      {simulatedResponse && (
+                        <div className={`pts-action-feedback ${simulatedResponse === 'Available' ? 'accepted' : 'declined'}`}>
+                          {simulatedResponse === 'Available' ? (
+                            <><CheckCircle2 size={14} /> Response pre-set to <strong>ACCEPTED</strong> (Session status: Ready to Schedule)</>
+                          ) : (
+                            <><XCircle size={14} /> Response pre-set to <strong>DECLINED</strong> (Trainer unavailable)</>
+                          )}
+                        </div>
+                      )}
+                    </div>
+
                     <p>{replace(template.closing)}</p>
                   </div>
                 </article>

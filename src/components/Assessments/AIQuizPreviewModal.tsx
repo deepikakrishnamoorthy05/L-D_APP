@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'framer-motion';
 import {
   Sparkles,
   X,
+  ArrowLeft,
   Edit,
   RotateCcw,
   Trash2,
@@ -444,12 +445,21 @@ export const AIQuizPreviewModal: React.FC<AIQuizPreviewModalProps> = ({
 
         {/* MODAL FOOTER */}
         <div className="ai-quiz-modal-footer">
+          <button
+            type="button"
+            onClick={onClose}
+            className="ai-quiz-btn-secondary"
+            style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}
+          >
+            <ArrowLeft size={15} /> Back
+          </button>
+
           {onRegenerateQuiz && (
             <button
               type="button"
               onClick={onRegenerateQuiz}
               className="ai-quiz-btn-secondary"
-              style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#0d9488', borderColor: 'rgba(13, 148, 136, 0.3)' }}
+              style={{ display: 'inline-flex', alignItems: 'center', gap: '6px', color: '#0d9488', borderColor: 'rgba(13, 148, 136, 0.3)' }}
             >
               <RotateCcw size={14} /> Regenerate Quiz
             </button>

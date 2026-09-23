@@ -13,7 +13,7 @@ export const CreateBootcampModal: React.FC<Props> = ({ initialData, isDuplicateM
   const isEdit = Boolean(initialData && !isDuplicateMode);
   const [step, setStep] = useState(1);
   const [name, setName] = useState(isDuplicateMode && initialData ? `${initialData.name} Copy` : initialData?.name || '');
-  const [bootcampType, setBootcampType] = useState<BootcampType>(initialData?.bootcampType || 'BOOTCAMP');
+  const [bootcampType, setBootcampType] = useState<BootcampType>(initialData?.bootcampType || 'LATERAL');
   const [startDate, setStartDate] = useState(initialData?.startDate || '');
   const [endDate, setEndDate] = useState(initialData?.endDate || '');
   const [showCurriculum, setShowCurriculum] = useState(false);
@@ -87,13 +87,7 @@ export const CreateBootcampModal: React.FC<Props> = ({ initialData, isDuplicateM
             placeholder="Enter bootcamp name"
           />
         </label>
-        <label className="simple-field full">
-          <span>Type</span>
-          <select value={bootcampType} onChange={e=>setBootcampType(e.target.value as BootcampType)}>
-            <option value="BOOTCAMP">Regular Bootcamp</option>
-            <option value="LATERAL">Lateral Bootcamp</option>
-          </select>
-        </label>
+
         <div className="simple-date-grid">
           <label className="simple-field"><span>Start Date *</span><div><CalendarDays/><input type="date" value={startDate} onChange={e=>setStartDate(e.target.value)}/></div></label>
           <label className="simple-field"><span>End Date *</span><div><CalendarDays/><input type="date" min={startDate} value={endDate} onChange={e=>setEndDate(e.target.value)}/></div></label>

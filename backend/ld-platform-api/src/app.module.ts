@@ -10,8 +10,8 @@ import { AssessmentsModule } from './modules/assessments/assessments.module.js';
 import { FeedbackModule } from './modules/feedback/feedback.module.js';
 import { CertificationsModule } from './modules/certifications/certifications.module.js';
 import { AiModule } from './modules/ai/ai.module.js';
-import { NotificationsModule } from './modules/notifications/notifications.module.js';
 import { QuizModule } from './modules/quiz/quiz.module.js';
+import { WeeklyDashboardModule } from './modules/weekly-dashboard/weekly-dashboard.module.js';
 import { DatabaseModule } from './database/database.module.js';
 
 @Module({
@@ -27,8 +27,8 @@ import { DatabaseModule } from './database/database.module.js';
     FeedbackModule,
     CertificationsModule,
     AiModule,
-    NotificationsModule,
     QuizModule,
+    WeeklyDashboardModule,
     DatabaseModule,
   ],
   controllers: [AppController],

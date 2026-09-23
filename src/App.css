@@ -42790,6 +42790,133 @@ html.dark .text-slate-600,
   color: var(--text-2, #B7C4D1) !important;
 }
 
+/* ==========================================================================
+   PREMIUM EXECUTIVE DATE & CALENDAR UI DESIGN SYSTEM
+   Enhances all date inputs, picker triggers, calendar icons & popups
+   with vibrant teal accents, glassmorphic styling & rounded geometry.
+   ========================================================================== */
+
+/* 1. Global Date Input Base */
+input[type="date"] {
+  accent-color: #0d9488 !important;
+  color-scheme: light dark;
+  font-family: inherit;
+  font-weight: 600;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+/* 2. Webkit Native Calendar Picker Trigger Button */
+input[type="date"]::-webkit-calendar-picker-indicator {
+  cursor: pointer;
+  padding: 5px;
+  border-radius: 7px;
+  margin-left: 6px;
+  filter: invert(38%) sepia(85%) saturate(540%) hue-rotate(125deg) brightness(92%) contrast(90%);
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+input[type="date"]::-webkit-calendar-picker-indicator:hover {
+  background: rgba(13, 148, 136, 0.15);
+  transform: scale(1.15);
+}
+
+/* 3. Date Input Field Container (Modal / Form Field Wrappers) */
+.simple-field > div:has(input[type="date"]),
+.simple-field > div {
+  border-radius: 12px !important;
+  transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
+.simple-field > div:has(input[type="date"]):focus-within,
+.simple-field > div:focus-within {
+  border-color: #0d9488 !important;
+  box-shadow: 0 0 0 4px rgba(13, 148, 136, 0.18), 0 4px 14px rgba(13, 148, 136, 0.1) !important;
+}
+
+.simple-field > div svg {
+  color: #0d9488 !important;
+  transition: transform 0.2s ease, color 0.2s ease;
+}
+
+.simple-field > div:focus-within svg {
+  transform: scale(1.12);
+  color: #0f766e !important;
+}
+
+/* 4. Calendar Popups & Picker Dialogs (PrimeReact, Flatpickr, Custom) */
+.p-datepicker,
+.react-datepicker,
+.flatpickr-calendar {
+  border-radius: 16px !important;
+  border: 1px solid rgba(13, 148, 136, 0.25) !important;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.25) !important;
+  background: #ffffff !important;
+  font-family: inherit !important;
+  overflow: hidden !important;
+  padding: 10px !important;
+}
+
+.p-datepicker-header,
+.react-datepicker__header {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+  color: #ffffff !important;
+  border-radius: 10px 10px 0 0 !important;
+  padding: 10px !important;
+}
+
+.p-datepicker-title,
+.react-datepicker__current-month {
+  color: #ffffff !important;
+  font-weight: 700 !important;
+}
+
+.p-datepicker table td > span.p-highlight,
+.react-datepicker__day--selected {
+  background: linear-gradient(135deg, #0d9488 0%, #0f766e 100%) !important;
+  color: #ffffff !important;
+  border-radius: 50% !important;
+  box-shadow: 0 4px 10px rgba(13, 148, 136, 0.35) !important;
+  font-weight: 700 !important;
+}
+
+.p-datepicker table td > span:hover,
+.react-datepicker__day:hover {
+  background: rgba(13, 148, 136, 0.12) !important;
+  color: #0d9488 !important;
+  border-radius: 50% !important;
+}
+
+.p-datepicker-buttonbar button,
+.datepicker-footer-btn {
+  background: #f1f5f9 !important;
+  color: #0d9488 !important;
+  font-weight: 700 !important;
+  border-radius: 8px !important;
+  border: 1px solid rgba(13, 148, 136, 0.2) !important;
+  padding: 6px 14px !important;
+  transition: all 0.18s ease !important;
+}
+
+.p-datepicker-buttonbar button:hover,
+.datepicker-footer-btn:hover {
+  background: #0d9488 !important;
+  color: #ffffff !important;
+}
+
+/* 5. Dark Mode Calendar System */
+[data-theme="dark"] input[type="date"]::-webkit-calendar-picker-indicator {
+  filter: invert(65%) sepia(70%) saturate(600%) hue-rotate(130deg) brightness(110%) contrast(100%) !important;
+}
+
+[data-theme="dark"] .p-datepicker,
+[data-theme="dark"] .react-datepicker,
+[data-theme="dark"] .flatpickr-calendar {
+  background: #0d1b2a !important;
+  border-color: rgba(32, 199, 190, 0.3) !important;
+  color: #f4f8fb !important;
+}
+
 
 
 
